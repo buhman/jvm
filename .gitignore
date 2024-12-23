@@ -1,0 +1,8 @@
+.~*
+*.o
+*.d
+*.gch
+*.csv
+*.class
+main
+print_class
