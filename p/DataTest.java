@@ -3,6 +3,10 @@ package p;
 import p.Data;
 
 class DataTest {
+    static void main() {
+        test();
+    }
+
     static int test() {
         return test2(6, 3) * 5;
     }

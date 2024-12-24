@@ -156,6 +156,7 @@ def generate_execute_fixed_width_instruction(instruction):
         conversion = sign_type_table[(argument.signed, argument.size)]
         yield f"{c_type} {argument.name} = {conversion}(&code[pc + {offset}]);"
         offset += argument.size
+    yield f"vm->current_frame->next_pc = pc + {1 + instruction.arguments_size};"
     argument_values = ", ".join(
         argument.name
         for argument in instruction.arguments
@@ -163,10 +164,10 @@ def generate_execute_fixed_width_instruction(instruction):
     if argument_values:
         argument_values = ", " + argument_values
     yield f"op_{instruction.mnemonic}(vm{argument_values});"
-    yield f"return pc + {1 + instruction.arguments_size};"
 
 def generate_execute_variable_width_instruction(instruction):
     yield f"{instruction.mnemonic.upper()}_ARGS;"
+    yield f"vm->current_frame->next_pc = {instruction.mnemonic.upper()}_NEXT_PC;"
     argument_values = ", ".join(
         argument
         for argument in instruction.arguments
@@ -174,10 +175,9 @@ def generate_execute_variable_width_instruction(instruction):
     if argument_values:
         argument_values = ", " + argument_values
     yield f"op_{instruction.mnemonic}(vm{argument_values});"
-    yield f"return {instruction.mnemonic.upper()}_NEXT_PC;"
 
 def generate_execute_decoder():
-    yield "uint32_t decode_execute_instruction(struct vm * vm, const uint8_t * code, uint32_t pc)"
+    yield "void decode_execute_instruction(struct vm * vm, const uint8_t * code, uint32_t pc)"
     yield "{"
     yield "switch (code[pc]) {"
     for instruction in opcode_table:
@@ -189,11 +189,12 @@ def generate_execute_decoder():
         else:
             yield from generate_execute_fixed_width_instruction(instruction)
 
+        yield "break;"
         yield "}"
     yield "default:"
     yield "{"
     yield "assert(false);"
-    yield "return pc;"
+    yield "break;"
     yield "}"
     yield "}"
     yield "}"

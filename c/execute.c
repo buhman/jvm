@@ -488,7 +488,7 @@ void op_getstatic(struct vm * vm, uint32_t index)
 
 void op_goto(struct vm * vm, int32_t branch)
 {
-  vm->current_thread.pc = vm->current_thread.pc + branch;
+  vm->current_frame->pc = vm->current_frame->pc + branch;
 }
 
 void op_goto_w(struct vm * vm, int32_t branch)
@@ -626,7 +626,7 @@ void op_if_icmpeq(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 == value2) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -635,7 +635,7 @@ void op_if_icmpge(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 >= value2) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -644,7 +644,7 @@ void op_if_icmpgt(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 > value2) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -653,7 +653,7 @@ void op_if_icmple(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 <= value2) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -662,7 +662,7 @@ void op_if_icmplt(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 < value2) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -671,7 +671,7 @@ void op_if_icmpne(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 != value2) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -679,7 +679,7 @@ void op_ifeq(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value == 0) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -687,7 +687,7 @@ void op_ifge(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value >= 0) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -695,7 +695,7 @@ void op_ifgt(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value > 0) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -703,7 +703,7 @@ void op_ifle(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value <= 0) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -711,7 +711,7 @@ void op_iflt(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value < 0) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -719,7 +719,7 @@ void op_ifne(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value != 0) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -727,7 +727,7 @@ void op_ifnonnull(struct vm * vm, int32_t branch)
 {
   void * value = (void *)operand_stack_pop_u32(vm->current_frame);
   if (value != nullptr) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -735,7 +735,7 @@ void op_ifnull(struct vm * vm, int32_t branch)
 {
   void * value = (void *)operand_stack_pop_u32(vm->current_frame);
   if (value == nullptr) {
-    vm->current_thread.pc = vm->current_thread.pc + branch;
+    vm->current_frame->pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -889,7 +889,17 @@ void op_ireturn(struct vm * vm)
       boolean by taking the bitwise AND of value and 1. */
 
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
-  printf("return %d\n", value);
+  switch (vm->current_frame->return_type) {
+  case 'I':
+    break;
+  default:
+    fprintf(stderr, "conversion not implemented: %c\n", vm->current_frame->return_type);
+    assert(false);
+    break;
+  }
+  operand_stack_push_u32(vm->current_frame, value);
+
+  vm_method_return(vm);
 }
 
 void op_ishl(struct vm * vm)
@@ -1220,12 +1230,11 @@ void op_newarray(struct vm * vm, uint32_t atype)
 
 void op_nop(struct vm * vm)
 {
-  assert(!"op_nop");
 }
 
 void op_pop(struct vm * vm)
 {
-  assert(!"op_pop");
+  operand_stack_pop_u32(vm->current_frame);
 }
 
 void op_pop2(struct vm * vm)
@@ -1250,7 +1259,7 @@ void op_ret(struct vm * vm, uint32_t index)
 
 void op_return(struct vm * vm)
 {
-  assert(!"op_return");
+  vm_method_return(vm);
 }
 
 void op_saload(struct vm * vm)
@@ -1265,7 +1274,7 @@ void op_sastore(struct vm * vm)
 
 void op_sipush(struct vm * vm, int32_t byte)
 {
-  assert(!"op_sipush");
+  assert(!"op_sipush2");
 }
 
 void op_swap(struct vm * vm)
@@ -1277,10 +1286,10 @@ void op_tableswitch(struct vm * vm, int32_t defaultbyte, int32_t lowbyte, int32_
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   if (index < lowbyte || index > highbyte) {
-    vm->current_thread.pc = vm->current_thread.pc + defaultbyte;
+    vm->current_frame->pc = vm->current_frame->pc + defaultbyte;
   } else {
     int32_t offset = BE_BSWAP32(table[index - lowbyte]);
-    vm->current_thread.pc = vm->current_thread.pc + offset;
+    vm->current_frame->pc = vm->current_frame->pc + offset;
   }
 }
 

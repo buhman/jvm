@@ -8,11 +8,13 @@ struct frame {
   struct Code_attribute * code;
   uint32_t * local_variable;
   uint32_t * operand_stack;
+  uint32_t pc;
+  uint32_t next_pc;
   uint16_t operand_stack_ix;
+  uint8_t return_type;
 };
 
 struct thread {
-  uint32_t pc;
   struct class_file * current_class;
   struct method_info * current_method;
 };
@@ -59,3 +61,4 @@ static inline void operand_stack_dup_u32(struct frame * frame)
 }
 
 void vm_static_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info);
+void vm_method_return(struct vm * vm);

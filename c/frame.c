@@ -23,7 +23,7 @@ struct frame * stack_pop_frame(struct stack * stack, int num_frames)
 {
   stack->ix -= num_frames;
   assert(stack->ix >= 0);
-  struct frame * frame = &stack->frame[stack->ix];
+  struct frame * frame = &stack->frame[stack->ix - 1];
   return frame;
 }
 
@@ -122,40 +122,71 @@ void vm_static_method_call(struct vm * vm, struct class_file * class_file, struc
     uint32_t value = operand_stack_pop_u32(old_frame);
     vm->current_frame->local_variable[nargs - i - 1] = value;
   }
-  vm->current_thread.pc = 0;
+  vm->current_frame->return_type = descriptor_constant->utf8.bytes[nargs + 2];
+
+  vm->current_frame->pc = 0;
   vm->current_thread.current_class = class_file;
   vm->current_thread.current_method = method_info;
 }
 
+void vm_method_return(struct vm * vm)
+{
+  struct frame * old_frame = vm->current_frame;
+
+  stack_pop_data(&vm->data_stack, old_frame->code->max_locals);
+  stack_pop_data(&vm->data_stack, old_frame->code->max_stack);
+
+  vm->current_frame = stack_pop_frame(&vm->frame_stack, 1);
+  assert(vm->current_frame != old_frame);
+  vm->current_frame->pc = vm->current_frame->next_pc;
+
+  switch (old_frame->return_type) {
+  case 'I':
+    uint32_t value = operand_stack_pop_u32(old_frame);
+    operand_stack_push_u32(vm->current_frame, value);
+    break;
+  case 'V':
+    break;
+  default:
+    fprintf(stderr, "return type not implemented: %c\n", old_frame->return_type);
+    break;
+  }
+  assert(old_frame->operand_stack_ix == 0);
+}
+
+static void print_vm_stack(struct vm * vm)
+{
+  printf("[  ");
+  for (int i = 5; i > 0; i--) {
+    if (i > vm->current_frame->operand_stack_ix) {
+      printf("            ");
+      continue;
+    }
+    int32_t value = vm->current_frame->operand_stack[vm->current_frame->operand_stack_ix - i];
+    if (value > 65536)
+      printf("0x%08x  ", value);
+    else
+      printf("%10d  ", value);
+  }
+  printf("]\n");
+}
+
 void vm_execute(struct vm * vm)
 {
-  printf("execute:\n");
-
   while (true) {
-    printf("[  ");
-    for (int i = 5; i > 0; i--) {
-      if (i > vm->current_frame->operand_stack_ix) {
-        printf("            ");
-        continue;
-      }
-      int32_t value = vm->current_frame->operand_stack[vm->current_frame->operand_stack_ix - i];
-      if (value > 65536)
-        printf("0x%08x  ", value);
-      else
-        printf("%10d  ", value);
-    }
-    printf("]\n");
-    decode_print_instruction(vm->current_frame->code->code, vm->current_thread.pc);
-    uint32_t old_pc = vm->current_thread.pc;
-    uint32_t next_pc = decode_execute_instruction(vm, vm->current_frame->code->code, vm->current_thread.pc);
-    if (vm->current_thread.pc == old_pc) {
-      // if the instruction did not branch, increment pc
-      vm->current_thread.pc = next_pc;
-    }
-
-    if (vm->current_thread.pc >= vm->current_frame->code->code_length) {
+    print_vm_stack(vm);
+    decode_print_instruction(vm->current_frame->code->code, vm->current_frame->pc);
+    uint32_t old_pc = vm->current_frame->pc;
+    struct method_info * old_method = vm->current_thread.current_method;
+    decode_execute_instruction(vm, vm->current_frame->code->code, vm->current_frame->pc);
+    //if (vm->current_frame->pc >= vm->current_frame->code->code_length) {
+    if (vm->frame_stack.ix == 1) {
       printf("terminate\n");
       break;
+    }
+    if (vm->current_thread.current_method == old_method && vm->current_frame->pc == old_pc) {
+      // if the instruction did not branch, increment pc
+      vm->current_frame->pc = vm->current_frame->next_pc;
     }
   }
 }
@@ -177,7 +208,7 @@ int main(int argc, const char * argv[])
                                                                  (const uint8_t *)main_class,
                                                                  string_length(main_class));
 
-  const char * method_name = "test";
+  const char * method_name = "main";
   int method_name_length = string_length(method_name);
   struct method_info * method_info = class_resolver_lookup_method(class_entry,
                                                                   (const uint8_t *)method_name,
@@ -196,6 +227,15 @@ int main(int argc, const char * argv[])
   vm.data_stack.capacity = 0x100000;
   uint32_t data[vm.data_stack.capacity];
   vm.data_stack.data = data;
+
+  struct frame * entry_frame = stack_push_frame(&vm.frame_stack, 1);
+  struct Code_attribute code;
+  code.max_locals = 0;
+  code.max_stack = 0;
+  entry_frame->code = &code;
+  entry_frame->local_variable = 0;
+  entry_frame->operand_stack = 0;
+  entry_frame->operand_stack_ix = 0;
 
   vm_static_method_call(&vm, class_entry->class_file, method_info);
   vm_execute(&vm);

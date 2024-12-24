@@ -1097,1096 +1097,1301 @@ uint32_t decode_print_instruction(const uint8_t * code, uint32_t pc)
     }
   }
 }
-uint32_t decode_execute_instruction(struct vm * vm, const uint8_t * code, uint32_t pc)
+void decode_execute_instruction(struct vm * vm, const uint8_t * code, uint32_t pc)
 {
   switch (code[pc]) {
     case 0: // nop
     {
+      vm->current_frame->next_pc = pc + 1;
       op_nop(vm);
-      return pc + 1;
+      break;
     }
     case 1: // aconst_null
     {
+      vm->current_frame->next_pc = pc + 1;
       op_aconst_null(vm);
-      return pc + 1;
+      break;
     }
     case 2: // iconst_m1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iconst_m1(vm);
-      return pc + 1;
+      break;
     }
     case 3: // iconst_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iconst_0(vm);
-      return pc + 1;
+      break;
     }
     case 4: // iconst_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iconst_1(vm);
-      return pc + 1;
+      break;
     }
     case 5: // iconst_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iconst_2(vm);
-      return pc + 1;
+      break;
     }
     case 6: // iconst_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iconst_3(vm);
-      return pc + 1;
+      break;
     }
     case 7: // iconst_4
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iconst_4(vm);
-      return pc + 1;
+      break;
     }
     case 8: // iconst_5
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iconst_5(vm);
-      return pc + 1;
+      break;
     }
     case 9: // lconst_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lconst_0(vm);
-      return pc + 1;
+      break;
     }
     case 10: // lconst_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lconst_1(vm);
-      return pc + 1;
+      break;
     }
     case 11: // fconst_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fconst_0(vm);
-      return pc + 1;
+      break;
     }
     case 12: // fconst_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fconst_1(vm);
-      return pc + 1;
+      break;
     }
     case 13: // fconst_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fconst_2(vm);
-      return pc + 1;
+      break;
     }
     case 14: // dconst_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dconst_0(vm);
-      return pc + 1;
+      break;
     }
     case 15: // dconst_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dconst_1(vm);
-      return pc + 1;
+      break;
     }
     case 16: // bipush
     {
       int32_t byte = _s1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_bipush(vm, byte);
-      return pc + 2;
+      break;
     }
     case 17: // sipush
     {
       int32_t byte = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_sipush(vm, byte);
-      return pc + 3;
+      break;
     }
     case 18: // ldc
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_ldc(vm, index);
-      return pc + 2;
+      break;
     }
     case 19: // ldc_w
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_ldc_w(vm, index);
-      return pc + 3;
+      break;
     }
     case 20: // ldc2_w
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_ldc2_w(vm, index);
-      return pc + 3;
+      break;
     }
     case 21: // iload
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_iload(vm, index);
-      return pc + 2;
+      break;
     }
     case 22: // lload
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_lload(vm, index);
-      return pc + 2;
+      break;
     }
     case 23: // fload
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_fload(vm, index);
-      return pc + 2;
+      break;
     }
     case 24: // dload
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_dload(vm, index);
-      return pc + 2;
+      break;
     }
     case 25: // aload
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_aload(vm, index);
-      return pc + 2;
+      break;
     }
     case 26: // iload_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iload_0(vm);
-      return pc + 1;
+      break;
     }
     case 27: // iload_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iload_1(vm);
-      return pc + 1;
+      break;
     }
     case 28: // iload_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iload_2(vm);
-      return pc + 1;
+      break;
     }
     case 29: // iload_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iload_3(vm);
-      return pc + 1;
+      break;
     }
     case 30: // lload_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lload_0(vm);
-      return pc + 1;
+      break;
     }
     case 31: // lload_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lload_1(vm);
-      return pc + 1;
+      break;
     }
     case 32: // lload_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lload_2(vm);
-      return pc + 1;
+      break;
     }
     case 33: // lload_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lload_3(vm);
-      return pc + 1;
+      break;
     }
     case 34: // fload_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fload_0(vm);
-      return pc + 1;
+      break;
     }
     case 35: // fload_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fload_1(vm);
-      return pc + 1;
+      break;
     }
     case 36: // fload_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fload_2(vm);
-      return pc + 1;
+      break;
     }
     case 37: // fload_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fload_3(vm);
-      return pc + 1;
+      break;
     }
     case 38: // dload_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dload_0(vm);
-      return pc + 1;
+      break;
     }
     case 39: // dload_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dload_1(vm);
-      return pc + 1;
+      break;
     }
     case 40: // dload_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dload_2(vm);
-      return pc + 1;
+      break;
     }
     case 41: // dload_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dload_3(vm);
-      return pc + 1;
+      break;
     }
     case 42: // aload_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_aload_0(vm);
-      return pc + 1;
+      break;
     }
     case 43: // aload_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_aload_1(vm);
-      return pc + 1;
+      break;
     }
     case 44: // aload_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_aload_2(vm);
-      return pc + 1;
+      break;
     }
     case 45: // aload_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_aload_3(vm);
-      return pc + 1;
+      break;
     }
     case 46: // iaload
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iaload(vm);
-      return pc + 1;
+      break;
     }
     case 47: // laload
     {
+      vm->current_frame->next_pc = pc + 1;
       op_laload(vm);
-      return pc + 1;
+      break;
     }
     case 48: // faload
     {
+      vm->current_frame->next_pc = pc + 1;
       op_faload(vm);
-      return pc + 1;
+      break;
     }
     case 49: // daload
     {
+      vm->current_frame->next_pc = pc + 1;
       op_daload(vm);
-      return pc + 1;
+      break;
     }
     case 50: // aaload
     {
+      vm->current_frame->next_pc = pc + 1;
       op_aaload(vm);
-      return pc + 1;
+      break;
     }
     case 51: // baload
     {
+      vm->current_frame->next_pc = pc + 1;
       op_baload(vm);
-      return pc + 1;
+      break;
     }
     case 52: // caload
     {
+      vm->current_frame->next_pc = pc + 1;
       op_caload(vm);
-      return pc + 1;
+      break;
     }
     case 53: // saload
     {
+      vm->current_frame->next_pc = pc + 1;
       op_saload(vm);
-      return pc + 1;
+      break;
     }
     case 54: // istore
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_istore(vm, index);
-      return pc + 2;
+      break;
     }
     case 55: // lstore
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_lstore(vm, index);
-      return pc + 2;
+      break;
     }
     case 56: // fstore
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_fstore(vm, index);
-      return pc + 2;
+      break;
     }
     case 57: // dstore
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_dstore(vm, index);
-      return pc + 2;
+      break;
     }
     case 58: // astore
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_astore(vm, index);
-      return pc + 2;
+      break;
     }
     case 59: // istore_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_istore_0(vm);
-      return pc + 1;
+      break;
     }
     case 60: // istore_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_istore_1(vm);
-      return pc + 1;
+      break;
     }
     case 61: // istore_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_istore_2(vm);
-      return pc + 1;
+      break;
     }
     case 62: // istore_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_istore_3(vm);
-      return pc + 1;
+      break;
     }
     case 63: // lstore_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lstore_0(vm);
-      return pc + 1;
+      break;
     }
     case 64: // lstore_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lstore_1(vm);
-      return pc + 1;
+      break;
     }
     case 65: // lstore_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lstore_2(vm);
-      return pc + 1;
+      break;
     }
     case 66: // lstore_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lstore_3(vm);
-      return pc + 1;
+      break;
     }
     case 67: // fstore_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fstore_0(vm);
-      return pc + 1;
+      break;
     }
     case 68: // fstore_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fstore_1(vm);
-      return pc + 1;
+      break;
     }
     case 69: // fstore_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fstore_2(vm);
-      return pc + 1;
+      break;
     }
     case 70: // fstore_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fstore_3(vm);
-      return pc + 1;
+      break;
     }
     case 71: // dstore_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dstore_0(vm);
-      return pc + 1;
+      break;
     }
     case 72: // dstore_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dstore_1(vm);
-      return pc + 1;
+      break;
     }
     case 73: // dstore_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dstore_2(vm);
-      return pc + 1;
+      break;
     }
     case 74: // dstore_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dstore_3(vm);
-      return pc + 1;
+      break;
     }
     case 75: // astore_0
     {
+      vm->current_frame->next_pc = pc + 1;
       op_astore_0(vm);
-      return pc + 1;
+      break;
     }
     case 76: // astore_1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_astore_1(vm);
-      return pc + 1;
+      break;
     }
     case 77: // astore_2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_astore_2(vm);
-      return pc + 1;
+      break;
     }
     case 78: // astore_3
     {
+      vm->current_frame->next_pc = pc + 1;
       op_astore_3(vm);
-      return pc + 1;
+      break;
     }
     case 79: // iastore
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iastore(vm);
-      return pc + 1;
+      break;
     }
     case 80: // lastore
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lastore(vm);
-      return pc + 1;
+      break;
     }
     case 81: // fastore
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fastore(vm);
-      return pc + 1;
+      break;
     }
     case 82: // dastore
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dastore(vm);
-      return pc + 1;
+      break;
     }
     case 83: // aastore
     {
+      vm->current_frame->next_pc = pc + 1;
       op_aastore(vm);
-      return pc + 1;
+      break;
     }
     case 84: // bastore
     {
+      vm->current_frame->next_pc = pc + 1;
       op_bastore(vm);
-      return pc + 1;
+      break;
     }
     case 85: // castore
     {
+      vm->current_frame->next_pc = pc + 1;
       op_castore(vm);
-      return pc + 1;
+      break;
     }
     case 86: // sastore
     {
+      vm->current_frame->next_pc = pc + 1;
       op_sastore(vm);
-      return pc + 1;
+      break;
     }
     case 87: // pop
     {
+      vm->current_frame->next_pc = pc + 1;
       op_pop(vm);
-      return pc + 1;
+      break;
     }
     case 88: // pop2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_pop2(vm);
-      return pc + 1;
+      break;
     }
     case 89: // dup
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dup(vm);
-      return pc + 1;
+      break;
     }
     case 90: // dup_x1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dup_x1(vm);
-      return pc + 1;
+      break;
     }
     case 91: // dup_x2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dup_x2(vm);
-      return pc + 1;
+      break;
     }
     case 92: // dup2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dup2(vm);
-      return pc + 1;
+      break;
     }
     case 93: // dup2_x1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dup2_x1(vm);
-      return pc + 1;
+      break;
     }
     case 94: // dup2_x2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dup2_x2(vm);
-      return pc + 1;
+      break;
     }
     case 95: // swap
     {
+      vm->current_frame->next_pc = pc + 1;
       op_swap(vm);
-      return pc + 1;
+      break;
     }
     case 96: // iadd
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iadd(vm);
-      return pc + 1;
+      break;
     }
     case 97: // ladd
     {
+      vm->current_frame->next_pc = pc + 1;
       op_ladd(vm);
-      return pc + 1;
+      break;
     }
     case 98: // fadd
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fadd(vm);
-      return pc + 1;
+      break;
     }
     case 99: // dadd
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dadd(vm);
-      return pc + 1;
+      break;
     }
     case 100: // isub
     {
+      vm->current_frame->next_pc = pc + 1;
       op_isub(vm);
-      return pc + 1;
+      break;
     }
     case 101: // lsub
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lsub(vm);
-      return pc + 1;
+      break;
     }
     case 102: // fsub
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fsub(vm);
-      return pc + 1;
+      break;
     }
     case 103: // dsub
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dsub(vm);
-      return pc + 1;
+      break;
     }
     case 104: // imul
     {
+      vm->current_frame->next_pc = pc + 1;
       op_imul(vm);
-      return pc + 1;
+      break;
     }
     case 105: // lmul
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lmul(vm);
-      return pc + 1;
+      break;
     }
     case 106: // fmul
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fmul(vm);
-      return pc + 1;
+      break;
     }
     case 107: // dmul
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dmul(vm);
-      return pc + 1;
+      break;
     }
     case 108: // idiv
     {
+      vm->current_frame->next_pc = pc + 1;
       op_idiv(vm);
-      return pc + 1;
+      break;
     }
     case 109: // ldiv
     {
+      vm->current_frame->next_pc = pc + 1;
       op_ldiv(vm);
-      return pc + 1;
+      break;
     }
     case 110: // fdiv
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fdiv(vm);
-      return pc + 1;
+      break;
     }
     case 111: // ddiv
     {
+      vm->current_frame->next_pc = pc + 1;
       op_ddiv(vm);
-      return pc + 1;
+      break;
     }
     case 112: // irem
     {
+      vm->current_frame->next_pc = pc + 1;
       op_irem(vm);
-      return pc + 1;
+      break;
     }
     case 113: // lrem
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lrem(vm);
-      return pc + 1;
+      break;
     }
     case 114: // frem
     {
+      vm->current_frame->next_pc = pc + 1;
       op_frem(vm);
-      return pc + 1;
+      break;
     }
     case 115: // drem
     {
+      vm->current_frame->next_pc = pc + 1;
       op_drem(vm);
-      return pc + 1;
+      break;
     }
     case 116: // ineg
     {
+      vm->current_frame->next_pc = pc + 1;
       op_ineg(vm);
-      return pc + 1;
+      break;
     }
     case 117: // lneg
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lneg(vm);
-      return pc + 1;
+      break;
     }
     case 118: // fneg
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fneg(vm);
-      return pc + 1;
+      break;
     }
     case 119: // dneg
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dneg(vm);
-      return pc + 1;
+      break;
     }
     case 120: // ishl
     {
+      vm->current_frame->next_pc = pc + 1;
       op_ishl(vm);
-      return pc + 1;
+      break;
     }
     case 121: // lshl
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lshl(vm);
-      return pc + 1;
+      break;
     }
     case 122: // ishr
     {
+      vm->current_frame->next_pc = pc + 1;
       op_ishr(vm);
-      return pc + 1;
+      break;
     }
     case 123: // lshr
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lshr(vm);
-      return pc + 1;
+      break;
     }
     case 124: // iushr
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iushr(vm);
-      return pc + 1;
+      break;
     }
     case 125: // lushr
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lushr(vm);
-      return pc + 1;
+      break;
     }
     case 126: // iand
     {
+      vm->current_frame->next_pc = pc + 1;
       op_iand(vm);
-      return pc + 1;
+      break;
     }
     case 127: // land
     {
+      vm->current_frame->next_pc = pc + 1;
       op_land(vm);
-      return pc + 1;
+      break;
     }
     case 128: // ior
     {
+      vm->current_frame->next_pc = pc + 1;
       op_ior(vm);
-      return pc + 1;
+      break;
     }
     case 129: // lor
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lor(vm);
-      return pc + 1;
+      break;
     }
     case 130: // ixor
     {
+      vm->current_frame->next_pc = pc + 1;
       op_ixor(vm);
-      return pc + 1;
+      break;
     }
     case 131: // lxor
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lxor(vm);
-      return pc + 1;
+      break;
     }
     case 132: // iinc
     {
       uint32_t index = _u1(&code[pc + 1]);
       uint32_t _const = _u1(&code[pc + 2]);
+      vm->current_frame->next_pc = pc + 3;
       op_iinc(vm, index, _const);
-      return pc + 3;
+      break;
     }
     case 133: // i2l
     {
+      vm->current_frame->next_pc = pc + 1;
       op_i2l(vm);
-      return pc + 1;
+      break;
     }
     case 134: // i2f
     {
+      vm->current_frame->next_pc = pc + 1;
       op_i2f(vm);
-      return pc + 1;
+      break;
     }
     case 135: // i2d
     {
+      vm->current_frame->next_pc = pc + 1;
       op_i2d(vm);
-      return pc + 1;
+      break;
     }
     case 136: // l2i
     {
+      vm->current_frame->next_pc = pc + 1;
       op_l2i(vm);
-      return pc + 1;
+      break;
     }
     case 137: // l2f
     {
+      vm->current_frame->next_pc = pc + 1;
       op_l2f(vm);
-      return pc + 1;
+      break;
     }
     case 138: // l2d
     {
+      vm->current_frame->next_pc = pc + 1;
       op_l2d(vm);
-      return pc + 1;
+      break;
     }
     case 139: // f2i
     {
+      vm->current_frame->next_pc = pc + 1;
       op_f2i(vm);
-      return pc + 1;
+      break;
     }
     case 140: // f2l
     {
+      vm->current_frame->next_pc = pc + 1;
       op_f2l(vm);
-      return pc + 1;
+      break;
     }
     case 141: // f2d
     {
+      vm->current_frame->next_pc = pc + 1;
       op_f2d(vm);
-      return pc + 1;
+      break;
     }
     case 142: // d2i
     {
+      vm->current_frame->next_pc = pc + 1;
       op_d2i(vm);
-      return pc + 1;
+      break;
     }
     case 143: // d2l
     {
+      vm->current_frame->next_pc = pc + 1;
       op_d2l(vm);
-      return pc + 1;
+      break;
     }
     case 144: // d2f
     {
+      vm->current_frame->next_pc = pc + 1;
       op_d2f(vm);
-      return pc + 1;
+      break;
     }
     case 145: // i2b
     {
+      vm->current_frame->next_pc = pc + 1;
       op_i2b(vm);
-      return pc + 1;
+      break;
     }
     case 146: // i2c
     {
+      vm->current_frame->next_pc = pc + 1;
       op_i2c(vm);
-      return pc + 1;
+      break;
     }
     case 147: // i2s
     {
+      vm->current_frame->next_pc = pc + 1;
       op_i2s(vm);
-      return pc + 1;
+      break;
     }
     case 148: // lcmp
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lcmp(vm);
-      return pc + 1;
+      break;
     }
     case 149: // fcmpl
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fcmpl(vm);
-      return pc + 1;
+      break;
     }
     case 150: // fcmpg
     {
+      vm->current_frame->next_pc = pc + 1;
       op_fcmpg(vm);
-      return pc + 1;
+      break;
     }
     case 151: // dcmpl
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dcmpl(vm);
-      return pc + 1;
+      break;
     }
     case 152: // dcmpg
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dcmpg(vm);
-      return pc + 1;
+      break;
     }
     case 153: // ifeq
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_ifeq(vm, branch);
-      return pc + 3;
+      break;
     }
     case 154: // ifne
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_ifne(vm, branch);
-      return pc + 3;
+      break;
     }
     case 155: // iflt
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_iflt(vm, branch);
-      return pc + 3;
+      break;
     }
     case 156: // ifge
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_ifge(vm, branch);
-      return pc + 3;
+      break;
     }
     case 157: // ifgt
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_ifgt(vm, branch);
-      return pc + 3;
+      break;
     }
     case 158: // ifle
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_ifle(vm, branch);
-      return pc + 3;
+      break;
     }
     case 159: // if_icmpeq
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_if_icmpeq(vm, branch);
-      return pc + 3;
+      break;
     }
     case 160: // if_icmpne
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_if_icmpne(vm, branch);
-      return pc + 3;
+      break;
     }
     case 161: // if_icmplt
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_if_icmplt(vm, branch);
-      return pc + 3;
+      break;
     }
     case 162: // if_icmpge
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_if_icmpge(vm, branch);
-      return pc + 3;
+      break;
     }
     case 163: // if_icmpgt
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_if_icmpgt(vm, branch);
-      return pc + 3;
+      break;
     }
     case 164: // if_icmple
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_if_icmple(vm, branch);
-      return pc + 3;
+      break;
     }
     case 165: // if_acmpeq
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_if_acmpeq(vm, branch);
-      return pc + 3;
+      break;
     }
     case 166: // if_acmpne
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_if_acmpne(vm, branch);
-      return pc + 3;
+      break;
     }
     case 167: // goto
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_goto(vm, branch);
-      return pc + 3;
+      break;
     }
     case 168: // jsr
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_jsr(vm, branch);
-      return pc + 3;
+      break;
     }
     case 169: // ret
     {
       uint32_t index = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_ret(vm, index);
-      return pc + 2;
+      break;
     }
     case 170: // tableswitch
     {
       TABLESWITCH_ARGS;
+      vm->current_frame->next_pc = TABLESWITCH_NEXT_PC;
       op_tableswitch(vm, defaultbyte, lowbyte, highbyte, table);
-      return TABLESWITCH_NEXT_PC;
+      break;
     }
     case 171: // lookupswitch
     {
       LOOKUPSWITCH_ARGS;
+      vm->current_frame->next_pc = LOOKUPSWITCH_NEXT_PC;
       op_lookupswitch(vm);
-      return LOOKUPSWITCH_NEXT_PC;
+      break;
     }
     case 172: // ireturn
     {
+      vm->current_frame->next_pc = pc + 1;
       op_ireturn(vm);
-      return pc + 1;
+      break;
     }
     case 173: // lreturn
     {
+      vm->current_frame->next_pc = pc + 1;
       op_lreturn(vm);
-      return pc + 1;
+      break;
     }
     case 174: // freturn
     {
+      vm->current_frame->next_pc = pc + 1;
       op_freturn(vm);
-      return pc + 1;
+      break;
     }
     case 175: // dreturn
     {
+      vm->current_frame->next_pc = pc + 1;
       op_dreturn(vm);
-      return pc + 1;
+      break;
     }
     case 176: // areturn
     {
+      vm->current_frame->next_pc = pc + 1;
       op_areturn(vm);
-      return pc + 1;
+      break;
     }
     case 177: // return
     {
+      vm->current_frame->next_pc = pc + 1;
       op_return(vm);
-      return pc + 1;
+      break;
     }
     case 178: // getstatic
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_getstatic(vm, index);
-      return pc + 3;
+      break;
     }
     case 179: // putstatic
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_putstatic(vm, index);
-      return pc + 3;
+      break;
     }
     case 180: // getfield
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_getfield(vm, index);
-      return pc + 3;
+      break;
     }
     case 181: // putfield
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_putfield(vm, index);
-      return pc + 3;
+      break;
     }
     case 182: // invokevirtual
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_invokevirtual(vm, index);
-      return pc + 3;
+      break;
     }
     case 183: // invokespecial
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_invokespecial(vm, index);
-      return pc + 3;
+      break;
     }
     case 184: // invokestatic
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_invokestatic(vm, index);
-      return pc + 3;
+      break;
     }
     case 185: // invokeinterface
     {
       uint32_t index = _u2(&code[pc + 1]);
       uint32_t count = _u1(&code[pc + 3]);
+      vm->current_frame->next_pc = pc + 5;
       op_invokeinterface(vm, index, count);
-      return pc + 5;
+      break;
     }
     case 186: // invokedynamic
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 5;
       op_invokedynamic(vm, index);
-      return pc + 5;
+      break;
     }
     case 187: // new
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_new(vm, index);
-      return pc + 3;
+      break;
     }
     case 188: // newarray
     {
       uint32_t atype = _u1(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 2;
       op_newarray(vm, atype);
-      return pc + 2;
+      break;
     }
     case 189: // anewarray
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_anewarray(vm, index);
-      return pc + 3;
+      break;
     }
     case 190: // arraylength
     {
+      vm->current_frame->next_pc = pc + 1;
       op_arraylength(vm);
-      return pc + 1;
+      break;
     }
     case 191: // athrow
     {
+      vm->current_frame->next_pc = pc + 1;
       op_athrow(vm);
-      return pc + 1;
+      break;
     }
     case 192: // checkcast
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_checkcast(vm, index);
-      return pc + 3;
+      break;
     }
     case 193: // instanceof
     {
       uint32_t index = _u2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_instanceof(vm, index);
-      return pc + 3;
+      break;
     }
     case 194: // monitorenter
     {
+      vm->current_frame->next_pc = pc + 1;
       op_monitorenter(vm);
-      return pc + 1;
+      break;
     }
     case 195: // monitorexit
     {
+      vm->current_frame->next_pc = pc + 1;
       op_monitorexit(vm);
-      return pc + 1;
+      break;
     }
     case 196: // wide
     {
       WIDE_ARGS;
+      vm->current_frame->next_pc = WIDE_NEXT_PC;
       op_wide(vm);
-      return WIDE_NEXT_PC;
+      break;
     }
     case 197: // multianewarray
     {
       uint32_t index = _u2(&code[pc + 1]);
       uint32_t dimensions = _u1(&code[pc + 3]);
+      vm->current_frame->next_pc = pc + 4;
       op_multianewarray(vm, index, dimensions);
-      return pc + 4;
+      break;
     }
     case 198: // ifnull
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_ifnull(vm, branch);
-      return pc + 3;
+      break;
     }
     case 199: // ifnonnull
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_ifnonnull(vm, branch);
-      return pc + 3;
+      break;
     }
     case 200: // goto_w
     {
       int32_t branch = _s2(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 3;
       op_goto_w(vm, branch);
-      return pc + 3;
+      break;
     }
     case 201: // jsr_w
     {
       int32_t branch = _s4(&code[pc + 1]);
+      vm->current_frame->next_pc = pc + 5;
       op_jsr_w(vm, branch);
-      return pc + 5;
+      break;
     }
     case 202: // breakpoint
     {
+      vm->current_frame->next_pc = pc + 1;
       op_breakpoint(vm);
-      return pc + 1;
+      break;
     }
     case 254: // impdep1
     {
+      vm->current_frame->next_pc = pc + 1;
       op_impdep1(vm);
-      return pc + 1;
+      break;
     }
     case 255: // impdep2
     {
+      vm->current_frame->next_pc = pc + 1;
       op_impdep2(vm);
-      return pc + 1;
+      break;
     }
     default:
     {
       assert(false);
-      return pc;
+      break;
     }
   }
 }
