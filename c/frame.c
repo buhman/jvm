@@ -9,39 +9,6 @@
 #include "decode.h"
 #include "frame.h"
 #include "class_resolver.h"
-#include "string.h"
-
-struct frame * stack_push_frame(struct stack * stack, int num_frames)
-{
-  struct frame * frame = &stack->frame[stack->ix];
-  stack->ix += num_frames;
-  assert(stack->ix <= stack->capacity);
-  return frame;
-}
-
-struct frame * stack_pop_frame(struct stack * stack, int num_frames)
-{
-  stack->ix -= num_frames;
-  assert(stack->ix >= 0);
-  struct frame * frame = &stack->frame[stack->ix - 1];
-  return frame;
-}
-
-uint32_t * stack_push_data(struct stack * stack, int num_data)
-{
-  uint32_t * data = &stack->data[stack->ix];
-  stack->ix += num_data;
-  assert(stack->ix <= stack->capacity);
-  return data;
-}
-
-uint32_t * stack_pop_data(struct stack * stack, int num_data)
-{
-  stack->ix -= num_data;
-  assert(stack->ix >= 0);
-  uint32_t * data = &stack->data[stack->ix];
-  return data;
-}
 
 struct Code_attribute * get_code_attribute(int code_name_index,
                                            int attributes_count,
@@ -60,6 +27,19 @@ int find_code_name_index(struct class_file * class_file)
     struct constant * constant = &class_file->constant_pool[i];
     if (constant->tag == CONSTANT_Utf8) {
       if (bytes_equal(constant->utf8.length, constant->utf8.bytes, "Code")) {
+        return i + 1;
+      }
+    }
+  }
+  return 0;
+}
+
+int find_constantvalue_name_index(struct class_file * class_file)
+{
+  for (int i = 0; i < class_file->constant_pool_count; i++) {
+    struct constant * constant = &class_file->constant_pool[i];
+    if (constant->tag == CONSTANT_Utf8) {
+      if (bytes_equal(constant->utf8.length, constant->utf8.bytes, "ConstantValue")) {
         return i + 1;
       }
     }
@@ -89,6 +69,75 @@ static int descriptor_nargs(struct constant * descriptor_constant)
   assert(i + 2 == descriptor_constant->utf8.length);
 
   return nargs;
+}
+
+bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
+{
+  if (class_entry->initialization_state == CLASS_INITIALIZED)
+    return true;
+
+  if (class_entry->initialization_state == CLASS_INITIALIZING) {
+    if (vm->current_thread.current_class == class_entry->class_file)
+      return true;
+    else
+      assert(false); // possible infinite initialization loop
+  }
+
+  class_entry->initialization_state = CLASS_INITIALIZING;
+
+  /* Then, initialize each static field of C with the constant value in its
+     ConstantValue attribute (§4.7.2), in the order the fields appear in the
+     ClassFile structure. */
+
+  struct class_file * class_file = class_entry->class_file;
+
+  int constantvalue_name_index = find_constantvalue_name_index(class_file);
+  assert(constantvalue_name_index != 0);
+
+  for (int i = 0; i < class_file->fields_count; i++) {
+    struct field_info * field_info = &class_file->fields[i];
+    if (!(field_info->access_flags & FIELD_ACC_STATIC))
+      continue;
+
+    for (int j = 0; j < field_info->attributes_count; j++) {
+      if (field_info->attributes[j].attribute_name_index == constantvalue_name_index) {
+        struct attribute_info * attribute = &field_info->attributes[j];
+        struct constant * constantvalue = &class_file->constant_pool[attribute->constantvalue->constantvalue_index - 1];
+        assert(constantvalue->tag == CONSTANT_Integer); // also need to support CONSTANT_String
+
+        struct constant * name_constant = &class_file->constant_pool[field_info->name_index - 1];
+        assert(name_constant->tag == CONSTANT_Utf8);
+        struct field_entry * field_entry = class_resolver_lookup_field(class_entry,
+                                                                       name_constant->utf8.bytes,
+                                                                       name_constant->utf8.length);
+        assert(field_entry != nullptr);
+        field_entry->value = constantvalue->integer.bytes;
+        printf("  constantvalue: %d\n", field_entry->value);
+        break;
+      }
+    }
+  }
+
+  /* Next, if C declares a class or interface initialization method, execute
+     that method. */
+  const uint8_t * method_name = (const uint8_t *)"<clinit>";
+  int method_length = 8;
+
+  struct method_info * method_info = class_resolver_lookup_method(class_entry,
+                                                                  method_name,
+                                                                  method_length);
+  if (method_info != nullptr) {
+    assert((method_info->access_flags & METHOD_ACC_STATIC) != 0);
+    printf("<clinit>\n");
+
+    // tamper with next_pc
+    vm->current_frame->next_pc = vm->current_frame->pc;
+
+    vm_static_method_call(vm, class_file, method_info);
+    return false;
+  }
+
+  return true;
 }
 
 void vm_static_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info)
@@ -132,6 +181,8 @@ void vm_static_method_call(struct vm * vm, struct class_file * class_file, struc
   vm->current_frame->pc = 0;
   vm->current_thread.current_class = class_file;
   vm->current_thread.current_method = method_info;
+
+  printf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
 }
 
 void vm_method_return(struct vm * vm)
@@ -224,54 +275,4 @@ void vm_execute(struct vm * vm)
       vm->current_frame->pc = vm->current_frame->next_pc;
     }
   }
-}
-
-int main(int argc, const char * argv[])
-{
-  assert(argc >= 3);
-
-  const char * main_class = argv[1];
-
-  const char ** class_filenames = &argv[2];
-  int num_class_filenames = argc - 2;
-
-  int class_hash_table_length;
-  struct hash_table_entry * class_hash_table = class_resolver_load_from_filenames(class_filenames, num_class_filenames, &class_hash_table_length);
-
-  struct class_entry * class_entry = class_resolver_lookup_class(class_hash_table_length,
-                                                                 class_hash_table,
-                                                                 (const uint8_t *)main_class,
-                                                                 string_length(main_class));
-
-  const char * method_name = "main";
-  int method_name_length = string_length(method_name);
-  struct method_info * method_info = class_resolver_lookup_method(class_entry,
-                                                                  (const uint8_t *)method_name,
-                                                                  method_name_length);
-
-  struct vm vm;
-  vm.class_hash_table.entry = class_hash_table;
-  vm.class_hash_table.length = class_hash_table_length;
-
-  vm.frame_stack.ix = 0;
-  vm.frame_stack.capacity = 1024;
-  struct frame frames[vm.frame_stack.capacity];
-  vm.frame_stack.frame = frames;
-
-  vm.data_stack.ix = 0;
-  vm.data_stack.capacity = 0x100000;
-  uint32_t data[vm.data_stack.capacity];
-  vm.data_stack.data = data;
-
-  struct frame * entry_frame = stack_push_frame(&vm.frame_stack, 1);
-  struct Code_attribute code;
-  code.max_locals = 0;
-  code.max_stack = 0;
-  entry_frame->code = &code;
-  entry_frame->local_variable = 0;
-  entry_frame->operand_stack = 0;
-  entry_frame->operand_stack_ix = 0;
-
-  vm_static_method_call(&vm, class_entry->class_file, method_info);
-  vm_execute(&vm);
 }

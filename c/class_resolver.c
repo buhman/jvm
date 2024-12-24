@@ -39,6 +39,7 @@ struct hash_table_entry * class_resolver_load_from_filenames(const char * filena
     assert(class_file->magic == 0xcafebabe);
 
     class_entry[i].class_file = class_file;
+    class_entry[i].initialization_state = CLASS_UNINITIALIZED;
 
     hash_table_add(class_hash_table_length,
                    class_hash_table,

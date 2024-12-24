@@ -13,11 +13,12 @@ OBJ = \
 	c/execute.o \
 	c/memory_allocator.o \
 	c/class_resolver.o \
-	c/hash_table.o
+	c/hash_table.o \
+	c/frame.o
 
 MAIN_OBJ = \
 	$(OBJ) \
-	c/frame.o
+	c/main.o
 
 PRINT_CLASS_OBJ = \
 	$(OBJ) \

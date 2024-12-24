@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "class_file.h"
+#include "class_resolver.h"
 
 struct frame {
   struct Code_attribute * code;
@@ -38,6 +39,38 @@ struct vm {
     struct hash_table_entry * entry;
   } class_hash_table;
 };
+
+static inline struct frame * stack_push_frame(struct stack * stack, int num_frames)
+{
+  struct frame * frame = &stack->frame[stack->ix];
+  stack->ix += num_frames;
+  assert(stack->ix <= stack->capacity);
+  return frame;
+}
+
+static inline struct frame * stack_pop_frame(struct stack * stack, int num_frames)
+{
+  stack->ix -= num_frames;
+  assert(stack->ix >= 0);
+  struct frame * frame = &stack->frame[stack->ix - 1];
+  return frame;
+}
+
+static inline uint32_t * stack_push_data(struct stack * stack, int num_data)
+{
+  uint32_t * data = &stack->data[stack->ix];
+  stack->ix += num_data;
+  assert(stack->ix <= stack->capacity);
+  return data;
+}
+
+static inline uint32_t * stack_pop_data(struct stack * stack, int num_data)
+{
+  stack->ix -= num_data;
+  assert(stack->ix >= 0);
+  uint32_t * data = &stack->data[stack->ix];
+  return data;
+}
 
 static inline void operand_stack_push_u32(struct frame * frame, uint32_t value)
 {
@@ -76,5 +109,7 @@ static inline float operand_stack_pop_f32(struct frame * frame)
   return f;
 }
 
+bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry);
 void vm_static_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info);
 void vm_method_return(struct vm * vm);
+void vm_execute(struct vm * vm);

@@ -10,8 +10,15 @@ struct field_entry {
   uint32_t value;
 };
 
+enum initialization_state {
+  CLASS_UNINITIALIZED,
+  CLASS_INITIALIZING,
+  CLASS_INITIALIZED,
+};
+
 struct class_entry {
   struct class_file * class_file;
+  enum initialization_state initialization_state;
 
   struct {
     int length;

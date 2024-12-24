@@ -550,6 +550,13 @@ void op_getstatic(struct vm * vm, uint32_t index)
                                                                  field_name_constant->utf8.length);
   assert(field_entry != nullptr);
 
+  /*  On successful resolution of the field, the class or interface that
+      declared the resolved field is initialized if that class or interface has
+      not already been initialized (§5.5). */
+
+  if (!vm_initialize_class(vm, class_entry))
+    return;
+
   uint32_t value = field_entry->value;
   operand_stack_push_u32(vm->current_frame, value);
 }
@@ -925,6 +932,10 @@ void op_invokestatic(struct vm * vm, uint32_t index)
                                                                   method_name_constant->utf8.length);
   assert(method_info != nullptr);
 
+  /* On successful resolution of the method, the class or interface that
+     declared the resolved method is initialized if that class or interface has
+     not already been initialized (§5.5). */
+
   vm_static_method_call(vm, class_entry->class_file, method_info);
 }
 
@@ -1266,6 +1277,17 @@ void op_multianewarray(struct vm * vm, uint32_t index, uint32_t dimensions)
 
 void op_new(struct vm * vm, uint32_t index)
 {
+  /* On successful resolution of the class, it is initialized if it has not
+     already been initialized (§5.5).
+
+     (new) Upon execution of a new instruction, the class to be initialized is
+     the class referenced by the instruction. */
+
+  /*
+  if (!vm_initialize_class(vm, class_entry))
+    return;
+  */
+
   assert(!"op_new");
 }
 
@@ -1307,8 +1329,20 @@ void op_newarray(struct vm * vm, uint32_t atype)
   int32_t count = operand_stack_pop_u32(vm->current_frame);
   int32_t size = element_size * count + 4;
   int32_t * arrayref = memory_allocate(size);
+
   assert(arrayref != 0);
   arrayref[0] = count;
+
+  /* Each of the elements of the new array is initialized to the default initial
+     value (§2.3, §2.4) for the element type of the array type. */
+  /* round up u32_count, possibly initializing past the end of the array. This
+     is acceptable because memory_allocate always allocates a multiple of 4
+     greater than or equal to `size`. */
+  int32_t u32_count = (size - 4 + 3) / 4;
+  for (int i = 0; i < u32_count; i++) {
+    arrayref[i + 1] = 0;
+  }
+
   operand_stack_push_u32(vm->current_frame, (uint32_t)arrayref);
 }
 
@@ -1333,7 +1367,47 @@ void op_putfield(struct vm * vm, uint32_t index)
 
 void op_putstatic(struct vm * vm, uint32_t index)
 {
-  assert(!"op_putstatic");
+  struct constant * fieldref_constant = &vm->current_thread.current_class->constant_pool[index - 1];
+  #ifdef DEBUG
+  assert(fieldref_constant->tag == CONSTANT_Fieldref);
+  #endif
+  struct constant * class_constant = &vm->current_thread.current_class->constant_pool[fieldref_constant->fieldref.class_index - 1];
+  #ifdef DEBUG
+  assert(class_constant->tag == CONSTANT_Class);
+  #endif
+  struct constant * nameandtype_constant = &vm->current_thread.current_class->constant_pool[fieldref_constant->fieldref.name_and_type_index - 1];
+  #ifdef DEBUG
+  assert(nameandtype_constant->tag == CONSTANT_NameAndType);
+  #endif
+  struct constant * class_name_constant = &vm->current_thread.current_class->constant_pool[class_constant->class.name_index - 1];
+  #ifdef DEBUG
+  assert(class_name_constant->tag == CONSTANT_Utf8);
+  #endif
+  struct constant * field_name_constant = &vm->current_thread.current_class->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
+  #ifdef DEBUG
+  assert(field_name_constant->tag == CONSTANT_Utf8);
+  #endif
+
+  struct class_entry * class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
+                                                                 vm->class_hash_table.entry,
+                                                                 class_name_constant->utf8.bytes,
+                                                                 class_name_constant->utf8.length);
+  assert(class_entry != nullptr);
+
+  struct field_entry * field_entry = class_resolver_lookup_field(class_entry,
+                                                                 field_name_constant->utf8.bytes,
+                                                                 field_name_constant->utf8.length);
+  assert(field_entry != nullptr);
+
+  /* On successful resolution of the field, the class or interface that declared
+     the resolved field is initialized if that class or interface has not
+     already been initialized (§5.5). */
+
+  if (!vm_initialize_class(vm, class_entry))
+    return;
+
+  uint32_t value = operand_stack_pop_u32(vm->current_frame);
+  field_entry->value = value;
 }
 
 void op_ret(struct vm * vm, uint32_t index)
@@ -1358,7 +1432,7 @@ void op_sastore(struct vm * vm)
 
 void op_sipush(struct vm * vm, int32_t byte)
 {
-  assert(!"op_sipush2");
+  operand_stack_push_u32(vm->current_frame, byte);
 }
 
 void op_swap(struct vm * vm)
