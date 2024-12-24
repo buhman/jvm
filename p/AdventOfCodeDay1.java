@@ -1,6 +1,6 @@
 package p;
 
-class AdventDay1 {
+class AdventOfCodeDay1 {
     public static int part1() {
         int[] input = {3,   4,
                        4,   3,

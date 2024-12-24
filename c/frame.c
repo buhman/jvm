@@ -73,12 +73,17 @@ static int descriptor_nargs(struct constant * descriptor_constant)
   assert(descriptor_constant->utf8.length >= 2);
   assert(descriptor_constant->utf8.bytes[0] == '(');
 
+  printf("method descriptor: ");
+  print_utf8_string(descriptor_constant);
+  printf("\n");
+
   int i = 1;
   int nargs = 0;
   while (i < descriptor_constant->utf8.length) {
     if (descriptor_constant->utf8.bytes[i] == ')')
       break;
-    nargs += 1;
+    if (descriptor_constant->utf8.bytes[i] != '[')
+      nargs += 1;
     i += 1;
   }
   assert(i + 2 == descriptor_constant->utf8.length);
@@ -100,7 +105,6 @@ void vm_static_method_call(struct vm * vm, struct class_file * class_file, struc
 
   int code_name_index = find_code_name_index(class_file);
   assert(code_name_index > 0);
-  printf("code_name_index %d\n", code_name_index);
 
   struct Code_attribute * code = get_code_attribute(code_name_index,
                                                     method_info->attributes_count,
@@ -120,9 +124,10 @@ void vm_static_method_call(struct vm * vm, struct class_file * class_file, struc
   printf("nargs %d\n", nargs);
   for (int i = 0; i < nargs; i++) {
     uint32_t value = operand_stack_pop_u32(old_frame);
+    printf("local[%d] = %x\n", nargs - i - 1, value);
     vm->current_frame->local_variable[nargs - i - 1] = value;
   }
-  vm->current_frame->return_type = descriptor_constant->utf8.bytes[nargs + 2];
+  vm->current_frame->return_type = descriptor_constant->utf8.bytes[descriptor_constant->utf8.length - 1];
 
   vm->current_frame->pc = 0;
   vm->current_thread.current_class = class_file;
@@ -140,9 +145,38 @@ void vm_method_return(struct vm * vm)
   assert(vm->current_frame != old_frame);
   vm->current_frame->pc = vm->current_frame->next_pc;
 
+  /*
+    boolean int 1
+    byte int 1
+    char int 1
+    short int 1
+    int int 1
+    float float 1
+    reference reference 1
+    returnAddress returnAddress 1
+    long long 2
+    double double 2
+  */
+  /*
+    B byte
+    C char
+    D double
+    F float
+    I int
+    J long
+    L ClassName ; Named class or interface type
+    S short
+    Z boolean
+    [ ComponentType Array of given component type
+  */
+
   switch (old_frame->return_type) {
-  case 'F': [[fallthrough]];
-  case 'I':
+  case 'Z': [[fallthrough]];
+  case 'B': [[fallthrough]];
+  case 'C': [[fallthrough]];
+  case 'S': [[fallthrough]];
+  case 'I': [[fallthrough]];
+  case 'F':
     uint32_t value = operand_stack_pop_u32(old_frame);
     operand_stack_push_u32(vm->current_frame, value);
     break;

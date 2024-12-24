@@ -120,6 +120,10 @@ struct class_entry * class_resolver_lookup_class(int class_hash_table_length,
                                                  const uint8_t * class_name,
                                                  int class_name_length)
 {
+  printf("class_resolver_lookup_class: ");
+  for (int i = 0; i < class_name_length; i++) { fputc(class_name[i], stdout); }
+  fputc('\n', stdout);
+
   struct hash_table_entry * e = hash_table_find(class_hash_table_length,
                                                 class_hash_table,
                                                 class_name,
@@ -134,6 +138,10 @@ struct field_entry * class_resolver_lookup_field(struct class_entry * class_entr
                                                  const uint8_t * field_name,
                                                  int field_name_length)
 {
+  printf("class_resolver_lookup_field: ");
+  for (int i = 0; i < field_name_length; i++) { fputc(field_name[i], stdout); }
+  fputc('\n', stdout);
+
   int fields_hash_table_length = class_entry->fields.length;
   struct hash_table_entry * fields_hash_table = class_entry->fields.entry;
 
@@ -150,6 +158,10 @@ struct method_info * class_resolver_lookup_method(struct class_entry * class_ent
                                                   const uint8_t * method_name,
                                                   int method_name_length)
 {
+  printf("class_resolver_lookup_method: ");
+  for (int i = 0; i < method_name_length; i++) { fputc(method_name[i], stdout); }
+  fputc('\n', stdout);
+
   int methods_hash_table_length = class_entry->methods.length;
   struct hash_table_entry * methods_hash_table = class_entry->methods.entry;
 

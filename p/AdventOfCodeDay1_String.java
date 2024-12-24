@@ -1,6 +1,6 @@
 package p;
 
-class AdventOfCode2024Day1 {
+class AdventOfCodeDay1_String {
     public static int part1() {
         char[] string_input = {
             '3', ' ', ' ', ' ', '4', '\n',

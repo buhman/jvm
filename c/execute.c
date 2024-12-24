@@ -75,7 +75,6 @@ void op_astore(struct vm * vm, uint32_t index)
 
 void op_astore_0(struct vm * vm)
 {
-  printf("op_astore0 %d\n", vm->current_frame->operand_stack_ix);
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
   vm->current_frame->local_variable[0] = value;
 }
@@ -959,14 +958,28 @@ void op_ireturn(struct vm * vm)
       of the invoked method was boolean, then value is narrowed from int to
       boolean by taking the bitwise AND of value and 1. */
 
-  uint32_t value = operand_stack_pop_u32(vm->current_frame);
+  //  The current method must have return type boolean, byte, char, short, or int
+
+  int32_t value = operand_stack_pop_u32(vm->current_frame);
   switch (vm->current_frame->return_type) {
-  case 'I':
+  case 'Z': // boolean
+    value = value & 1;
+    break;
+  case 'B': // byte
+    value = (int8_t)value;
+    break;
+  case 'C': // char
+    value = (uint16_t)value;
+    break;
+  case 'S': // short
+    value = (int16_t)value;
+    break;
+  case 'I': // int
+    value = (int32_t)value;
     break;
   default:
-    fprintf(stderr, "conversion not implemented: %c\n", vm->current_frame->return_type);
+    fprintf(stderr, "invalid conversion: %c\n", vm->current_frame->return_type);
     assert(false);
-    break;
   }
   operand_stack_push_u32(vm->current_frame, value);
 
