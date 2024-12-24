@@ -141,6 +141,7 @@ void vm_method_return(struct vm * vm)
   vm->current_frame->pc = vm->current_frame->next_pc;
 
   switch (old_frame->return_type) {
+  case 'F': [[fallthrough]];
   case 'I':
     uint32_t value = operand_stack_pop_u32(old_frame);
     operand_stack_push_u32(vm->current_frame, value);
@@ -163,7 +164,7 @@ static void print_vm_stack(struct vm * vm)
       continue;
     }
     int32_t value = vm->current_frame->operand_stack[vm->current_frame->operand_stack_ix - i];
-    if (value > 65536)
+    if (value > 32767 || value < -32768)
       printf("0x%08x  ", value);
     else
       printf("%10d  ", value);
@@ -174,12 +175,12 @@ static void print_vm_stack(struct vm * vm)
 void vm_execute(struct vm * vm)
 {
   while (true) {
+    assert(vm->current_frame->pc < vm->current_frame->code->code_length);
     print_vm_stack(vm);
     decode_print_instruction(vm->current_frame->code->code, vm->current_frame->pc);
     uint32_t old_pc = vm->current_frame->pc;
     struct method_info * old_method = vm->current_thread.current_method;
     decode_execute_instruction(vm, vm->current_frame->code->code, vm->current_frame->pc);
-    //if (vm->current_frame->pc >= vm->current_frame->code->code_length) {
     if (vm->frame_stack.ix == 1) {
       printf("terminate\n");
       break;

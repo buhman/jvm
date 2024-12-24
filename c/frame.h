@@ -60,5 +60,21 @@ static inline void operand_stack_dup_u32(struct frame * frame)
   frame->operand_stack_ix++;
 }
 
+static inline void operand_stack_push_f32(struct frame * frame, float f)
+{
+  uint32_t value = *((uint32_t *)&f);
+  frame->operand_stack[frame->operand_stack_ix] = value;
+  frame->operand_stack_ix++;
+}
+
+static inline float operand_stack_pop_f32(struct frame * frame)
+{
+  frame->operand_stack_ix--;
+  uint32_t value = frame->operand_stack[frame->operand_stack_ix];
+  frame->operand_stack[frame->operand_stack_ix] = -1;
+  float f = *((float *)&value);
+  return f;
+}
+
 void vm_static_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info);
 void vm_method_return(struct vm * vm);
