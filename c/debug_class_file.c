@@ -8,6 +8,13 @@
 #include "decode.h"
 #include "debug_class_file.h"
 
+void print_utf8_string(struct constant * constant)
+{
+  for (int i = 0; i < constant->utf8.length; i++) {
+    fputc(constant->utf8.bytes[i], stdout);
+  }
+}
+
 void print_constant(struct constant * constant)
 {
   switch (constant->tag) {
@@ -60,10 +67,8 @@ void print_constant(struct constant * constant)
   case CONSTANT_Utf8:
     printf("CONSTANT_Utf8 length=%d bytes=",
            constant->utf8.length);
-    for (int i = 0; i < constant->utf8.length; i++) {
-      fputc(constant->utf8.bytes[i], stdout);
-    }
-    fputc('\n', stdout);
+    print_utf8_string(constant);
+    printf("\n");
     break;
   case CONSTANT_MethodHandle:
     printf("CONSTANT_MethodHandle reference_kind=%d reference_index=%d\n",

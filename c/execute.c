@@ -3,6 +3,7 @@
 #include "execute.h"
 #include "memory_allocator.h"
 #include "bswap.h"
+#include "class_resolver.h"
 
 void op_aaload(struct vm * vm)
 {
@@ -449,7 +450,40 @@ void op_getfield(struct vm * vm, uint32_t index)
 
 void op_getstatic(struct vm * vm, uint32_t index)
 {
-  assert(!"op_getstatic");
+  struct constant * fieldref_constant = &vm->current_thread.current_class->constant_pool[index - 1];
+  #ifdef DEBUG
+  assert(fieldref_constant->tag == CONSTANT_Fieldref);
+  #endif
+  struct constant * class_constant = &vm->current_thread.current_class->constant_pool[fieldref_constant->fieldref.class_index - 1];
+  #ifdef DEBUG
+  assert(class_constant->tag == CONSTANT_Class);
+  #endif
+  struct constant * nameandtype_constant = &vm->current_thread.current_class->constant_pool[fieldref_constant->fieldref.name_and_type_index - 1];
+  #ifdef DEBUG
+  assert(nameandtype_constant->tag == CONSTANT_NameAndType);
+  #endif
+  struct constant * class_name_constant = &vm->current_thread.current_class->constant_pool[class_constant->class.name_index - 1];
+  #ifdef DEBUG
+  assert(class_name_constant->tag == CONSTANT_Utf8);
+  #endif
+  struct constant * field_name_constant = &vm->current_thread.current_class->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
+  #ifdef DEBUG
+  assert(field_name_constant->tag == CONSTANT_Utf8);
+  #endif
+
+  struct class_entry * class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
+                                                                 vm->class_hash_table.entry,
+                                                                 class_name_constant->utf8.bytes,
+                                                                 class_name_constant->utf8.length);
+  assert(class_entry != nullptr);
+
+  struct field_entry * field_entry = class_resolver_lookup_field(class_entry,
+                                                                 field_name_constant->utf8.bytes,
+                                                                 field_name_constant->utf8.length);
+  assert(field_entry != nullptr);
+
+  uint32_t value = field_entry->value;
+  operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_goto(struct vm * vm, int32_t branch)
@@ -789,7 +823,39 @@ void op_invokespecial(struct vm * vm, uint32_t index)
 
 void op_invokestatic(struct vm * vm, uint32_t index)
 {
-  assert(!"op_invokestatic");
+  struct constant * methodref_constant = &vm->current_thread.current_class->constant_pool[index - 1];
+  #ifdef DEBUG
+  assert(methodref_constant->tag == CONSTANT_Methodref);
+  #endif
+  struct constant * class_constant = &vm->current_thread.current_class->constant_pool[methodref_constant->methodref.class_index - 1];
+  #ifdef DEBUG
+  assert(class_constant->tag == CONSTANT_Class);
+  #endif
+  struct constant * nameandtype_constant = &vm->current_thread.current_class->constant_pool[methodref_constant->methodref.name_and_type_index - 1];
+  #ifdef DEBUG
+  assert(nameandtype_constant->tag == CONSTANT_NameAndType);
+  #endif
+  struct constant * class_name_constant = &vm->current_thread.current_class->constant_pool[class_constant->class.name_index - 1];
+  #ifdef DEBUG
+  assert(class_name_constant->tag == CONSTANT_Utf8);
+  #endif
+  struct constant * method_name_constant = &vm->current_thread.current_class->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
+  #ifdef DEBUG
+  assert(method_name_constant->tag == CONSTANT_Utf8);
+  #endif
+
+  struct class_entry * class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
+                                                                 vm->class_hash_table.entry,
+                                                                 class_name_constant->utf8.bytes,
+                                                                 class_name_constant->utf8.length);
+  assert(class_entry != nullptr);
+
+  struct method_info * method_info = class_resolver_lookup_method(class_entry,
+                                                                  method_name_constant->utf8.bytes,
+                                                                  method_name_constant->utf8.length);
+  assert(method_info != nullptr);
+
+  vm_static_method_call(vm, class_entry->class_file, method_info);
 }
 
 void op_invokevirtual(struct vm * vm, uint32_t index)
@@ -815,6 +881,13 @@ void op_irem(struct vm * vm)
 
 void op_ireturn(struct vm * vm)
 {
+  /*  Prior to pushing value onto the operand stack of the frame of the invoker,
+      it may have to be converted. If the return type of the invoked method was
+      byte, char, or short, then value is converted from int to the return type
+      as if by execution of i2b, i2c, or i2s, respectively. If the return type
+      of the invoked method was boolean, then value is narrowed from int to
+      boolean by taking the bitwise AND of value and 1. */
+
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
   printf("return %d\n", value);
 }

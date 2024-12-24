@@ -3,12 +3,13 @@
 #include <stdio.h>
 
 #include "class_file.h"
-#include "file.h"
 #include "memory.h"
 #include "debug_class_file.h"
 #include "bytes.h"
 #include "decode.h"
 #include "frame.h"
+#include "class_resolver.h"
+#include "string.h"
 
 struct frame * stack_push_frame(struct stack * stack, int num_frames)
 {
@@ -66,27 +67,69 @@ int find_code_name_index(struct class_file * class_file)
   return 0;
 }
 
-void vm_execute(struct vm * vm)
+static int descriptor_nargs(struct constant * descriptor_constant)
 {
-  printf("execute:\n");
-  struct constant * class = &vm->current_thread.current_class->constant_pool[vm->current_thread.current_class->this_class - 1];
-  print_constant(class);
-  print_constant(&vm->current_thread.current_class->constant_pool[class->class.name_index - 1]);
-  print_constant(&vm->current_thread.current_class->constant_pool[vm->current_thread.current_method->name_index - 1]);
+  assert(descriptor_constant->tag == CONSTANT_Utf8);
+  assert(descriptor_constant->utf8.length >= 2);
+  assert(descriptor_constant->utf8.bytes[0] == '(');
 
-  int code_name_index = find_code_name_index(vm->current_thread.current_class);
+  int i = 1;
+  int nargs = 0;
+  while (i < descriptor_constant->utf8.length) {
+    if (descriptor_constant->utf8.bytes[i] == ')')
+      break;
+    nargs += 1;
+    i += 1;
+  }
+  assert(i + 2 == descriptor_constant->utf8.length);
+
+  return nargs;
+}
+
+void vm_static_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info)
+{
+  /* If the method is not native, the nargs argument values are popped from the
+     operand stack. A new frame is created on the Java Virtual Machine stack for
+     the method being invoked. The nargs argument values are consecutively made
+     the values of local variables of the new frame, with arg1 in local variable
+     0 (or, if arg1 is of type long or double, in local variables 0 and 1) and
+     so on. The new frame is then made current, and the Java Virtual Machine pc
+     is set to the opcode of the first instruction of the method to be
+     invoked. Execution continues with the first instruction of the method.
+  */
+
+  int code_name_index = find_code_name_index(class_file);
   assert(code_name_index > 0);
   printf("code_name_index %d\n", code_name_index);
 
   struct Code_attribute * code = get_code_attribute(code_name_index,
-                                                    vm->current_thread.current_method->attributes_count,
-                                                    vm->current_thread.current_method->attributes);
+                                                    method_info->attributes_count,
+                                                    method_info->attributes);
   assert(code != nullptr);
 
+  struct frame * old_frame = vm->current_frame;
+
   vm->current_frame = stack_push_frame(&vm->frame_stack, 1);
+  vm->current_frame->code = code;
   vm->current_frame->local_variable = stack_push_data(&vm->data_stack, code->max_locals);
   vm->current_frame->operand_stack = stack_push_data(&vm->data_stack, code->max_stack);
   vm->current_frame->operand_stack_ix = 0;
+
+  struct constant * descriptor_constant = &class_file->constant_pool[method_info->descriptor_index - 1];
+  int nargs = descriptor_nargs(descriptor_constant);
+  printf("nargs %d\n", nargs);
+  for (int i = 0; i < nargs; i++) {
+    uint32_t value = operand_stack_pop_u32(old_frame);
+    vm->current_frame->local_variable[nargs - i - 1] = value;
+  }
+  vm->current_thread.pc = 0;
+  vm->current_thread.current_class = class_file;
+  vm->current_thread.current_method = method_info;
+}
+
+void vm_execute(struct vm * vm)
+{
+  printf("execute:\n");
 
   while (true) {
     printf("[  ");
@@ -102,34 +145,47 @@ void vm_execute(struct vm * vm)
         printf("%10d  ", value);
     }
     printf("]\n");
-    decode_print_instruction(code->code, vm->current_thread.pc);
+    decode_print_instruction(vm->current_frame->code->code, vm->current_thread.pc);
     uint32_t old_pc = vm->current_thread.pc;
-    uint32_t next_pc = decode_execute_instruction(vm, code->code, vm->current_thread.pc);
+    uint32_t next_pc = decode_execute_instruction(vm, vm->current_frame->code->code, vm->current_thread.pc);
     if (vm->current_thread.pc == old_pc) {
       // if the instruction did not branch, increment pc
       vm->current_thread.pc = next_pc;
     }
 
-    if (vm->current_thread.pc >= code->code_length) {
+    if (vm->current_thread.pc >= vm->current_frame->code->code_length) {
       printf("terminate\n");
       break;
     }
   }
 }
 
-int main(int argc, char * argv[])
+int main(int argc, const char * argv[])
 {
-  assert(argc >= 2);
-  uint8_t * buf = file_read(argv[1]);
-  struct class_file * class_file = class_file_parse(buf);
+  assert(argc >= 3);
 
-  assert(class_file->magic == 0xcafebabe);
-  assert(class_file->methods_count >= 1);
+  const char * main_class = argv[1];
+
+  const char ** class_filenames = &argv[2];
+  int num_class_filenames = argc - 2;
+
+  int class_hash_table_length;
+  struct hash_table_entry * class_hash_table = class_resolver_load_from_filenames(class_filenames, num_class_filenames, &class_hash_table_length);
+
+  struct class_entry * class_entry = class_resolver_lookup_class(class_hash_table_length,
+                                                                 class_hash_table,
+                                                                 (const uint8_t *)main_class,
+                                                                 string_length(main_class));
+
+  const char * method_name = "test";
+  int method_name_length = string_length(method_name);
+  struct method_info * method_info = class_resolver_lookup_method(class_entry,
+                                                                  (const uint8_t *)method_name,
+                                                                  method_name_length);
 
   struct vm vm;
-  vm.current_thread.pc = 0;
-  vm.current_thread.current_class = class_file;
-  vm.current_thread.current_method = &class_file->methods[1];
+  vm.class_hash_table.entry = class_hash_table;
+  vm.class_hash_table.length = class_hash_table_length;
 
   vm.frame_stack.ix = 0;
   vm.frame_stack.capacity = 1024;
@@ -141,5 +197,6 @@ int main(int argc, char * argv[])
   uint32_t data[vm.data_stack.capacity];
   vm.data_stack.data = data;
 
+  vm_static_method_call(&vm, class_entry->class_file, method_info);
   vm_execute(&vm);
 }

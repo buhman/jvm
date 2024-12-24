@@ -5,12 +5,10 @@
 #include "class_file.h"
 
 struct frame {
+  struct Code_attribute * code;
   uint32_t * local_variable;
   uint32_t * operand_stack;
   uint16_t operand_stack_ix;
-  #ifdef DEBUG
-  uint32_t operand_stack_capacity;
-  #endif
 };
 
 struct thread {
@@ -33,6 +31,10 @@ struct vm {
   struct stack data_stack;
   struct thread current_thread;
   struct frame * current_frame;
+  struct {
+    int length;
+    struct hash_table_entry * entry;
+  } class_hash_table;
 };
 
 static inline void operand_stack_push_u32(struct frame * frame, uint32_t value)
@@ -55,3 +57,5 @@ static inline void operand_stack_dup_u32(struct frame * frame)
   frame->operand_stack[frame->operand_stack_ix] = value;
   frame->operand_stack_ix++;
 }
+
+void vm_static_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info);

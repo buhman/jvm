@@ -11,7 +11,9 @@ OBJ = \
 	c/malloc.o \
 	c/file.o \
 	c/execute.o \
-	c/memory_allocator.o
+	c/memory_allocator.o \
+	c/class_resolver.o \
+	c/hash_table.o
 
 MAIN_OBJ = \
 	$(OBJ) \
@@ -24,7 +26,7 @@ PRINT_CLASS_OBJ = \
 CC ?= gcc
 ARCH = -m32
 CFLAGS ?= -Wall -Werror -Wfatal-errors -Wno-error=unused-variable -std=c2x -DDEBUG -g
-OPT ?= -Og
+OPT ?= -O0
 DEPFLAGS = -MMD -MP
 
 %.o: %.c

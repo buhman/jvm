@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 #include "malloc.h"
 
 struct arena {
