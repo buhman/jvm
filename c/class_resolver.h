@@ -26,6 +26,11 @@ struct class_entry {
   struct {
     int length;
     struct hash_table_entry * entry;
+  } strings;
+
+  struct {
+    int length;
+    struct hash_table_entry * entry;
   } interfaces;
 
   struct {
@@ -52,3 +57,7 @@ struct method_info * class_resolver_lookup_method(struct class_entry * class_ent
 struct field_entry * class_resolver_lookup_field(struct class_entry * class_entry,
                                                  const uint8_t * field_name,
                                                  int field_name_length);
+int32_t * class_resolver_lookup_string(int class_hash_table_length,
+                                       struct hash_table_entry * class_hash_table,
+                                       struct class_entry * class_entry,
+                                       const int string_index);

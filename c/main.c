@@ -54,6 +54,6 @@ int main(int argc, const char * argv[])
   entry_frame->operand_stack = 0;
   entry_frame->operand_stack_ix = 0;
 
-  vm_static_method_call(&vm, class_entry->class_file, method_info);
+  vm_static_method_call(&vm, class_entry, method_info);
   vm_execute(&vm);
 }

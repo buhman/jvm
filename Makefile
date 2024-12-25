@@ -4,6 +4,9 @@
 %.class: %.java
 	javac $<
 
+java/lang/%.class: java/lang/%.java
+	javac --source 8 --target 8 --boot-class-path . $<
+
 OBJ = \
 	c/decode.o \
 	c/class_file.o \

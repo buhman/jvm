@@ -166,3 +166,25 @@ struct hash_table_entry * hash_table_find2(int hash_table_length,
   }
   return nullptr;
 }
+
+void hash_table_add_int(int hash_table_length,
+                        struct hash_table_entry * entry,
+                        int key,
+                        void * value)
+{
+  hash_table_add(hash_table_length,
+                 entry,
+                 (const uint8_t *)&key,
+                 4,
+                 value);
+}
+
+struct hash_table_entry * hash_table_find_int(int hash_table_length,
+                                              struct hash_table_entry * entry,
+                                              int key)
+{
+  return hash_table_find(hash_table_length,
+                         entry,
+                         (const uint8_t *)&key,
+                         4);
+}

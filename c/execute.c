@@ -131,8 +131,8 @@ void op_baload(struct vm * vm)
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
   assert(arrayref[0] > 0 && index < arrayref[0]);
-  int8_t * chararray = (int8_t *)&arrayref[1];
-  int8_t value = chararray[index];
+  int8_t * bytearray = (int8_t *)&arrayref[1];
+  int8_t value = bytearray[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
 
@@ -142,8 +142,8 @@ void op_bastore(struct vm * vm)
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
   assert(arrayref[0] > 0 && index < arrayref[0]);
-  int8_t * chararray = (int8_t *)&arrayref[1];
-  chararray[index] = value;
+  int8_t * bytearray = (int8_t *)&arrayref[1];
+  bytearray[index] = value;
 }
 
 void op_bipush(struct vm * vm, int32_t byte)
@@ -682,30 +682,34 @@ void op_getfield(struct vm * vm, uint32_t index)
                                               &class_entry,
                                               &field_entry,
                                               &field_descriptor_constant);
-  assert(field_descriptor_constant->utf8.length == 1);
+  // could be an array
+  assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
 
   uint32_t field_index = field_entry->field_info - class_entry->class_file->fields;
   printf("putfield field_index %d\n", field_index);
 
   int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  int32_t * objectfields = &objectref[1];
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
-  case 'Z': [[fallthrough]];
   case 'B': [[fallthrough]];
   case 'C': [[fallthrough]];
-  case 'S': [[fallthrough]];
+  case 'F': [[fallthrough]];
   case 'I': [[fallthrough]];
-  case 'F':
+  case 'L': [[fallthrough]];
+  case 'S': [[fallthrough]];
+  case 'Z': [[fallthrough]];
+  case '[':
     {
-      uint32_t value = objectref[field_index];
+      uint32_t value = objectfields[field_index];
       operand_stack_push_u32(vm->current_frame, value);
     }
     break;
   case 'D': [[fallthrough]];
   case 'J':
     {
-      uint32_t low = objectref[field_index * 2];
-      uint32_t high = objectref[field_index * 2 + 1];
+      uint32_t low = objectfields[field_index * 2];
+      uint32_t high = objectfields[field_index * 2 + 1];
       operand_stack_push_u32(vm->current_frame, low);
       operand_stack_push_u32(vm->current_frame, high);
     }
@@ -732,15 +736,17 @@ void op_getstatic(struct vm * vm, uint32_t index)
   if (!vm_initialize_class(vm, class_entry))
     return;
 
-  assert(field_descriptor_constant->utf8.length == 1);
+  assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
-  case 'Z': [[fallthrough]];
   case 'B': [[fallthrough]];
   case 'C': [[fallthrough]];
-  case 'S': [[fallthrough]];
+  case 'F': [[fallthrough]];
   case 'I': [[fallthrough]];
-  case 'F':
+  case 'L': [[fallthrough]];
+  case 'S': [[fallthrough]];
+  case 'Z': [[fallthrough]];
+  case '[':
     {
       uint32_t value = field_entry->value32;
       operand_stack_push_u32(vm->current_frame, value);
@@ -1110,7 +1116,7 @@ void op_invokespecial(struct vm * vm, uint32_t index)
                                               &class_entry,
                                               &method_info);
 
-  vm_special_method_call(vm, class_entry->class_file, method_info);
+  vm_special_method_call(vm, class_entry, method_info);
 }
 
 void op_invokestatic(struct vm * vm, uint32_t index)
@@ -1125,7 +1131,7 @@ void op_invokestatic(struct vm * vm, uint32_t index)
      declared the resolved method is initialized if that class or interface has
      not already been initialized (§5.5). */
 
-  vm_static_method_call(vm, class_entry->class_file, method_info);
+  vm_static_method_call(vm, class_entry, method_info);
 }
 
 void op_invokevirtual(struct vm * vm, uint32_t index)
@@ -1136,7 +1142,7 @@ void op_invokevirtual(struct vm * vm, uint32_t index)
                                               &class_entry,
                                               &method_info);
 
-  vm_special_method_call(vm, class_entry->class_file, method_info);
+  vm_special_method_call(vm, class_entry, method_info);
 }
 
 void op_ior(struct vm * vm)
@@ -1361,17 +1367,24 @@ void op_lconst_1(struct vm * vm)
 
 void op_ldc(struct vm * vm, uint32_t index)
 {
-  struct constant * constant = &vm->current_frame->class->constant_pool[index - 1];
-  #ifdef DEBUG
-  assert(constant->tag == CONSTANT_Integer || constant->tag == CONSTANT_Float);
-  #endif
-  int32_t value = constant->integer.bytes;
-  operand_stack_push_u32(vm->current_frame, value);
+  struct constant * constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
+  if (constant->tag == CONSTANT_Integer || constant->tag == CONSTANT_Float) {
+    int32_t value = constant->integer.bytes;
+    operand_stack_push_u32(vm->current_frame, value);
+  } else if (constant->tag == CONSTANT_String) {
+    int32_t * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
+                                                       vm->class_hash_table.entry,
+                                                       vm->current_frame->class_entry,
+                                                       constant->string.string_index);
+    operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
+  } else {
+    assert(false);
+  }
 }
 
 void op_ldc2_w(struct vm * vm, uint32_t index)
 {
-  struct constant * constant = &vm->current_frame->class->constant_pool[index - 1];
+  struct constant * constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
   #ifdef DEBUG
   assert(constant->tag == CONSTANT_Long || constant->tag == CONSTANT_Double);
   #endif
@@ -1381,7 +1394,7 @@ void op_ldc2_w(struct vm * vm, uint32_t index)
 
 void op_ldc_w(struct vm * vm, uint32_t index)
 {
-  struct constant * constant = &vm->current_frame->class->constant_pool[index - 1];
+  struct constant * constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
   #ifdef DEBUG
   assert(constant->tag == CONSTANT_Integer || constant->tag == CONSTANT_Float);
   #endif
@@ -1579,11 +1592,11 @@ void op_multianewarray(struct vm * vm, uint32_t index, uint32_t dimensions)
 
 void op_new(struct vm * vm, uint32_t index)
 {
-  struct constant * class_constant = &vm->current_frame->class->constant_pool[index - 1];
+  struct constant * class_constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
   #ifdef DEBUG
   assert(class_constant->tag == CONSTANT_Class);
   #endif
-  struct constant * class_name_constant = &vm->current_frame->class->constant_pool[class_constant->class.name_index - 1];
+  struct constant * class_name_constant = &vm->current_frame->class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
   #ifdef DEBUG
   assert(class_name_constant->tag == CONSTANT_Utf8);
   #endif
@@ -1609,13 +1622,13 @@ void op_new(struct vm * vm, uint32_t index)
      reference to the instance, is pushed onto the operand stack. */
 
   int fields_count = class_entry->class_file->fields_count;
-  int32_t * objectref = (int32_t *)-1;
-  if (fields_count > 0) {
-    objectref = memory_allocate(fields_count * 2 * 4);
-    for (int i = 0; i < fields_count; i++) {
-      objectref[i * 2] = 0;
-      objectref[i * 2 + 1] = 0;
-    }
+  int32_t * objectref = memory_allocate(fields_count * 2 * 4 + 4);
+  assert(objectref != nullptr);
+  objectref[0] = (int32_t)class_entry;
+  int32_t * objectfields = &objectref[1];
+  for (int i = 0; i < fields_count; i++) {
+    objectfields[i * 2] = 0;
+    objectfields[i * 2 + 1] = 0;
   }
 
   operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
@@ -1709,22 +1722,25 @@ void op_putfield(struct vm * vm, uint32_t index)
      type or an array type, then the value must be a value of the field descriptor
      type. */
 
-  assert(field_descriptor_constant->utf8.length == 1);
+  assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
 
   uint32_t field_index = field_entry->field_info - class_entry->class_file->fields;
   printf("putfield field_index %d\n", field_index);
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
-  case 'Z': [[fallthrough]];
   case 'B': [[fallthrough]];
   case 'C': [[fallthrough]];
-  case 'S': [[fallthrough]];
+  case 'F': [[fallthrough]];
   case 'I': [[fallthrough]];
-  case 'F':
+  case 'L': [[fallthrough]];
+  case 'S': [[fallthrough]];
+  case 'Z': [[fallthrough]];
+  case '[':
     {
       uint32_t value = operand_stack_pop_u32(vm->current_frame);
       int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-      objectref[field_index] = value;
+      int32_t * objectfields = &objectref[1];
+      objectfields[field_index] = value;
     }
     break;
   case 'D': [[fallthrough]];
@@ -1733,8 +1749,9 @@ void op_putfield(struct vm * vm, uint32_t index)
       uint32_t high = operand_stack_pop_u32(vm->current_frame);
       uint32_t low = operand_stack_pop_u32(vm->current_frame);
       int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-      objectref[field_index * 2 + 1] = high;
-      objectref[field_index * 2] = low;
+      int32_t * objectfields = &objectref[1];
+      objectfields[field_index * 2 + 1] = high;
+      objectfields[field_index * 2] = low;
     }
     break;
   default:
@@ -1767,15 +1784,17 @@ void op_putstatic(struct vm * vm, uint32_t index)
   if (!vm_initialize_class(vm, class_entry))
     return;
 
-  assert(field_descriptor_constant->utf8.length == 1);
+  assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
-  case 'Z': [[fallthrough]];
   case 'B': [[fallthrough]];
   case 'C': [[fallthrough]];
-  case 'S': [[fallthrough]];
+  case 'F': [[fallthrough]];
   case 'I': [[fallthrough]];
-  case 'F':
+  case 'L': [[fallthrough]];
+  case 'S': [[fallthrough]];
+  case 'Z': [[fallthrough]];
+  case '[':
     {
       uint32_t value = operand_stack_pop_u32(vm->current_frame);
       field_entry->value32 = value;

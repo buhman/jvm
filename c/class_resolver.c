@@ -10,6 +10,7 @@
 #include "class_resolver.h"
 #include "string.h"
 #include "debug_class_file.h"
+#include "memory_allocator.h"
 
 struct hash_table_entry * class_resolver_load_from_filenames(const char * filenames[], int length, int * hash_table_length)
 {
@@ -46,6 +47,13 @@ struct hash_table_entry * class_resolver_load_from_filenames(const char * filena
                    (const uint8_t *)filenames[i],
                    class_name_length,
                    &class_entry[i]);
+
+    // make hash table for strings
+    int strings_hash_table_length = class_file->constant_pool_count;
+    uint32_t strings_hash_table_size = (sizeof (struct hash_table_entry)) * strings_hash_table_length;
+    struct hash_table_entry * strings_hash_table = malloc_class_arena(strings_hash_table_size);
+    class_entry[i].strings.length = strings_hash_table_length;
+    class_entry[i].strings.entry = strings_hash_table;
 
     // make hash table for interfaces
     /*
@@ -185,4 +193,52 @@ struct method_info * class_resolver_lookup_method(struct class_entry * class_ent
     return nullptr;
 
   return (struct method_info *)e->value;
+}
+
+int32_t * class_resolver_lookup_string(int class_hash_table_length,
+                                       struct hash_table_entry * class_hash_table,
+                                       struct class_entry * class_entry,
+                                       const int string_index)
+{
+  printf("class_resolver_lookup_string: %d\n", string_index);
+
+  int strings_hash_table_length = class_entry->strings.length;
+  struct hash_table_entry * strings_hash_table = class_entry->strings.entry;
+
+  struct hash_table_entry * e = hash_table_find_int(strings_hash_table_length,
+                                                    strings_hash_table,
+                                                    string_index);
+  if (e != nullptr) {
+    int32_t * objectref = (int32_t *)e->value;
+    return objectref;
+  }
+
+  struct constant * utf8_constant = &class_entry->class_file->constant_pool[string_index - 1];
+  assert(utf8_constant->tag == CONSTANT_Utf8);
+
+  struct class_entry * string_class_entry = class_resolver_lookup_class(class_hash_table_length,
+                                                                        class_hash_table,
+                                                                        (const uint8_t *)"java/lang/String",
+                                                                        16);
+
+  int32_t size = utf8_constant->utf8.length + 4;
+  int32_t * arrayref = memory_allocate(size);
+  assert(arrayref != nullptr);
+  arrayref[0] = utf8_constant->utf8.length;
+  uint8_t * bytearray = (uint8_t *)&arrayref[1];
+  for (int i = 0; i < utf8_constant->utf8.length; i++)
+    bytearray[i] = utf8_constant->utf8.bytes[i];
+
+  assert(string_class_entry != nullptr);
+  int32_t * objectref = memory_allocate(4 + 4);
+  assert(objectref != nullptr);
+  objectref[0] = (int32_t)string_class_entry;
+  objectref[1] = (int32_t)arrayref;
+
+  hash_table_add_int(strings_hash_table_length,
+                     strings_hash_table,
+                     string_index,
+                     objectref);
+
+  return objectref;
 }
