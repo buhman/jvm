@@ -321,7 +321,8 @@ void vm_method_return(struct vm * vm)
   case 'I': [[fallthrough]];
   case 'L': [[fallthrough]];
   case 'S': [[fallthrough]];
-  case 'Z':
+  case 'Z': [[fallthrough]];
+  case '[':
     {
       uint32_t value = operand_stack_pop_u32(old_frame);
       operand_stack_push_u32(vm->current_frame, value);

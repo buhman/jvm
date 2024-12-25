@@ -80,7 +80,7 @@ void op_anewarray(struct vm * vm, uint32_t index)
 
 void op_areturn(struct vm * vm)
 {
-  assert(vm->current_frame->return_type == 'L');
+  assert(vm->current_frame->return_type == 'L' || vm->current_frame->return_type == '[');
   vm_method_return(vm);
 }
 
