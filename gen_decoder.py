@@ -240,7 +240,8 @@ def renderer():
         return _render(out, lines)
     return render, out
 
-render, out = renderer()
-render(generate_print_decoder())
-render(generate_execute_decoder())
-sys.stdout.write(out.getvalue())
+if __name__ == "__main__":
+    render, out = renderer()
+    render(generate_print_decoder())
+    render(generate_execute_decoder())
+    sys.stdout.write(out.getvalue())

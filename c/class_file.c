@@ -142,8 +142,14 @@ struct class_file * class_file_parse(const uint8_t * buf)
       break;
     case CONSTANT_Long:                 [[fallthrough]];
     case CONSTANT_Double:
-      constant->_long.high_bytes = parse_u4(&buf);
-      constant->_long.low_bytes = parse_u4(&buf);
+      {
+        uint64_t high_bytes = parse_u4(&buf);
+        uint64_t low_bytes = parse_u4(&buf);
+        constant->_long.bytes = high_bytes << 32 | low_bytes;
+        // long and double use two constant pool entries
+        class_file->constant_pool[i + 1].tag = 0;
+        i += 1;
+      }
       break;
     case CONSTANT_NameAndType:
       constant->nameandtype.name_index = parse_u2(&buf);
@@ -170,9 +176,7 @@ struct class_file * class_file_parse(const uint8_t * buf)
       constant->module.name_index = parse_u2(&buf);
       break;
     default:
-      #ifdef DEBUG
       assert(false);
-      #endif
       break;
     }
   }

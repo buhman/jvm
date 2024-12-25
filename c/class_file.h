@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+typedef uint64_t u8;
 typedef uint32_t u4;
 typedef uint16_t u2;
 typedef uint8_t u1;
@@ -58,13 +59,11 @@ struct constant_Float_info {
 };
 
 struct constant_Long_info {
-  u4 high_bytes;
-  u4 low_bytes;
+  u8 bytes;
 };
 
 struct constant_Double_info {
-  u4 high_bytes;
-  u4 low_bytes;
+  u8 bytes;
 };
 
 struct constant_NameAndType_info {

@@ -1,17 +1,11 @@
 import struct
 import sys
 from binascii import hexlify
+import csv
 
-def parse_row(s):
-    a, b, c, d = s.strip().split(',')
-    return int(a), c, int(d)
+from gen_decoder import parse_opcode_table
 
-def parse_opcode_table(buf):
-    rows = [parse_row(i) for i in buf.strip().split('\n')]
-    return {opcode: (name, args) for opcode, name, args in rows}
-
-with open('opcodes.csv', 'r') as f:
-    opcode_table = parse_opcode_table(f.read())
+opcode_table = parse_opcode_table()
 
 def size_to_format(size):
     if size == 4:
@@ -60,7 +54,11 @@ def parse_cp_info(buf):
             buf, value = field(buf, field_size)
             last_value = value
         d[field_name] = value
-    return buf, (name, d)
+    if tag in {5, 6}:
+        entries = 2
+    else:
+        entries = 1
+    return buf, (name, d), entries
 
 def parse_attribute_info(buf):
     buf, attribute_name_index = field(buf, 2)
@@ -96,12 +94,12 @@ def dump_opcodes(buf, indent):
     ix = 0
     while len(buf) > 0:
         op = buf[0]
-        name, arg_length = opcode_table[op]
+        instruction = opcode_table[op]
         buf = buf[1:]
-        args = list(buf[0:arg_length])
-        print(indent, f"{ix:> 3}", name, args)
-        ix += 1 + arg_length
-        buf = buf[arg_length:]
+        args = list(buf[0:instruction.arguments_size])
+        print(indent, f"{ix:> 3}", instruction.mnemonic, args)
+        ix += 1 + instruction.arguments_size
+        buf = buf[instruction.arguments_size:]
 
 def print_code_info(buf, indent, constant_pool):
     code_attribute = [
@@ -158,10 +156,14 @@ def parse_class(buf):
 
     print("constant_pool:")
     constant_pool = []
-    for i in range(constant_pool_count - 1):
-        buf, cp_info = parse_cp_info(buf)
+    i = 1
+    while i < constant_pool_count:
+        buf, cp_info, entries = parse_cp_info(buf)
         constant_pool.append(cp_info)
-        print(i + 1, cp_info)
+        if entries == 2:
+            constant_pool.append(None)
+        print(i, cp_info)
+        i += entries
 
     buf, access_flags = field(buf, 2)
     buf, this_class = field(buf, 2)

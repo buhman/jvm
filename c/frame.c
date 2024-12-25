@@ -60,10 +60,20 @@ static int descriptor_nargs(struct constant * descriptor_constant)
   int i = 1;
   int nargs = 0;
   while (i < descriptor_constant->utf8.length) {
-    if (descriptor_constant->utf8.bytes[i] == ')')
+    uint8_t byte = descriptor_constant->utf8.bytes[i];
+    if (byte == ')')
       break;
-    if (descriptor_constant->utf8.bytes[i] != '[')
+    switch (byte) {
+    case '[':
+      break;
+    case 'D': [[fallthrough]];
+    case 'J':
+      nargs += 2;
+      break;
+    default:
       nargs += 1;
+      break;
+    }
     i += 1;
   }
   assert(i + 2 == descriptor_constant->utf8.length);
@@ -92,28 +102,28 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
   struct class_file * class_file = class_entry->class_file;
 
   int constantvalue_name_index = find_constantvalue_name_index(class_file);
-  assert(constantvalue_name_index != 0);
+  if (constantvalue_name_index != 0) {
+    for (int i = 0; i < class_file->fields_count; i++) {
+      struct field_info * field_info = &class_file->fields[i];
+      if (!(field_info->access_flags & FIELD_ACC_STATIC))
+        continue;
 
-  for (int i = 0; i < class_file->fields_count; i++) {
-    struct field_info * field_info = &class_file->fields[i];
-    if (!(field_info->access_flags & FIELD_ACC_STATIC))
-      continue;
+      for (int j = 0; j < field_info->attributes_count; j++) {
+        if (field_info->attributes[j].attribute_name_index == constantvalue_name_index) {
+          struct attribute_info * attribute = &field_info->attributes[j];
+          struct constant * constantvalue = &class_file->constant_pool[attribute->constantvalue->constantvalue_index - 1];
+          assert(constantvalue->tag == CONSTANT_Integer); // also need to support CONSTANT_String
 
-    for (int j = 0; j < field_info->attributes_count; j++) {
-      if (field_info->attributes[j].attribute_name_index == constantvalue_name_index) {
-        struct attribute_info * attribute = &field_info->attributes[j];
-        struct constant * constantvalue = &class_file->constant_pool[attribute->constantvalue->constantvalue_index - 1];
-        assert(constantvalue->tag == CONSTANT_Integer); // also need to support CONSTANT_String
-
-        struct constant * name_constant = &class_file->constant_pool[field_info->name_index - 1];
-        assert(name_constant->tag == CONSTANT_Utf8);
-        struct field_entry * field_entry = class_resolver_lookup_field(class_entry,
-                                                                       name_constant->utf8.bytes,
-                                                                       name_constant->utf8.length);
-        assert(field_entry != nullptr);
-        field_entry->value = constantvalue->integer.bytes;
-        printf("  constantvalue: %d\n", field_entry->value);
-        break;
+          struct constant * name_constant = &class_file->constant_pool[field_info->name_index - 1];
+          assert(name_constant->tag == CONSTANT_Utf8);
+          struct field_entry * field_entry = class_resolver_lookup_field(class_entry,
+                                                                         name_constant->utf8.bytes,
+                                                                         name_constant->utf8.length);
+          assert(field_entry != nullptr);
+          field_entry->value = constantvalue->integer.bytes;
+          printf("  constantvalue: %d\n", field_entry->value);
+          break;
+        }
       }
     }
   }
@@ -232,8 +242,17 @@ void vm_method_return(struct vm * vm)
   case 'S': [[fallthrough]];
   case 'I': [[fallthrough]];
   case 'F':
-    uint32_t value = operand_stack_pop_u32(old_frame);
-    operand_stack_push_u32(vm->current_frame, value);
+    {
+      uint32_t value = operand_stack_pop_u32(old_frame);
+      operand_stack_push_u32(vm->current_frame, value);
+    }
+    break;
+  case 'D': [[fallthrough]];
+  case 'J':
+    {
+      uint64_t value = operand_stack_pop_u64(old_frame);
+      operand_stack_push_u64(vm->current_frame, value);
+    }
     break;
   case 'V':
     break;

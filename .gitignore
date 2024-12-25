@@ -7,3 +7,4 @@
 *.out
 main
 print_class
+__pycache__

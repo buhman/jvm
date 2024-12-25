@@ -18,6 +18,7 @@ int main(int argc, const char * argv[])
                                                                  class_hash_table,
                                                                  (const uint8_t *)main_class,
                                                                  string_length(main_class));
+  assert(class_entry != nullptr);
 
   const char * method_name = "main";
   int method_name_length = string_length(method_name);
@@ -28,6 +29,7 @@ int main(int argc, const char * argv[])
                                                                   method_name_length,
                                                                   (const uint8_t *)method_descriptor,
                                                                   method_descriptor_length);
+  assert(method_info != nullptr);
 
   struct vm vm;
   vm.class_hash_table.entry = class_hash_table;

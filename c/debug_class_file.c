@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "class_file.h"
 #include "bytes.h"
@@ -50,14 +51,12 @@ void print_constant(struct constant * constant)
            *(float *)(&constant->_float.bytes));
     break;
   case CONSTANT_Long:
-    printf("CONSTANT_Long high_bytes=%d low_bytes=%d\n",
-           constant->_long.high_bytes,
-           constant->_long.low_bytes);
+    printf("CONSTANT_Long bytes=%" PRId64 "\n",
+           constant->_long.bytes);
     break;
   case CONSTANT_Double:
-    printf("CONSTANT_Double high_bytes=%d low_bytes=%d\n",
-           constant->_long.high_bytes,
-           constant->_long.low_bytes);
+    printf("CONSTANT_Double bytes=%f\n",
+           *(double *)(&constant->_double.bytes));
     break;
   case CONSTANT_NameAndType:
     printf("CONSTANT_NameAndType %d %d\n",
@@ -221,8 +220,10 @@ void print_class_file(struct class_file * class_file)
 
   printf("constants:\n");
   for (int i = 0; i < class_file->constant_pool_count - 1; i++) {
-    printf("% 3d: ", i + 1);
-    print_constant(&class_file->constant_pool[i]);
+    if (class_file->constant_pool[i].tag != 0) {
+      printf("% 3d: ", i + 1);
+      print_constant(&class_file->constant_pool[i]);
+    }
   }
 
   printf("access_flags %04x\n", class_file->access_flags);

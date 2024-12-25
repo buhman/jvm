@@ -181,7 +181,8 @@ struct method_info * class_resolver_lookup_method(struct class_entry * class_ent
                                                  method_name_length,
                                                  method_descriptor,
                                                  method_descriptor_length);
-  assert(e != nullptr);
+  if (e == nullptr)
+    return nullptr;
 
   return (struct method_info *)e->value;
 }
