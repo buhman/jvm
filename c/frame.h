@@ -127,6 +127,26 @@ static inline uint64_t operand_stack_pop_u64(struct frame * frame)
   return value;
 }
 
+static inline void operand_stack_push_f64(struct frame * frame, double f)
+{
+  uint64_t value = *((uint64_t *)&f);
+  frame->operand_stack[frame->operand_stack_ix] = (uint32_t)(value >> 0);
+  frame->operand_stack_ix++;
+  frame->operand_stack[frame->operand_stack_ix] = (uint32_t)(value >> 32);
+  frame->operand_stack_ix++;
+}
+
+static inline double operand_stack_pop_f64(struct frame * frame)
+{
+  frame->operand_stack_ix--;
+  uint64_t high = frame->operand_stack[frame->operand_stack_ix];
+  frame->operand_stack_ix--;
+  uint64_t low = frame->operand_stack[frame->operand_stack_ix];
+  uint64_t value = (high << 32) | (low << 0);
+  double f = *((double *)&value);
+  return f;
+}
+
 bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry);
 void vm_static_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info);
 void vm_method_return(struct vm * vm);

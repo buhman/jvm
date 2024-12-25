@@ -149,132 +149,225 @@ void op_checkcast(struct vm * vm, uint32_t index)
 
 void op_d2f(struct vm * vm)
 {
-  assert(!"op_d2f");
+  double value = operand_stack_pop_f64(vm->current_frame);
+  float result = (float)value;
+  operand_stack_push_f32(vm->current_frame, result);
 }
 
 void op_d2i(struct vm * vm)
 {
-  assert(!"op_d2i");
+  double value = operand_stack_pop_f64(vm->current_frame);
+  int32_t result = (int32_t)value;
+  operand_stack_push_u32(vm->current_frame, result);
 }
 
 void op_d2l(struct vm * vm)
 {
-  assert(!"op_d2l");
+  double value = operand_stack_pop_f64(vm->current_frame);
+  int64_t result = (int64_t)value;
+  operand_stack_push_u64(vm->current_frame, result);
 }
 
 void op_dadd(struct vm * vm)
 {
-  assert(!"op_dadd");
+  double value2 = operand_stack_pop_f64(vm->current_frame);
+  double value1 = operand_stack_pop_f64(vm->current_frame);
+  double result = value1 + value2;
+  operand_stack_push_f64(vm->current_frame, result);
 }
 
 void op_daload(struct vm * vm)
 {
-  assert(!"op_daload");
+  int32_t index = operand_stack_pop_u32(vm->current_frame);
+  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref[0] > 0 && index < arrayref[0]);
+  int64_t * longarray = (int64_t *)&arrayref[1];
+  int64_t value = longarray[index];
+  operand_stack_push_u64(vm->current_frame, value);
 }
 
 void op_dastore(struct vm * vm)
 {
-  assert(!"op_dastore");
+  int64_t value = operand_stack_pop_u64(vm->current_frame);
+  int32_t index = operand_stack_pop_u32(vm->current_frame);
+  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref[0] > 0 && index < arrayref[0]);
+  int64_t * longarray = (int64_t *)&arrayref[1];
+  longarray[index] = value;
 }
 
 void op_dcmpg(struct vm * vm)
 {
-  assert(!"op_dcmpg");
+  double value2 = operand_stack_pop_f64(vm->current_frame);
+  double value1 = operand_stack_pop_f64(vm->current_frame);
+  bool greater = value1 > value2;
+  bool equal = value1 == value2;
+  int32_t value;
+  if (__builtin_isnan(value1) || __builtin_isnan(value2)) {
+    value = 1;
+  } else if (equal) {
+    value = 0;
+  } else if (greater) {
+    value = 1;
+  } else { // less than
+    value = -1;
+  }
+  operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_dcmpl(struct vm * vm)
 {
-  assert(!"op_dcmpl");
+  double value2 = operand_stack_pop_f64(vm->current_frame);
+  double value1 = operand_stack_pop_f64(vm->current_frame);
+  bool greater = value1 > value2;
+  bool equal = value1 == value2;
+  int32_t value;
+  if (__builtin_isnan(value1) || __builtin_isnan(value2)) {
+    value = -1;
+  } else if (equal) {
+    value = 0;
+  } else if (greater) {
+    value = 1;
+  } else { // less than
+    value = -1;
+  }
+  operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_dconst_0(struct vm * vm)
 {
-  assert(!"op_dconst_0");
+  operand_stack_push_f64(vm->current_frame, 0.0f);
 }
 
 void op_dconst_1(struct vm * vm)
 {
-  assert(!"op_dconst_1");
+  operand_stack_push_f64(vm->current_frame, 1.0f);
 }
 
 void op_ddiv(struct vm * vm)
 {
-  assert(!"op_ddiv");
+  double value2 = operand_stack_pop_f64(vm->current_frame);
+  double value1 = operand_stack_pop_f64(vm->current_frame);
+  double result = value1 / value2;
+  operand_stack_push_f64(vm->current_frame, result);
 }
 
 void op_dload(struct vm * vm, uint32_t index)
 {
-  assert(!"op_dload");
+  uint32_t low = vm->current_frame->local_variable[index];
+  uint32_t high = vm->current_frame->local_variable[index + 1];
+  operand_stack_push_u32(vm->current_frame, low);
+  operand_stack_push_u32(vm->current_frame, high);
 }
 
 void op_dload_0(struct vm * vm)
 {
-  assert(!"op_dload_0");
+  uint32_t low = vm->current_frame->local_variable[0];
+  uint32_t high = vm->current_frame->local_variable[0 + 1];
+  operand_stack_push_u32(vm->current_frame, low);
+  operand_stack_push_u32(vm->current_frame, high);
 }
 
 void op_dload_1(struct vm * vm)
 {
-  assert(!"op_dload_1");
+  uint32_t low = vm->current_frame->local_variable[1];
+  uint32_t high = vm->current_frame->local_variable[1 + 1];
+  operand_stack_push_u32(vm->current_frame, low);
+  operand_stack_push_u32(vm->current_frame, high);
 }
 
 void op_dload_2(struct vm * vm)
 {
-  assert(!"op_dload_2");
+  uint32_t low = vm->current_frame->local_variable[2];
+  uint32_t high = vm->current_frame->local_variable[2 + 1];
+  operand_stack_push_u32(vm->current_frame, low);
+  operand_stack_push_u32(vm->current_frame, high);
 }
 
 void op_dload_3(struct vm * vm)
 {
-  assert(!"op_dload_3");
+  uint32_t low = vm->current_frame->local_variable[3];
+  uint32_t high = vm->current_frame->local_variable[3 + 1];
+  operand_stack_push_u32(vm->current_frame, low);
+  operand_stack_push_u32(vm->current_frame, high);
 }
 
 void op_dmul(struct vm * vm)
 {
-  assert(!"op_dmul");
+  double value2 = operand_stack_pop_f64(vm->current_frame);
+  double value1 = operand_stack_pop_f64(vm->current_frame);
+  double result = value1 * value2;
+  operand_stack_push_f64(vm->current_frame, result);
 }
 
 void op_dneg(struct vm * vm)
 {
-  assert(!"op_dneg");
+  double value = operand_stack_pop_f64(vm->current_frame);
+  double result = -value;
+  operand_stack_push_f64(vm->current_frame, result);
 }
 
 void op_drem(struct vm * vm)
 {
-  assert(!"op_drem");
+  double value2 = operand_stack_pop_f64(vm->current_frame);
+  double value1 = operand_stack_pop_f64(vm->current_frame);
+  double q = value1 / value2;
+  double result = value1 - (value2 * (double)((int64_t)q));
+  operand_stack_push_f64(vm->current_frame, result);
 }
 
 void op_dreturn(struct vm * vm)
 {
-  assert(!"op_dreturn");
+  assert(vm->current_frame->return_type == 'D');
+  vm_method_return(vm);
 }
 
 void op_dstore(struct vm * vm, uint32_t index)
 {
-  assert(!"op_dstore");
+  uint32_t high = operand_stack_pop_u32(vm->current_frame);
+  uint32_t low = operand_stack_pop_u32(vm->current_frame);
+  vm->current_frame->local_variable[index + 1] = high;
+  vm->current_frame->local_variable[index] = low;
 }
 
 void op_dstore_0(struct vm * vm)
 {
-  assert(!"op_dstore_0");
+  uint32_t high = operand_stack_pop_u32(vm->current_frame);
+  uint32_t low = operand_stack_pop_u32(vm->current_frame);
+  vm->current_frame->local_variable[0 + 1] = high;
+  vm->current_frame->local_variable[0] = low;
 }
 
 void op_dstore_1(struct vm * vm)
 {
-  assert(!"op_dstore_1");
+  uint32_t high = operand_stack_pop_u32(vm->current_frame);
+  uint32_t low = operand_stack_pop_u32(vm->current_frame);
+  vm->current_frame->local_variable[1 + 1] = high;
+  vm->current_frame->local_variable[1] = low;
 }
 
 void op_dstore_2(struct vm * vm)
 {
-  assert(!"op_dstore_2");
+  uint32_t high = operand_stack_pop_u32(vm->current_frame);
+  uint32_t low = operand_stack_pop_u32(vm->current_frame);
+  vm->current_frame->local_variable[2 + 1] = high;
+  vm->current_frame->local_variable[2] = low;
 }
 
 void op_dstore_3(struct vm * vm)
 {
-  assert(!"op_dstore_3");
+  uint32_t high = operand_stack_pop_u32(vm->current_frame);
+  uint32_t low = operand_stack_pop_u32(vm->current_frame);
+  vm->current_frame->local_variable[3 + 1] = high;
+  vm->current_frame->local_variable[3] = low;
 }
 
 void op_dsub(struct vm * vm)
 {
-  assert(!"op_dsub");
+  double value2 = operand_stack_pop_f64(vm->current_frame);
+  double value1 = operand_stack_pop_f64(vm->current_frame);
+  double result = value1 - value2;
+  operand_stack_push_f64(vm->current_frame, result);
 }
 
 void op_dup(struct vm * vm)
@@ -309,7 +402,9 @@ void op_dup_x2(struct vm * vm)
 
 void op_f2d(struct vm * vm)
 {
-  assert(!"op_f2d");
+  float value = operand_stack_pop_f32(vm->current_frame);
+  double result = (double)value;
+  operand_stack_push_f64(vm->current_frame, result);
 }
 
 void op_f2i(struct vm * vm)
@@ -589,7 +684,9 @@ void op_i2c(struct vm * vm)
 
 void op_i2d(struct vm * vm)
 {
-  assert(!"op_i2d");
+  int32_t value = operand_stack_pop_u32(vm->current_frame);
+  double result = (double)value;
+  operand_stack_push_f64(vm->current_frame, result);
 }
 
 void op_i2f(struct vm * vm)
@@ -1092,7 +1189,9 @@ void op_jsr_w(struct vm * vm, int32_t branch)
 
 void op_l2d(struct vm * vm)
 {
-  assert(!"op_l2d");
+  int64_t value = operand_stack_pop_u64(vm->current_frame);
+  double result = (double)value;
+  operand_stack_push_f64(vm->current_frame, result);
 }
 
 void op_l2f(struct vm * vm)
