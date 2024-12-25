@@ -73,7 +73,7 @@ struct hash_table_entry * class_resolver_load_from_filenames(const char * filena
         printf("\n");
 
         field_entry[i].field_info = &class_file->fields[i];
-        field_entry[i].value = 0;
+        field_entry[i].value64 = 0;
 
         hash_table_add(fields_hash_table_length,
                        fields_hash_table,

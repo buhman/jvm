@@ -13,7 +13,8 @@ struct frame {
   uint32_t * operand_stack;
   uint32_t pc;
   uint32_t next_pc;
-  uint16_t operand_stack_ix;
+  int32_t operand_stack_ix;
+  struct class_entry * initialization_frame;
   uint8_t return_type;
 };
 
@@ -22,8 +23,8 @@ struct stack {
     struct frame * frame;
     uint32_t * data;
   };
-  uint32_t ix;
-  uint32_t capacity;
+  int32_t ix;
+  int32_t capacity;
 };
 
 struct vm {
@@ -35,7 +36,6 @@ struct vm {
     struct hash_table_entry * entry;
   } class_hash_table;
 };
-
 static inline struct frame * stack_push_frame(struct stack * stack, int num_frames)
 {
   struct frame * frame = &stack->frame[stack->ix];
@@ -77,6 +77,7 @@ static inline void operand_stack_push_u32(struct frame * frame, uint32_t value)
 static inline uint32_t operand_stack_pop_u32(struct frame * frame)
 {
   frame->operand_stack_ix--;
+  assert(frame->operand_stack_ix >= 0);
   uint32_t value = frame->operand_stack[frame->operand_stack_ix];
   frame->operand_stack[frame->operand_stack_ix] = -1;
   return value;
@@ -99,6 +100,7 @@ static inline void operand_stack_push_f32(struct frame * frame, float f)
 static inline float operand_stack_pop_f32(struct frame * frame)
 {
   frame->operand_stack_ix--;
+  assert(frame->operand_stack_ix >= 0);
   uint32_t value = frame->operand_stack[frame->operand_stack_ix];
   frame->operand_stack[frame->operand_stack_ix] = -1;
   float f = *((float *)&value);
@@ -116,8 +118,10 @@ static inline void operand_stack_push_u64(struct frame * frame, uint64_t value)
 static inline uint64_t operand_stack_pop_u64(struct frame * frame)
 {
   frame->operand_stack_ix--;
+  assert(frame->operand_stack_ix >= 0);
   uint64_t high = frame->operand_stack[frame->operand_stack_ix];
   frame->operand_stack_ix--;
+  assert(frame->operand_stack_ix >= 0);
   uint64_t low = frame->operand_stack[frame->operand_stack_ix];
   uint64_t value = (high << 32) | (low << 0);
   return value;
@@ -135,8 +139,10 @@ static inline void operand_stack_push_f64(struct frame * frame, double f)
 static inline double operand_stack_pop_f64(struct frame * frame)
 {
   frame->operand_stack_ix--;
+  assert(frame->operand_stack_ix >= 0);
   uint64_t high = frame->operand_stack[frame->operand_stack_ix];
   frame->operand_stack_ix--;
+  assert(frame->operand_stack_ix >= 0);
   uint64_t low = frame->operand_stack[frame->operand_stack_ix];
   uint64_t value = (high << 32) | (low << 0);
   double f = *((double *)&value);

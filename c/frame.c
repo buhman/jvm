@@ -47,7 +47,7 @@ int find_constantvalue_name_index(struct class_file * class_file)
   return 0;
 }
 
-static int descriptor_nargs(struct constant * descriptor_constant)
+static int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type)
 {
   assert(descriptor_constant->tag == CONSTANT_Utf8);
   assert(descriptor_constant->utf8.length >= 2);
@@ -56,6 +56,7 @@ static int descriptor_nargs(struct constant * descriptor_constant)
   printf("method descriptor: ");
   print_utf8_string(descriptor_constant);
   printf("\n");
+  printf("args: `");
 
   int i = 1;
   int nargs = 0;
@@ -70,19 +71,37 @@ static int descriptor_nargs(struct constant * descriptor_constant)
     case 'J':
       nargs += 2;
       break;
+    case 'L':
+      nargs += 1;
+      while (descriptor_constant->utf8.bytes[i] != ';') i += 1;
+      break;
     default:
       nargs += 1;
       break;
     }
     i += 1;
   }
-  assert(i + 2 == descriptor_constant->utf8.length);
+  printf("\n");
+
+  *return_type = descriptor_constant->utf8.bytes[i + 1];
 
   return nargs;
 }
 
 bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
 {
+  printf("vm_initialize_class: ");
+  struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->this_class - 1];
+  #ifdef DEBUG
+  assert(class_constant->tag == CONSTANT_Class);
+  #endif
+  struct constant * class_name_constant = &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  #ifdef DEBUG
+  assert(class_name_constant->tag == CONSTANT_Utf8);
+  #endif
+  print_constant(class_name_constant);
+  printf("\n");
+
   if (class_entry->initialization_state == CLASS_INITIALIZED)
     return true;
 
@@ -120,8 +139,8 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
                                                                          name_constant->utf8.bytes,
                                                                          name_constant->utf8.length);
           assert(field_entry != nullptr);
-          field_entry->value = constantvalue->integer.bytes;
-          printf("  constantvalue: %d\n", field_entry->value);
+          field_entry->value32 = constantvalue->integer.bytes;
+          printf("  constantvalue: %d\n", field_entry->value32);
           break;
         }
       }
@@ -148,7 +167,13 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
     vm->current_frame->next_pc = vm->current_frame->pc;
 
     vm_static_method_call(vm, class_file, method_info);
+
+    // tamper with initialization_frame
+    vm->current_frame->initialization_frame = class_entry;
     return false;
+  } else {
+    class_entry->initialization_state = CLASS_INITIALIZED;
+    printf("<clinit> does not exist for this class\n");
   }
 
   return true;
@@ -181,9 +206,10 @@ void vm_special_method_call(struct vm * vm, struct class_file * class_file, stru
   vm->current_frame->local_variable = stack_push_data(&vm->data_stack, code->max_locals);
   vm->current_frame->operand_stack = stack_push_data(&vm->data_stack, code->max_stack);
   vm->current_frame->operand_stack_ix = 0;
+  vm->current_frame->initialization_frame = nullptr;
 
   struct constant * descriptor_constant = &class_file->constant_pool[method_info->descriptor_index - 1];
-  int nargs = descriptor_nargs(descriptor_constant);
+  int nargs = descriptor_nargs(descriptor_constant, &vm->current_frame->return_type);
   nargs += 1;
   printf("nargs+1: %d\n", nargs);
   for (int i = 0; i < nargs; i++) {
@@ -191,7 +217,6 @@ void vm_special_method_call(struct vm * vm, struct class_file * class_file, stru
     printf("local[%d] = %x\n", nargs - i - 1, value);
     vm->current_frame->local_variable[nargs - i - 1] = value;
   }
-  vm->current_frame->return_type = descriptor_constant->utf8.bytes[descriptor_constant->utf8.length - 1];
 
   vm->current_frame->pc = 0;
   vm->current_frame->class = class_file;
@@ -227,16 +252,17 @@ void vm_static_method_call(struct vm * vm, struct class_file * class_file, struc
   vm->current_frame->local_variable = stack_push_data(&vm->data_stack, code->max_locals);
   vm->current_frame->operand_stack = stack_push_data(&vm->data_stack, code->max_stack);
   vm->current_frame->operand_stack_ix = 0;
+  vm->current_frame->initialization_frame = nullptr;
 
   struct constant * descriptor_constant = &class_file->constant_pool[method_info->descriptor_index - 1];
-  int nargs = descriptor_nargs(descriptor_constant);
+  int nargs = descriptor_nargs(descriptor_constant, &vm->current_frame->return_type);
   printf("nargs %d\n", nargs);
   for (int i = 0; i < nargs; i++) {
     uint32_t value = operand_stack_pop_u32(old_frame);
     printf("local[%d] = %x\n", nargs - i - 1, value);
     vm->current_frame->local_variable[nargs - i - 1] = value;
   }
-  vm->current_frame->return_type = descriptor_constant->utf8.bytes[descriptor_constant->utf8.length - 1];
+  ;
 
   vm->current_frame->pc = 0;
   vm->current_frame->class = class_file;
@@ -247,6 +273,13 @@ void vm_static_method_call(struct vm * vm, struct class_file * class_file, struc
 
 void vm_method_return(struct vm * vm)
 {
+  if (vm->current_frame->initialization_frame != nullptr) {
+    printf("vm_method_return: initialization_frame!=nullptr\n");
+    struct class_entry * class_entry = vm->current_frame->initialization_frame;
+    class_entry->initialization_state = CLASS_INITIALIZED;
+    vm->current_frame->initialization_frame = 0;
+  }
+
   struct frame * old_frame = vm->current_frame;
 
   stack_pop_data(&vm->data_stack, old_frame->code->max_locals);
@@ -282,12 +315,13 @@ void vm_method_return(struct vm * vm)
   */
 
   switch (old_frame->return_type) {
-  case 'Z': [[fallthrough]];
   case 'B': [[fallthrough]];
   case 'C': [[fallthrough]];
-  case 'S': [[fallthrough]];
+  case 'F': [[fallthrough]];
   case 'I': [[fallthrough]];
-  case 'F':
+  case 'L': [[fallthrough]];
+  case 'S': [[fallthrough]];
+  case 'Z':
     {
       uint32_t value = operand_stack_pop_u32(old_frame);
       operand_stack_push_u32(vm->current_frame, value);
@@ -304,6 +338,7 @@ void vm_method_return(struct vm * vm)
     break;
   default:
     fprintf(stderr, "return type not implemented: %c\n", old_frame->return_type);
+    assert(false);
     break;
   }
   assert(old_frame->operand_stack_ix == 0);

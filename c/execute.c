@@ -8,17 +8,27 @@
 
 void op_aaload(struct vm * vm)
 {
-  assert(!"op_aaload");
+  int32_t index = operand_stack_pop_u32(vm->current_frame);
+  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref[0] > 0 && index < arrayref[0]);
+  uint32_t * referencearray = (uint32_t *)&arrayref[1];
+  uint32_t value = referencearray[index];
+  operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_aastore(struct vm * vm)
 {
-  assert(!"op_aastore");
+  uint32_t value = operand_stack_pop_u32(vm->current_frame);
+  int32_t index = operand_stack_pop_u32(vm->current_frame);
+  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref[0] > 0 && index < arrayref[0]);
+  int32_t * referencearray = (int32_t *)&arrayref[1];
+  referencearray[index] = value;
 }
 
 void op_aconst_null(struct vm * vm)
 {
-  assert(!"op_aconst_null");
+  operand_stack_push_u32(vm->current_frame, 0);
 }
 
 void op_aload(struct vm * vm, uint32_t index)
@@ -53,12 +63,25 @@ void op_aload_3(struct vm * vm)
 
 void op_anewarray(struct vm * vm, uint32_t index)
 {
-  assert(!"op_anewarray");
+  int32_t count = operand_stack_pop_u32(vm->current_frame);
+  int32_t size = 4 * count + 4;
+  int32_t * arrayref = memory_allocate(size);
+  assert(arrayref != 0);
+  arrayref[0] = count;
+
+  /* All components of the new array are initialized to null, the default value
+     for reference types */
+  for (int i = 0; i < count; i++) {
+    arrayref[i + 1] = 0;
+  }
+
+  operand_stack_push_u32(vm->current_frame, (uint32_t)arrayref);
 }
 
 void op_areturn(struct vm * vm)
 {
-  assert(!"op_areturn");
+  assert(vm->current_frame->return_type == 'L');
+  vm_method_return(vm);
 }
 
 void op_arraylength(struct vm * vm)
@@ -105,12 +128,22 @@ void op_athrow(struct vm * vm)
 
 void op_baload(struct vm * vm)
 {
-  assert(!"op_baload");
+  int32_t index = operand_stack_pop_u32(vm->current_frame);
+  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref[0] > 0 && index < arrayref[0]);
+  int8_t * chararray = (int8_t *)&arrayref[1];
+  int8_t value = chararray[index];
+  operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_bastore(struct vm * vm)
 {
-  assert(!"op_bastore");
+  int8_t value = operand_stack_pop_u32(vm->current_frame);
+  int32_t index = operand_stack_pop_u32(vm->current_frame);
+  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref[0] > 0 && index < arrayref[0]);
+  int8_t * chararray = (int8_t *)&arrayref[1];
+  chararray[index] = value;
 }
 
 void op_bipush(struct vm * vm, int32_t byte)
@@ -707,7 +740,7 @@ void op_goto_w(struct vm * vm, int32_t branch)
 void op_i2b(struct vm * vm)
 {
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
-  uint8_t result = value;
+  int8_t result = value;
   operand_stack_push_u32(vm->current_frame, result);
 }
 
@@ -827,12 +860,20 @@ void op_idiv(struct vm * vm)
 
 void op_if_acmpeq(struct vm * vm, int32_t branch)
 {
-  assert(!"op_if_acmpeq");
+  int32_t value2 = operand_stack_pop_u32(vm->current_frame);
+  int32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  if (value1 == value2) {
+    vm->current_frame->pc = vm->current_frame->pc + branch;
+  }
 }
 
 void op_if_acmpne(struct vm * vm, int32_t branch)
 {
-  assert(!"op_if_acmpne");
+  int32_t value2 = operand_stack_pop_u32(vm->current_frame);
+  int32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  if (value1 != value2) {
+    vm->current_frame->pc = vm->current_frame->pc + branch;
+  }
 }
 
 void op_if_icmpeq(struct vm * vm, int32_t branch)
@@ -1532,11 +1573,13 @@ void op_new(struct vm * vm, uint32_t index)
      reference to the instance, is pushed onto the operand stack. */
 
   int fields_count = class_entry->class_file->fields_count;
-  (void)fields_count;
-  int32_t * objectref = memory_allocate(fields_count * 2 * 4);
-  for (int i = 0; i < fields_count; i++) {
-    objectref[i * 2] = 0;
-    objectref[i * 2 + 1] = 0;
+  int32_t * objectref = (int32_t *)-1;
+  if (fields_count > 0) {
+    objectref = memory_allocate(fields_count * 2 * 4);
+    for (int i = 0; i < fields_count; i++) {
+      objectref[i * 2] = 0;
+      objectref[i * 2 + 1] = 0;
+    }
   }
 
   operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
@@ -1726,12 +1769,22 @@ void op_return(struct vm * vm)
 
 void op_saload(struct vm * vm)
 {
-  assert(!"op_saload");
+  int32_t index = operand_stack_pop_u32(vm->current_frame);
+  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref[0] > 0 && index < arrayref[0]);
+  int16_t * shortarray = (int16_t *)&arrayref[1];
+  int16_t value = shortarray[index];
+  operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_sastore(struct vm * vm)
 {
-  assert(!"op_sastore");
+  uint16_t value = operand_stack_pop_u32(vm->current_frame);
+  int32_t index = operand_stack_pop_u32(vm->current_frame);
+  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref[0] > 0 && index < arrayref[0]);
+  int16_t * shortarray = (int16_t *)&arrayref[1];
+  shortarray[index] = value;
 }
 
 void op_sipush(struct vm * vm, int32_t byte)
