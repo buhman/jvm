@@ -22,3 +22,18 @@ struct hash_table_entry * hash_table_find(int hash_table_length,
                                           struct hash_table_entry * entry,
                                           const uint8_t * key,
                                           int key_length);
+
+void hash_table_add2(int hash_table_length,
+                     struct hash_table_entry * entry,
+                     const uint8_t * key1,
+                     int key1_length,
+                     const uint8_t * key2,
+                     int key2_length,
+                     void * value);
+
+struct hash_table_entry * hash_table_find2(int hash_table_length,
+                                           struct hash_table_entry * entry,
+                                           const uint8_t * key1,
+                                           int key1_length,
+                                           const uint8_t * key2,
+                                           int key2_length);

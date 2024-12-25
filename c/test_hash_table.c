@@ -145,6 +145,12 @@ static uint32_t _strlen(const char * s)
   return si - s;
 }
 
+void print_key(const uint8_t * key, int key_length)
+{
+  for (int i = 0; i < key_length; i++)
+    fputc(key[i], stdout);
+}
+
 int main()
 {
   int hash_table_length = 128 * 2;
@@ -170,6 +176,7 @@ int main()
       printf("collision %s\n", e->key);
     }
     assert(e != nullptr);
-    printf("%s %d\n", e->key, (int)e->value);
+    print_key(e->key, e->key_length);
+    printf(" %d\n", (int)e->value);
   }
 }

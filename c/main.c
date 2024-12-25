@@ -21,9 +21,13 @@ int main(int argc, const char * argv[])
 
   const char * method_name = "main";
   int method_name_length = string_length(method_name);
+  const char * method_descriptor = "()V";
+  int method_descriptor_length = string_length(method_descriptor);
   struct method_info * method_info = class_resolver_lookup_method(class_entry,
                                                                   (const uint8_t *)method_name,
-                                                                  method_name_length);
+                                                                  method_name_length,
+                                                                  (const uint8_t *)method_descriptor,
+                                                                  method_descriptor_length);
 
   struct vm vm;
   vm.class_hash_table.entry = class_hash_table;

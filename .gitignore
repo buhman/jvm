@@ -4,5 +4,6 @@
 *.gch
 *.csv
 *.class
+*.out
 main
 print_class

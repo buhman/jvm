@@ -920,6 +920,10 @@ void op_invokestatic(struct vm * vm, uint32_t index)
   #ifdef DEBUG
   assert(method_name_constant->tag == CONSTANT_Utf8);
   #endif
+  struct constant * method_descriptor_constant = &vm->current_thread.current_class->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
+  #ifdef DEBUG
+  assert(method_descriptor_constant->tag == CONSTANT_Utf8);
+  #endif
 
   struct class_entry * class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
                                                                  vm->class_hash_table.entry,
@@ -929,7 +933,9 @@ void op_invokestatic(struct vm * vm, uint32_t index)
 
   struct method_info * method_info = class_resolver_lookup_method(class_entry,
                                                                   method_name_constant->utf8.bytes,
-                                                                  method_name_constant->utf8.length);
+                                                                  method_name_constant->utf8.length,
+                                                                  method_descriptor_constant->utf8.bytes,
+                                                                  method_descriptor_constant->utf8.length);
   assert(method_info != nullptr);
 
   /* On successful resolution of the method, the class or interface that

@@ -121,11 +121,15 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
   /* Next, if C declares a class or interface initialization method, execute
      that method. */
   const uint8_t * method_name = (const uint8_t *)"<clinit>";
-  int method_length = 8;
+  int method_name_length = 8;
+  const uint8_t * method_descriptor = (const uint8_t *)"()V";
+  int method_descriptor_length = 3;
 
   struct method_info * method_info = class_resolver_lookup_method(class_entry,
                                                                   method_name,
-                                                                  method_length);
+                                                                  method_name_length,
+                                                                  method_descriptor,
+                                                                  method_descriptor_length);
   if (method_info != nullptr) {
     assert((method_info->access_flags & METHOD_ACC_STATIC) != 0);
     printf("<clinit>\n");

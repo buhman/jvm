@@ -1,5 +1,7 @@
 #include "malloc.h"
 
+#include <assert.h>
+
 struct arena {
   uint8_t * mem;
   uint32_t size;
@@ -16,7 +18,9 @@ struct arena class_arena = {
 
 void * malloc_class_arena(uint32_t size)
 {
+  assert((class_arena.ix & (~3)) == class_arena.ix);
   void * ptr = &class_arena.mem[class_arena.ix];
+  size = (size + 3) & (~3);
   class_arena.ix += size;
   return ptr;
 }

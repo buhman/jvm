@@ -62,7 +62,7 @@ struct hash_table_entry * class_resolver_load_from_filenames(const char * filena
       int fields_hash_table_length = class_file->fields_count * 2;
       uint32_t fields_hash_table_size = (sizeof (struct hash_table_entry)) * fields_hash_table_length;
       struct hash_table_entry * fields_hash_table = malloc_class_arena(fields_hash_table_size);
-      uint32_t field_entry_size = (sizeof (struct field_entry)) * length;
+      uint32_t field_entry_size = (sizeof (struct field_entry)) * class_file->fields_count;
       struct field_entry * field_entry = malloc_class_arena(field_entry_size);
       for (int i = 0; i < class_file->fields_count; i++) {
         u2 name_index = class_file->fields[i].name_index;
@@ -95,15 +95,20 @@ struct hash_table_entry * class_resolver_load_from_filenames(const char * filena
         u2 name_index = class_file->methods[i].name_index;
         struct constant * name_constant = &class_file->constant_pool[name_index - 1];
         assert(name_constant->tag == CONSTANT_Utf8);
+        u2 descriptor_index = class_file->methods[i].descriptor_index;
+        struct constant * descriptor_constant = &class_file->constant_pool[descriptor_index - 1];
+        assert(descriptor_constant->tag == CONSTANT_Utf8);
         printf("hash table entry for method: ");
         print_utf8_string(name_constant);
         printf("\n");
 
-        hash_table_add(methods_hash_table_length,
-                       methods_hash_table,
-                       name_constant->utf8.bytes,
-                       name_constant->utf8.length,
-                       (void *)&class_file->methods[i]);
+        hash_table_add2(methods_hash_table_length,
+                        methods_hash_table,
+                        name_constant->utf8.bytes,
+                        name_constant->utf8.length,
+                        descriptor_constant->utf8.bytes,
+                        descriptor_constant->utf8.length,
+                        (void *)&class_file->methods[i]);
       }
 
       class_entry[i].methods.length = methods_hash_table_length;
@@ -157,19 +162,25 @@ struct field_entry * class_resolver_lookup_field(struct class_entry * class_entr
 
 struct method_info * class_resolver_lookup_method(struct class_entry * class_entry,
                                                   const uint8_t * method_name,
-                                                  int method_name_length)
+                                                  int method_name_length,
+                                                  const uint8_t * method_descriptor,
+                                                  int method_descriptor_length)
 {
   printf("class_resolver_lookup_method: ");
   for (int i = 0; i < method_name_length; i++) { fputc(method_name[i], stdout); }
+  fputc(' ', stdout);
+  for (int i = 0; i < method_descriptor_length; i++) { fputc(method_descriptor[i], stdout); }
   fputc('\n', stdout);
 
   int methods_hash_table_length = class_entry->methods.length;
   struct hash_table_entry * methods_hash_table = class_entry->methods.entry;
 
-  struct hash_table_entry * e = hash_table_find(methods_hash_table_length,
-                                                methods_hash_table,
-                                                method_name,
-                                                method_name_length);
+  struct hash_table_entry * e = hash_table_find2(methods_hash_table_length,
+                                                 methods_hash_table,
+                                                 method_name,
+                                                 method_name_length,
+                                                 method_descriptor,
+                                                 method_descriptor_length);
   assert(e != nullptr);
 
   return (struct method_info *)e->value;

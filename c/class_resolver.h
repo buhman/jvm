@@ -43,7 +43,9 @@ struct class_entry * class_resolver_lookup_class(int class_hash_table_length,
                                                  int class_name_length);
 struct method_info * class_resolver_lookup_method(struct class_entry * class_entry,
                                                   const uint8_t * method_name,
-                                                  int method_name_length);
+                                                  int method_name_length,
+                                                  const uint8_t * method_descriptor,
+                                                  int method_descriptor_length);
 struct field_entry * class_resolver_lookup_field(struct class_entry * class_entry,
                                                  const uint8_t * field_name,
                                                  int field_name_length);
