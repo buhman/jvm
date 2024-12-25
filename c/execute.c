@@ -682,8 +682,8 @@ void op_getfield(struct vm * vm, uint32_t index)
                                               &class_entry,
                                               &field_entry,
                                               &field_descriptor_constant);
-  // could be an array
-  assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
+
+  //assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
 
   uint32_t field_index = field_entry->field_info - class_entry->class_file->fields;
   printf("putfield field_index %d\n", field_index);
@@ -736,7 +736,7 @@ void op_getstatic(struct vm * vm, uint32_t index)
   if (!vm_initialize_class(vm, class_entry))
     return;
 
-  assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
+  //assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
   case 'B': [[fallthrough]];
@@ -1722,7 +1722,7 @@ void op_putfield(struct vm * vm, uint32_t index)
      type or an array type, then the value must be a value of the field descriptor
      type. */
 
-  assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
+  //assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
 
   uint32_t field_index = field_entry->field_info - class_entry->class_file->fields;
   printf("putfield field_index %d\n", field_index);
@@ -1784,7 +1784,7 @@ void op_putstatic(struct vm * vm, uint32_t index)
   if (!vm_initialize_class(vm, class_entry))
     return;
 
-  assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
+  //assert(field_descriptor_constant->utf8.length == 1 || field_descriptor_constant->utf8.length == 2);
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
   case 'B': [[fallthrough]];

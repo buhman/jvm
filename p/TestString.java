@@ -1,6 +1,12 @@
 package p;
 
 class TestString {
+    static final String s = """
+        text
+        text
+        text
+        """;
+
     static int test() {
         String s = new String("asdf");
         byte[] b = s.getBytes();
@@ -10,7 +16,6 @@ class TestString {
         }
         return sum;
     }
-
 
     public static void main() {
         test();
