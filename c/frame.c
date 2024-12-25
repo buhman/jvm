@@ -87,7 +87,7 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
     return true;
 
   if (class_entry->initialization_state == CLASS_INITIALIZING) {
-    if (vm->current_thread.current_class == class_entry->class_file)
+    if (vm->current_frame->class == class_entry->class_file)
       return true;
     else
       assert(false); // possible infinite initialization loop
@@ -154,6 +154,52 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
   return true;
 }
 
+void vm_special_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info)
+{
+  /* If the method is not native, the nargs argument values are popped from the
+     operand stack. A new frame is created on the Java Virtual Machine stack for
+     the method being invoked. The nargs argument values are consecutively made
+     the values of local variables of the new frame, with arg1 in local variable
+     0 (or, if arg1 is of type long or double, in local variables 0 and 1) and
+     so on. The new frame is then made current, and the Java Virtual Machine pc
+     is set to the opcode of the first instruction of the method to be
+     invoked. Execution continues with the first instruction of the method.
+  */
+
+  int code_name_index = find_code_name_index(class_file);
+  assert(code_name_index > 0);
+
+  struct Code_attribute * code = get_code_attribute(code_name_index,
+                                                    method_info->attributes_count,
+                                                    method_info->attributes);
+  assert(code != nullptr);
+
+  struct frame * old_frame = vm->current_frame;
+
+  vm->current_frame = stack_push_frame(&vm->frame_stack, 1);
+  vm->current_frame->code = code;
+  vm->current_frame->local_variable = stack_push_data(&vm->data_stack, code->max_locals);
+  vm->current_frame->operand_stack = stack_push_data(&vm->data_stack, code->max_stack);
+  vm->current_frame->operand_stack_ix = 0;
+
+  struct constant * descriptor_constant = &class_file->constant_pool[method_info->descriptor_index - 1];
+  int nargs = descriptor_nargs(descriptor_constant);
+  nargs += 1;
+  printf("nargs+1: %d\n", nargs);
+  for (int i = 0; i < nargs; i++) {
+    uint32_t value = operand_stack_pop_u32(old_frame);
+    printf("local[%d] = %x\n", nargs - i - 1, value);
+    vm->current_frame->local_variable[nargs - i - 1] = value;
+  }
+  vm->current_frame->return_type = descriptor_constant->utf8.bytes[descriptor_constant->utf8.length - 1];
+
+  vm->current_frame->pc = 0;
+  vm->current_frame->class = class_file;
+  vm->current_frame->method = method_info;
+
+  printf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
+}
+
 void vm_static_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info)
 {
   /* If the method is not native, the nargs argument values are popped from the
@@ -193,8 +239,8 @@ void vm_static_method_call(struct vm * vm, struct class_file * class_file, struc
   vm->current_frame->return_type = descriptor_constant->utf8.bytes[descriptor_constant->utf8.length - 1];
 
   vm->current_frame->pc = 0;
-  vm->current_thread.current_class = class_file;
-  vm->current_thread.current_method = method_info;
+  vm->current_frame->class = class_file;
+  vm->current_frame->method = method_info;
 
   printf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
 }
@@ -261,6 +307,7 @@ void vm_method_return(struct vm * vm)
     break;
   }
   assert(old_frame->operand_stack_ix == 0);
+  printf("vm_method_return\n");
 }
 
 static void print_vm_stack(struct vm * vm)
@@ -287,13 +334,13 @@ void vm_execute(struct vm * vm)
     print_vm_stack(vm);
     decode_print_instruction(vm->current_frame->code->code, vm->current_frame->pc);
     uint32_t old_pc = vm->current_frame->pc;
-    struct method_info * old_method = vm->current_thread.current_method;
+    struct method_info * old_method = vm->current_frame->method;
     decode_execute_instruction(vm, vm->current_frame->code->code, vm->current_frame->pc);
     if (vm->frame_stack.ix == 1) {
       printf("terminate\n");
       break;
     }
-    if (vm->current_thread.current_method == old_method && vm->current_frame->pc == old_pc) {
+    if (vm->current_frame->method == old_method && vm->current_frame->pc == old_pc) {
       // if the instruction did not branch, increment pc
       vm->current_frame->pc = vm->current_frame->next_pc;
     }

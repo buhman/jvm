@@ -6,6 +6,8 @@
 #include "class_resolver.h"
 
 struct frame {
+  struct class_file * class;
+  struct method_info * method;
   struct Code_attribute * code;
   uint32_t * local_variable;
   uint32_t * operand_stack;
@@ -13,11 +15,6 @@ struct frame {
   uint32_t next_pc;
   uint16_t operand_stack_ix;
   uint8_t return_type;
-};
-
-struct thread {
-  struct class_file * current_class;
-  struct method_info * current_method;
 };
 
 struct stack {
@@ -32,7 +29,6 @@ struct stack {
 struct vm {
   struct stack frame_stack;
   struct stack data_stack;
-  struct thread current_thread;
   struct frame * current_frame;
   struct {
     int length;
@@ -148,6 +144,7 @@ static inline double operand_stack_pop_f64(struct frame * frame)
 }
 
 bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry);
+void vm_special_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info);
 void vm_static_method_call(struct vm * vm, struct class_file * class_file, struct method_info * method_info);
 void vm_method_return(struct vm * vm);
 void vm_execute(struct vm * vm);

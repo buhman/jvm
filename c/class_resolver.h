@@ -7,7 +7,10 @@
 
 struct field_entry {
   struct field_info * field_info;
-  uint32_t value;
+  union {
+    uint64_t value64;
+    uint32_t value32;
+  };
 };
 
 enum initialization_state {
