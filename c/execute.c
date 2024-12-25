@@ -411,27 +411,58 @@ void op_dup(struct vm * vm)
 
 void op_dup2(struct vm * vm)
 {
-  assert(!"op_dup2");
+  uint32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value2 = operand_stack_pop_u32(vm->current_frame);
+  operand_stack_push_u32(vm->current_frame, value2);
+  operand_stack_push_u32(vm->current_frame, value1);
+  operand_stack_push_u32(vm->current_frame, value2);
+  operand_stack_push_u32(vm->current_frame, value1);
 }
 
 void op_dup2_x1(struct vm * vm)
 {
-  assert(!"op_dup2_x1");
+  uint32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value2 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value3 = operand_stack_pop_u32(vm->current_frame);
+  operand_stack_push_u32(vm->current_frame, value2);
+  operand_stack_push_u32(vm->current_frame, value1);
+  operand_stack_push_u32(vm->current_frame, value3);
+  operand_stack_push_u32(vm->current_frame, value2);
+  operand_stack_push_u32(vm->current_frame, value1);
 }
 
 void op_dup2_x2(struct vm * vm)
 {
-  assert(!"op_dup2_x2");
+  uint32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value2 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value3 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value4 = operand_stack_pop_u32(vm->current_frame);
+  operand_stack_push_u32(vm->current_frame, value2);
+  operand_stack_push_u32(vm->current_frame, value1);
+  operand_stack_push_u32(vm->current_frame, value4);
+  operand_stack_push_u32(vm->current_frame, value3);
+  operand_stack_push_u32(vm->current_frame, value2);
+  operand_stack_push_u32(vm->current_frame, value1);
 }
 
 void op_dup_x1(struct vm * vm)
 {
-  assert(!"op_dup_x1");
+  uint32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value2 = operand_stack_pop_u32(vm->current_frame);
+  operand_stack_push_u32(vm->current_frame, value1);
+  operand_stack_push_u32(vm->current_frame, value2);
+  operand_stack_push_u32(vm->current_frame, value1);
 }
 
 void op_dup_x2(struct vm * vm)
 {
-  assert(!"op_dup_x2");
+  uint32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value2 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value3 = operand_stack_pop_u32(vm->current_frame);
+  operand_stack_push_u32(vm->current_frame, value1);
+  operand_stack_push_u32(vm->current_frame, value3);
+  operand_stack_push_u32(vm->current_frame, value2);
+  operand_stack_push_u32(vm->current_frame, value1);
 }
 
 void op_f2d(struct vm * vm)
@@ -734,7 +765,7 @@ void op_goto(struct vm * vm, int32_t branch)
 
 void op_goto_w(struct vm * vm, int32_t branch)
 {
-  assert(!"op_goto_w");
+  vm->current_frame->pc = vm->current_frame->pc + branch;
 }
 
 void op_i2b(struct vm * vm)
@@ -1350,7 +1381,12 @@ void op_ldc2_w(struct vm * vm, uint32_t index)
 
 void op_ldc_w(struct vm * vm, uint32_t index)
 {
-  assert(!"op_ldc_w");
+  struct constant * constant = &vm->current_frame->class->constant_pool[index - 1];
+  #ifdef DEBUG
+  assert(constant->tag == CONSTANT_Integer || constant->tag == CONSTANT_Float);
+  #endif
+  int32_t value = constant->integer.bytes;
+  operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_ldiv(struct vm * vm)
@@ -1794,7 +1830,10 @@ void op_sipush(struct vm * vm, int32_t byte)
 
 void op_swap(struct vm * vm)
 {
-  assert(!"op_swap");
+  uint32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value2 = operand_stack_pop_u32(vm->current_frame);
+  operand_stack_push_u32(vm->current_frame, value1);
+  operand_stack_push_u32(vm->current_frame, value2);
 }
 
 void op_tableswitch(struct vm * vm, int32_t defaultbyte, int32_t lowbyte, int32_t highbyte, const int32_t * table)
