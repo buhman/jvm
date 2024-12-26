@@ -1,34 +1,7 @@
 %.csv: %.ods
 	libreoffice --headless --convert-to csv:"Text - txt - csv (StarCalc)":44,34,76,,,,true --outdir $(dir $@) $<
 
-%.class: %.java
-	javac $<
-
-java/lang/%.class: java/lang/%.java
-	javac --source 8 --target 8 --boot-class-path . $<
-
-OBJ = \
-	c/decode.o \
-	c/class_file.o \
-	c/debug_class_file.o \
-	c/malloc.o \
-	c/file.o \
-	c/execute.o \
-	c/memory_allocator.o \
-	c/class_resolver.o \
-	c/hash_table.o \
-	c/frame.o \
-	c/printf.o \
-	c/parse.o \
-	c/unparse.o
-
-MAIN_OBJ = \
-	$(OBJ) \
-	c/main.o
-
-PRINT_CLASS_OBJ = \
-	$(OBJ) \
-	c/print_class.o \
+include java.mk
 
 CC ?= gcc
 ARCH = -m32
@@ -39,10 +12,10 @@ DEPFLAGS = -MMD -MP
 %.o: %.c
 	$(CC) $(ARCH) $(CFLAGS) $(OPT) $(DEPFLAGS) -MF ${<}.d -c $< -o $@
 
-print_class: $(PRINT_CLASS_OBJ)
+print_class: $(OBJ) $(PRINT_CLASS_OBJ)
 	$(CC) $(ARCH) $^ -o $@
 
-main: $(MAIN_OBJ)
+main: $(OBJ) $(MAIN_HOSTED_OBJ)
 	$(CC) $(ARCH) $^ -o $@
 
 clean:

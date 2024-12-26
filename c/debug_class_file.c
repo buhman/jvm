@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <inttypes.h>
 
 #include "assert.h"
 #include "class_file.h"
@@ -51,7 +50,7 @@ void print_constant(struct constant * constant)
            *(float *)(&constant->_float.bytes));
     break;
   case CONSTANT_Long:
-    debugf("CONSTANT_Long bytes=%" PRId64 "\n",
+    debugf("CONSTANT_Long bytes=%l\n",
            constant->_long.bytes);
     break;
   case CONSTANT_Double:

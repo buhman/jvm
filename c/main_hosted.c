@@ -31,7 +31,7 @@ static struct hash_table_entry * load_from_filenames(const char * filenames[], i
 
   struct hash_table_entry * class_hash_table = class_resolver_load_from_buffers(class_names,
                                                                                 class_names_length,
-                                                                                buffers,
+                                                                                (const uint8_t **)buffers,
                                                                                 length,
                                                                                 hash_table_length);
 

@@ -1,11 +1,7 @@
 #pragma once
 
-#if defined(__linux__)
-#include "assert_hosted.h"
-#elif defined(_WIN32)
-#include "assert_hosted.h"
-#elif defined(__APPLE__)
-#include "assert_hosted.h"
-#else
+#if defined(__dreamcast__)
 #include "assert_dreamcast.h"
+#else
+#include "assert_hosted.h"
 #endif

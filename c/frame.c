@@ -2,7 +2,6 @@
 
 #include "assert.h"
 #include "class_file.h"
-#include "memory.h"
 #include "debug_class_file.h"
 #include "bytes.h"
 #include "decode.h"
@@ -75,8 +74,16 @@ static int descriptor_nargs(struct constant * descriptor_constant, uint8_t * ret
       nargs += 1;
       while (descriptor_constant->utf8.bytes[i] != ';') i += 1;
       break;
-    default:
+    case 'B': [[fallthrough]];
+    case 'C': [[fallthrough]];
+    case 'F': [[fallthrough]];
+    case 'I': [[fallthrough]];
+    case 'S': [[fallthrough]];
+    case 'Z':
       nargs += 1;
+      break;
+    default:
+      assert(false);
       break;
     }
     i += 1;
@@ -399,6 +406,7 @@ void vm_start(int class_hash_table_length,
                                                                  class_hash_table,
                                                                  main_class,
                                                                  main_class_length);
+
   assert(class_entry != nullptr);
 
   const char * method_name = "main";
