@@ -1,5 +1,5 @@
 package java.lang;
 
-class Object {
+public class Object {
     public Object() {}
 }

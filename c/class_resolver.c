@@ -147,9 +147,7 @@ static void class_resolver_allocate_attribute_entry(struct class_entry * class_e
   class_entry->attribute_entry = attribute_entry;
 }
 
-struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** class_names,
-                                                           const int * class_names_length,
-                                                           const uint8_t ** buffers,
+struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buffers,
                                                            int length,
                                                            int * hash_table_length)
 {
@@ -167,10 +165,15 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** clas
     class_entry[i].class_file = class_file;
     class_entry[i].initialization_state = CLASS_UNINITIALIZED;
 
+    struct constant * class_constant = &class_file->constant_pool[class_file->this_class - 1];
+    assert(class_constant->tag == CONSTANT_Class);
+    struct constant * class_name_constant = &class_file->constant_pool[class_constant->class.name_index - 1];
+    assert(class_name_constant->tag == CONSTANT_Utf8);
+
     hash_table_add(class_hash_table_length,
                    class_hash_table,
-                   class_names[i],
-                   class_names_length[i],
+                   class_name_constant->utf8.bytes,
+                   class_name_constant->utf8.length,
                    &class_entry[i]);
 
     // make hash table for interfaces

@@ -1,7 +1,7 @@
 %.class: %.java
 	javac $<
 
-java/lang/%.class: java/lang/%.java
+java/%.class: java/%.java
 	javac --source 8 --target 8 --boot-class-path . $<
 
 OBJ = \
@@ -16,7 +16,8 @@ OBJ = \
 	c/frame.o \
 	c/printf.o \
 	c/parse.o \
-	c/unparse.o
+	c/unparse.o \
+	c/native.o
 
 MAIN_DREAMCAST_OBJ = \
 	c/sh7091_scif.o \

@@ -94,4 +94,7 @@ static inline int32_t aligned_s4(const void * buf)
 
 #define WIDE_NEXT_PC 0
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #include "decode.inc.c"
+#pragma GCC diagnostic pop

@@ -1,6 +1,6 @@
 package java.lang;
 
-class String {
+public class String {
     private final byte[] value;
 
     public String() {

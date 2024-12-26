@@ -77,15 +77,6 @@ void hash_table_add(int hash_table_length,
   e->value = value;
 }
 
-static inline bool key_equal(const uint8_t * a, const uint8_t * b, int length)
-{
-  for (int i = 0; i < length; i++) {
-    if (a[i] != b[i])
-      return false;
-  }
-  return true;
-}
-
 struct hash_table_entry * hash_table_find(int hash_table_length,
                                           struct hash_table_entry * entry,
                                           const uint8_t * key,
@@ -99,7 +90,7 @@ struct hash_table_entry * hash_table_find(int hash_table_length,
   while (e != nullptr && e->key != nullptr) {
     //debugf("key find: %p ", e->key);
     //print_key(e->key, e->key_length);
-    if (e->key_length == key_length && key_equal(key, e->key, e->key_length)) {
+    if (e->key_length == key_length && hash_table_key_equal(key, e->key, e->key_length)) {
       return e;
     }
     e = e->next;

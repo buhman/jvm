@@ -5,6 +5,7 @@
 *.csv
 *.class
 *.out
+*.elf
 main
 print_class
 __pycache__

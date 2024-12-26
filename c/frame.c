@@ -9,6 +9,7 @@
 #include "class_resolver.h"
 #include "printf.h"
 #include "string.h"
+#include "native.h"
 
 struct Code_attribute * get_code_attribute(int code_name_index,
                                            int attributes_count,
@@ -194,18 +195,49 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
   return true;
 }
 
-void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info)
+void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info, int nargs, uint8_t return_type)
 {
-  /* If the method is not native, the nargs argument values are popped from the
-     operand stack. A new frame is created on the Java Virtual Machine stack for
-     the method being invoked. The nargs argument values are consecutively made
-     the values of local variables of the new frame, with arg1 in local variable
-     0 (or, if arg1 is of type long or double, in local variables 0 and 1) and
-     so on. The new frame is then made current, and the Java Virtual Machine pc
-     is set to the opcode of the first instruction of the method to be
-     invoked. Execution continues with the first instruction of the method.
-  */
+  debugf("vm_static_native_method_call: nargs %d\n", nargs);
 
+  uint32_t args[nargs];
+  for (int i = 0; i < nargs; i++) {
+    uint32_t value = operand_stack_pop_u32(vm->current_frame);
+    debugf("args[%d] = %x\n", nargs - i - 1, value);
+    args[nargs - i - 1] = value;
+  }
+
+  debugf("native:\n  ");
+  struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->this_class - 1];
+  struct constant * class_name_constant = &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  print_constant(class_name_constant);
+  debugf("  ");
+  struct constant * method_name_constant = &class_entry->class_file->constant_pool[method_info->name_index - 1];
+  print_constant(method_name_constant);
+
+  int java_io_printstream_length = 19;
+  bool java_io_printstream =
+    class_name_constant->utf8.length == java_io_printstream_length &&
+    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/io/PrintStream", class_name_constant->utf8.length);
+  if (java_io_printstream) {
+    int write_length = 5;
+    bool write =
+      method_name_constant->utf8.length == write_length &&
+      hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"write", method_name_constant->utf8.length);
+    if (write) {
+      if (nargs == 1) {
+        native_java_io_printstream_write_1(args);
+        return;
+      } else if (nargs == 2) {
+        native_java_io_printstream_write_2(args);
+        return;
+      }
+    }
+  }
+  assert(false);
+}
+
+void vm_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info, int nargs, uint8_t return_type)
+{
   int code_name_index = find_code_name_index(class_entry->class_file);
   assert(code_name_index > 0);
 
@@ -222,11 +254,8 @@ void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, st
   vm->current_frame->operand_stack = stack_push_data(&vm->data_stack, code->max_stack);
   vm->current_frame->operand_stack_ix = 0;
   vm->current_frame->initialization_frame = 0;
+  vm->current_frame->return_type = return_type;
 
-  struct constant * descriptor_constant = &class_entry->class_file->constant_pool[method_info->descriptor_index - 1];
-  int nargs = descriptor_nargs(descriptor_constant, &vm->current_frame->return_type);
-  nargs += 1;
-  debugf("nargs+1: %d\n", nargs);
   for (int i = 0; i < nargs; i++) {
     uint32_t value = operand_stack_pop_u32(old_frame);
     debugf("local[%d] = %x\n", nargs - i - 1, value);
@@ -238,6 +267,31 @@ void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, st
   vm->current_frame->method = method_info;
 
   debugf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
+}
+
+void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info)
+{
+  /* If the method is not native, the nargs argument values are popped from the
+     operand stack. A new frame is created on the Java Virtual Machine stack for
+     the method being invoked. The nargs argument values are consecutively made
+     the values of local variables of the new frame, with arg1 in local variable
+     0 (or, if arg1 is of type long or double, in local variables 0 and 1) and
+     so on. The new frame is then made current, and the Java Virtual Machine pc
+     is set to the opcode of the first instruction of the method to be
+     invoked. Execution continues with the first instruction of the method.
+  */
+
+  uint8_t return_type;
+  struct constant * descriptor_constant = &class_entry->class_file->constant_pool[method_info->descriptor_index - 1];
+  int nargs = descriptor_nargs(descriptor_constant, &return_type);
+  nargs += 1;
+  debugf("nargs+1: %d\n", nargs);
+
+  if (method_info->access_flags & METHOD_ACC_NATIVE) {
+    vm_native_method_call(vm, class_entry, method_info, nargs, return_type);
+  } else {
+    vm_method_call(vm, class_entry, method_info, nargs, return_type);
+  }
 }
 
 void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info)
@@ -252,38 +306,16 @@ void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, str
      invoked. Execution continues with the first instruction of the method.
   */
 
-  int code_name_index = find_code_name_index(class_entry->class_file);
-  assert(code_name_index > 0);
-
-  struct Code_attribute * code = get_code_attribute(code_name_index,
-                                                    method_info->attributes_count,
-                                                    method_info->attributes);
-  assert(code != nullptr);
-
-  struct frame * old_frame = vm->current_frame;
-
-  vm->current_frame = stack_push_frame(&vm->frame_stack, 1);
-  vm->current_frame->code = code;
-  vm->current_frame->local_variable = stack_push_data(&vm->data_stack, code->max_locals);
-  vm->current_frame->operand_stack = stack_push_data(&vm->data_stack, code->max_stack);
-  vm->current_frame->operand_stack_ix = 0;
-  vm->current_frame->initialization_frame = 0;
-
+  uint8_t return_type;
   struct constant * descriptor_constant = &class_entry->class_file->constant_pool[method_info->descriptor_index - 1];
-  int nargs = descriptor_nargs(descriptor_constant, &vm->current_frame->return_type);
+  int nargs = descriptor_nargs(descriptor_constant, &return_type);
   debugf("nargs %d\n", nargs);
-  for (int i = 0; i < nargs; i++) {
-    uint32_t value = operand_stack_pop_u32(old_frame);
-    debugf("local[%d] = %x\n", nargs - i - 1, value);
-    vm->current_frame->local_variable[nargs - i - 1] = value;
+
+  if (method_info->access_flags & METHOD_ACC_NATIVE) {
+    vm_native_method_call(vm, class_entry, method_info, nargs, return_type);
+  } else {
+    vm_method_call(vm, class_entry, method_info, nargs, return_type);
   }
-  ;
-
-  vm->current_frame->pc = 0;
-  vm->current_frame->class_entry = class_entry;
-  vm->current_frame->method = method_info;
-
-  debugf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
 }
 
 void vm_method_return(struct vm * vm)

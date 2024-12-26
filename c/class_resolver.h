@@ -48,9 +48,7 @@ struct class_entry {
   } methods;
 };
 
-struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** class_names,
-                                                           const int * class_names_length,
-                                                           const uint8_t ** buffers,
+struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buffers,
                                                            int length,
                                                            int * hash_table_length);
 struct class_entry * class_resolver_lookup_class(int class_hash_table_length,

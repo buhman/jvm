@@ -4,7 +4,9 @@ OPT = -O0
 
 MAKEFILE_PATH := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 LIB ?= $(MAKEFILE_PATH)/dreamcast
-CFLAGS += -D__dreamcast__ -DDEBUG
+CFLAGS += -D__dreamcast__
+CFLAGS += -DDEBUG
+#CFLAGS += -DDEBUG_PRINT
 CFLAGS += -I$(MAKEFILE_PATH)
 CFLAGS += -I$(MAKEFILE_PATH)/dreamcast/
 CARCH = -m4-single -ml
@@ -45,7 +47,11 @@ LIBGCC_OBJ = \
 	libgcc/_div_table.o
 
 CLASS_FILES = \
-	p/Multiply.class.o
+	p/Native.class.o \
+	java/lang/String.class.o \
+	java/lang/System.class.o \
+	java/io/PrintStream.class.o \
+	java/lang/Object.class.o
 
 main.elf: LDSCRIPT = $(LIB)/main.lds
 main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_FILES)
