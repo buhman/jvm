@@ -40,7 +40,7 @@ void hash_table_init(int hash_table_length,
 
 void print_key(const uint8_t * key, int key_length)
 {
-  printf("key: ");
+  debugf("key: ");
   for (int i = 0; i < key_length; i++)
     fputc(key[i], stdout);
   fputc('\n', stdout);
@@ -69,7 +69,7 @@ void hash_table_add(int hash_table_length,
 
   uint8_t * key_copy = malloc_class_arena(key_length);
   for (int i = 0; i < key_length; i++) key_copy[i] = key[i];
-  printf("key copy: %p ", key_copy);
+  debugf("key copy: %p ", key_copy);
   print_key(key_copy, key_length);
 
   e->key = key_copy;
@@ -97,7 +97,7 @@ struct hash_table_entry * hash_table_find(int hash_table_length,
   struct hash_table_entry * e = &entry[hash];
 
   while (e != nullptr && e->key != nullptr) {
-    //printf("key find: %p ", e->key);
+    //debugf("key find: %p ", e->key);
     //print_key(e->key, e->key_length);
     if (e->key_length == key_length && key_equal(key, e->key, e->key_length)) {
       return e;

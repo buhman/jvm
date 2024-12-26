@@ -115,15 +115,15 @@ def generate_print_fixed_width_instruction(instruction):
     if argument_values:
         argument_values = ", " + argument_values
     mnemonic = instruction.mnemonic.ljust(13)
-    yield f'printf("%4d: {mnemonic} {argument_format}\\n", pc{argument_values});'
+    yield f'debugf("%4d: {mnemonic} {argument_format}\\n", pc{argument_values});'
     yield f"return pc + {1 + instruction.arguments_size};"
 
 def generate_print_variable_width_instruction(instruction):
     mnemonic = instruction.mnemonic.ljust(13)
     yield f"{instruction.mnemonic.upper()}_ARGS;"
-    yield f'printf("%4d: {mnemonic} {{\\n", pc);'
+    yield f'debugf("%4d: {mnemonic} {{\\n", pc);'
     yield f"{instruction.mnemonic.upper()}_PRINT_ARGS();"
-    yield 'printf("}\\n");'
+    yield 'debugf("}\\n");'
     yield f"return {instruction.mnemonic.upper()}_NEXT_PC;"
 
 def generate_print_decoder():

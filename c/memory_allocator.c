@@ -77,37 +77,37 @@ void memory_free(void * p)
 int main()
 {
   memory_reset_free_list();
-  printf("%p\n", memory);
+  debugf("%p\n", memory);
 
   void * p1 = memory_allocate(32);
-  printf("p1 %p\n", p1);
+  debugf("p1 %p\n", p1);
   void * p2 = memory_allocate(16);
-  printf("p2 %p\n", p2);
+  debugf("p2 %p\n", p2);
   void * p3 = memory_allocate(256);
-  printf("p3 %p\n", p3);
+  debugf("p3 %p\n", p3);
   void * p4 = memory_allocate(90);
-  printf("p4 %p\n", p4);
-  for (int i = 0; i < free_list_length; i++) { printf("%d ", free_list[i]); }
-  printf("\n");
+  debugf("p4 %p\n", p4);
+  for (int i = 0; i < free_list_length; i++) { debugf("%d ", free_list[i]); }
+  debugf("\n");
 
   memory_free(p2);
   memory_free(p1);
   void * p5 = memory_allocate(256);
-  printf("%p\n", p4);
+  debugf("%p\n", p4);
 
-  for (int i = 0; i < free_list_length; i++) { printf("%d ", free_list[i]); }
-  printf("\n");
+  for (int i = 0; i < free_list_length; i++) { debugf("%d ", free_list[i]); }
+  debugf("\n");
 
   void * p6 = memory_allocate(128);
-  printf("p5 %p\n", p5);
+  debugf("p5 %p\n", p5);
 
   memory_free(p4);
 
   void * p7 = memory_allocate(128);
-  printf("p6 %p\n", p6);
+  debugf("p6 %p\n", p6);
   void * p8 = memory_allocate(128);
-  printf("p7 %p\n", p7);
+  debugf("p7 %p\n", p7);
   void * p9 = memory_allocate(128);
-  printf("p8 %p\n", p8);
+  debugf("p8 %p\n", p8);
 }
 #endif

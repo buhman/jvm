@@ -53,9 +53,9 @@ static int descriptor_nargs(struct constant * descriptor_constant, uint8_t * ret
   assert(descriptor_constant->utf8.length >= 2);
   assert(descriptor_constant->utf8.bytes[0] == '(');
 
-  printf("method descriptor: ");
+  debugf("method descriptor: ");
   print_utf8_string(descriptor_constant);
-  printf("\n");
+  debugf("\n");
 
   int i = 1;
   int nargs = 0;
@@ -88,7 +88,7 @@ static int descriptor_nargs(struct constant * descriptor_constant, uint8_t * ret
 
 bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
 {
-  printf("vm_initialize_class: ");
+  debugf("vm_initialize_class: ");
   struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->this_class - 1];
   #ifdef DEBUG
   assert(class_constant->tag == CONSTANT_Class);
@@ -98,7 +98,7 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
   assert(class_name_constant->tag == CONSTANT_Utf8);
   #endif
   print_constant(class_name_constant);
-  printf("\n");
+  debugf("\n");
 
   if (class_entry->initialization_state == CLASS_INITIALIZED)
     return true;
@@ -143,7 +143,7 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
                                                                          name_constant->utf8.length);
           assert(field_info != nullptr);
           class_entry->static_fields[field_entry->static_index] = constantvalue->integer.bytes;
-          printf("  constantvalue: %d\n", constantvalue->integer.bytes);
+          debugf("  constantvalue: %d\n", constantvalue->integer.bytes);
           break;
 
         }
@@ -169,7 +169,7 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
                                                                   method_descriptor_length);
   if (method_info != nullptr) {
     assert((method_info->access_flags & METHOD_ACC_STATIC) != 0);
-    printf("<clinit>\n");
+    debugf("<clinit>\n");
 
     // tamper with next_pc
     vm->current_frame->next_pc = vm->current_frame->pc;
@@ -180,7 +180,7 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
     return false;
   } else {
     class_entry->initialization_state = CLASS_INITIALIZED;
-    printf("<clinit> does not exist for this class\n");
+    debugf("<clinit> does not exist for this class\n");
   }
 
   return true;
@@ -218,10 +218,10 @@ void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, st
   struct constant * descriptor_constant = &class_entry->class_file->constant_pool[method_info->descriptor_index - 1];
   int nargs = descriptor_nargs(descriptor_constant, &vm->current_frame->return_type);
   nargs += 1;
-  printf("nargs+1: %d\n", nargs);
+  debugf("nargs+1: %d\n", nargs);
   for (int i = 0; i < nargs; i++) {
     uint32_t value = operand_stack_pop_u32(old_frame);
-    printf("local[%d] = %x\n", nargs - i - 1, value);
+    debugf("local[%d] = %x\n", nargs - i - 1, value);
     vm->current_frame->local_variable[nargs - i - 1] = value;
   }
 
@@ -229,7 +229,7 @@ void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, st
   vm->current_frame->class_entry = class_entry;
   vm->current_frame->method = method_info;
 
-  printf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
+  debugf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
 }
 
 void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info)
@@ -263,10 +263,10 @@ void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, str
 
   struct constant * descriptor_constant = &class_entry->class_file->constant_pool[method_info->descriptor_index - 1];
   int nargs = descriptor_nargs(descriptor_constant, &vm->current_frame->return_type);
-  printf("nargs %d\n", nargs);
+  debugf("nargs %d\n", nargs);
   for (int i = 0; i < nargs; i++) {
     uint32_t value = operand_stack_pop_u32(old_frame);
-    printf("local[%d] = %x\n", nargs - i - 1, value);
+    debugf("local[%d] = %x\n", nargs - i - 1, value);
     vm->current_frame->local_variable[nargs - i - 1] = value;
   }
   ;
@@ -275,13 +275,13 @@ void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, str
   vm->current_frame->class_entry = class_entry;
   vm->current_frame->method = method_info;
 
-  printf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
+  debugf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
 }
 
 void vm_method_return(struct vm * vm)
 {
   if (vm->current_frame->initialization_frame != 0) {
-    printf("vm_method_return: initialization_frame!=0\n");
+    debugf("vm_method_return: initialization_frame!=0\n");
     vm->current_frame->class_entry->initialization_state = CLASS_INITIALIZED;
     vm->current_frame->initialization_frame = 0;
   }
@@ -344,29 +344,29 @@ void vm_method_return(struct vm * vm)
   case 'V':
     break;
   default:
-    fprintf(stderr, "return type not implemented: %c\n", old_frame->return_type);
+    debugf("return type not implemented: %c\n", old_frame->return_type);
     assert(false);
     break;
   }
   assert(old_frame->operand_stack_ix == 0);
-  printf("vm_method_return\n");
+  debugf("vm_method_return\n");
 }
 
 static void print_vm_stack(struct vm * vm)
 {
-  printf("[  ");
+  debugf("[  ");
   for (int i = 5; i > 0; i--) {
     if (i > vm->current_frame->operand_stack_ix) {
-      printf("            ");
+      debugf("            ");
       continue;
     }
     int32_t value = vm->current_frame->operand_stack[vm->current_frame->operand_stack_ix - i];
     if (value > 32767 || value < -32768)
-      printf("0x%08x  ", value);
+      debugf("0x%08x  ", value);
     else
-      printf("%10d  ", value);
+      debugf("%10d  ", value);
   }
-  printf("]\n");
+  debugf("]\n");
 }
 
 void vm_execute(struct vm * vm)
@@ -379,7 +379,7 @@ void vm_execute(struct vm * vm)
     struct method_info * old_method = vm->current_frame->method;
     decode_execute_instruction(vm, vm->current_frame->code->code, vm->current_frame->pc);
     if (vm->frame_stack.ix == 1) {
-      printf("terminate\n");
+      debugf("terminate\n");
       break;
     }
     if (vm->current_frame->method == old_method && vm->current_frame->pc == old_pc) {

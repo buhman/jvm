@@ -74,9 +74,9 @@ static inline int32_t aligned_s4(const void * buf)
 #define TABLESWITCH_PRINT_ARGS() \
   do { \
     for (int i = lowbyte; i <= highbyte; i++) { \
-      printf("  %d: %d\n", i, aligned_s4(&table[i - lowbyte])); \
+      debugf("  %d: %d\n", i, aligned_s4(&table[i - lowbyte])); \
     } \
-    printf("default: %d\n", defaultbyte); \
+    debugf("default: %d\n", defaultbyte); \
   } while (0);
 
 #define TABLESWITCH_NEXT_PC \

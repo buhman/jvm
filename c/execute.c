@@ -682,7 +682,7 @@ void op_getfield(struct vm * vm, uint32_t index)
                                               &field_entry,
                                               &field_descriptor_constant);
 
-  printf("putfield instance_index %d\n", field_entry->instance_index);
+  debugf("putfield instance_index %d\n", field_entry->instance_index);
 
   int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
   int32_t * objectfields = &objectref[1];
@@ -1186,7 +1186,7 @@ void op_ireturn(struct vm * vm)
     value = (int32_t)value;
     break;
   default:
-    fprintf(stderr, "invalid conversion: %c\n", vm->current_frame->return_type);
+    debugf("invalid conversion: %c\n", vm->current_frame->return_type);
     assert(false);
   }
   operand_stack_push_u32(vm->current_frame, value);
@@ -1719,7 +1719,7 @@ void op_putfield(struct vm * vm, uint32_t index)
      type or an array type, then the value must be a value of the field descriptor
      type. */
 
-  printf("putfield instance_index %d\n", field_entry->instance_index);
+  debugf("putfield instance_index %d\n", field_entry->instance_index);
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
   case 'B': [[fallthrough]];

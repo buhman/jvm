@@ -64,9 +64,9 @@ static int32_t class_resolver_create_fields_hash_table(struct class_entry * clas
     u2 name_index = class_file->fields[i].name_index;
     struct constant * name_constant = &class_file->constant_pool[name_index - 1];
     assert(name_constant->tag == CONSTANT_Utf8);
-    printf("hash table entry for field: ");
+    debugf("hash table entry for field: ");
     print_utf8_string(name_constant);
-    printf("\n");
+    debugf("\n");
 
     struct field_info * field_info = &class_file->fields[i];
 
@@ -105,9 +105,9 @@ static void class_resolver_create_methods_hash_table(struct class_entry * class_
     u2 descriptor_index = class_file->methods[i].descriptor_index;
     struct constant * descriptor_constant = &class_file->constant_pool[descriptor_index - 1];
     assert(descriptor_constant->tag == CONSTANT_Utf8);
-    printf("hash table entry for method: ");
+    debugf("hash table entry for method: ");
     print_utf8_string(name_constant);
-    printf("\n");
+    debugf("\n");
 
     hash_table_add2(methods_hash_table_length,
                     methods_hash_table,
@@ -199,7 +199,7 @@ struct class_entry * class_resolver_lookup_class(int class_hash_table_length,
                                                  const uint8_t * class_name,
                                                  int class_name_length)
 {
-  printf("class_resolver_lookup_class: ");
+  debugf("class_resolver_lookup_class: ");
   for (int i = 0; i < class_name_length; i++) { fputc(class_name[i], stdout); }
   fputc('\n', stdout);
 
@@ -218,7 +218,7 @@ struct class_entry * class_resolver_lookup_class_from_class_index(int class_hash
                                                                   int32_t class_index)
 {
   if (class_entry->attribute_entry[class_index - 1].class_entry != nullptr) {
-    printf("class_resolver_lookup_class_from_class_index %d: [cached]\n", class_index);
+    debugf("class_resolver_lookup_class_from_class_index %d: [cached]\n", class_index);
     return class_entry->attribute_entry[class_index - 1].class_entry;
   }
 
@@ -247,7 +247,7 @@ struct field_entry * class_resolver_lookup_field(int fields_hash_table_length,
                                                  const uint8_t * field_name,
                                                  int field_name_length)
 {
-  printf("class_resolver_lookup_field: ");
+  debugf("class_resolver_lookup_field: ");
   for (int i = 0; i < field_name_length; i++) { fputc(field_name[i], stdout); }
   fputc('\n', stdout);
 
@@ -266,7 +266,7 @@ struct field_entry * class_resolver_lookup_field_from_fieldref_index(int fields_
                                                                      int fieldref_index)
 {
   if (class_entry->attribute_entry[fieldref_index - 1].field_entry != nullptr) {
-    printf("class_resolver_lookup_method_from_fieldref_index %d: [cached]\n", fieldref_index);
+    debugf("class_resolver_lookup_method_from_fieldref_index %d: [cached]\n", fieldref_index);
     return class_entry->attribute_entry[fieldref_index - 1].field_entry;
   }
 
@@ -301,7 +301,7 @@ struct method_info * class_resolver_lookup_method(int methods_hash_table_length,
                                                   const uint8_t * method_descriptor,
                                                   int method_descriptor_length)
 {
-  printf("class_resolver_lookup_method: ");
+  debugf("class_resolver_lookup_method: ");
   for (int i = 0; i < method_name_length; i++) { fputc(method_name[i], stdout); }
   fputc(' ', stdout);
   for (int i = 0; i < method_descriptor_length; i++) { fputc(method_descriptor[i], stdout); }
@@ -325,7 +325,7 @@ struct method_info * class_resolver_lookup_method_from_methodref_index(int metho
                                                                        int methodref_index)
 {
   if (class_entry->attribute_entry[methodref_index - 1].method_info != nullptr) {
-    printf("class_resolver_lookup_method_from_methodref_index %d: [cached]\n", methodref_index);
+    debugf("class_resolver_lookup_method_from_methodref_index %d: [cached]\n", methodref_index);
     return class_entry->attribute_entry[methodref_index - 1].method_info;
   }
 
@@ -364,9 +364,9 @@ int32_t * class_resolver_lookup_string(int class_hash_table_length,
                                        struct class_entry * class_entry,
                                        const int string_index)
 {
-  printf("class_resolver_lookup_string: %d\n", string_index);
+  debugf("class_resolver_lookup_string: %d\n", string_index);
   if (class_entry->attribute_entry[string_index - 1].string_objectref != nullptr) {
-    printf("class_resolver_lookup_string: [cached]\n");
+    debugf("class_resolver_lookup_string: [cached]\n");
     return class_entry->attribute_entry[string_index - 1].string_objectref;
   }
 
