@@ -17,7 +17,10 @@ OBJ = \
 	c/memory_allocator.o \
 	c/class_resolver.o \
 	c/hash_table.o \
-	c/frame.o
+	c/frame.o \
+	c/printf.o \
+	c/parse.o \
+	c/unparse.o
 
 MAIN_OBJ = \
 	$(OBJ) \
@@ -29,7 +32,7 @@ PRINT_CLASS_OBJ = \
 
 CC ?= gcc
 ARCH = -m32
-CFLAGS ?= -Wall -Werror -Wfatal-errors -Wno-error=unused-variable -std=c2x -DDEBUG -g
+CFLAGS ?= -Wall -Werror -Wfatal-errors -Wno-error=unused-variable -fstack-protector -std=c2x -DDEBUG -g
 OPT ?= -O0
 DEPFLAGS = -MMD -MP
 

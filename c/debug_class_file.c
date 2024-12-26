@@ -12,7 +12,7 @@
 void print_utf8_string(struct constant * constant)
 {
   for (int i = 0; i < constant->utf8.length; i++) {
-    fputc(constant->utf8.bytes[i], stdout);
+    debugc(constant->utf8.bytes[i]);
   }
 }
 
@@ -101,111 +101,111 @@ void print_constant(struct constant * constant)
 
 void print_attribute(const char * indent, struct attribute_info * attribute, struct constant * constant_pool)
 {
-  fputs(indent, stdout);
+  debugs(indent);
   debugf("attribute_name_index: %d\n", attribute->attribute_name_index);
   struct constant * attribute_name = &constant_pool[attribute->attribute_name_index - 1];
-  fputs(indent, stdout);
-  fputs("  ", stdout);
+  debugs(indent);
+  debugs("  ");
   print_constant(attribute_name);
 
   if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "ConstantValue")) {
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("constantvalue_index %d\n", attribute->constantvalue->constantvalue_index);
 
 
     struct constant * value = &constant_pool[attribute->constantvalue->constantvalue_index - 1];
-    fputs(indent, stdout);
-    fputs("  ", stdout);
+    debugs(indent);
+    debugs("  ");
     print_constant(value);
     if (value->tag == CONSTANT_String) {
-      fputs(indent, stdout);
-      fputs("    ", stdout);
+      debugs(indent);
+      debugs("    ");
       print_constant(&constant_pool[value->string.string_index - 1]);
     }
   } else if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "Code")) {
     // print code
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("max_stack %d\n", attribute->code->max_stack);
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("max_locals %d\n", attribute->code->max_locals);
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("code_length %d\n", attribute->code->code_length);
 
     // dump code
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("code:\n");
     uint32_t pc = 0;
     while (pc < attribute->code->code_length) {
-      fputs(indent, stdout);
-      fputs("  ", stdout);
+      debugs(indent);
+      debugs("  ");
       pc = decode_print_instruction(attribute->code->code, pc);
     }
 
 
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("exception_table_length: %d\n", attribute->code->exception_table_length);
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("exceptions:\n");
     for (int i = 0; i < attribute->code->exception_table_length; i++) {
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("  exception %d:\n", i);
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("    start_pc: %d\n", attribute->code->exception_table[i].start_pc);
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("    end_pc: %d\n", attribute->code->exception_table[i].end_pc);
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("    handler_pc: %d\n", attribute->code->exception_table[i].handler_pc);
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("    catch_type: %d\n", attribute->code->exception_table[i].catch_type);
     }
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("attributes_count: %d\n", attribute->code->attributes_count);
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("attributes:\n");
     for (int i = 0; i < attribute->code->attributes_count; i++) {
       char indent2[string_length(indent) + 2 + 1];
       string_copy(indent2, indent);
       string_copy(indent2 + string_length(indent), "    ");
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("  attribute %d:\n", i);
       print_attribute(indent2, &attribute->code->attributes[i], constant_pool);
     }
   } else if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "BootstrapMethods")) {
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("num_bootstrap_methods: %d\n", attribute->bootstrapmethods->num_bootstrap_methods);
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("bootstrap methods:\n");
     for (int i = 0; i < attribute->bootstrapmethods->num_bootstrap_methods; i++) {
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("  bootstrap_method %d:\n", i);
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("    bootstrap_method_ref: %d\n", attribute->bootstrapmethods->bootstrap_methods[i].bootstrap_method_ref);
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("    num_bootstrap_arguments: %d\n", attribute->bootstrapmethods->bootstrap_methods[i].num_bootstrap_arguments);
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("    bootstrap_arguments:\n");
       for (int j = 0; j < attribute->bootstrapmethods->bootstrap_methods[i].num_bootstrap_arguments; j++) {
-        fputs(indent, stdout);
+        debugs(indent);
         debugf("      bootstrap_argument %d: %d\n", j, attribute->bootstrapmethods->bootstrap_methods[i].bootstrap_arguments[j]);
       }
     }
   } else if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "NestHost")) {
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("host_class_index: %d\n", attribute->nesthost->host_class_index);
   } else if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "NestMembers")) {
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("number_of_classes: %d\n", attribute->nestmembers->number_of_classes);
-    fputs(indent, stdout);
+    debugs(indent);
     debugf("classes:\n");
     for (int i = 0; i < attribute->nestmembers->number_of_classes; i++) {
-      fputs(indent, stdout);
+      debugs(indent);
       debugf("  class %d:\n", i);
-      fputs(indent, stdout);
-      fputs("    ", stdout);
+      debugs(indent);
+      debugs("    ");
       print_constant(&constant_pool[attribute->nestmembers->classes[i] - 1]);
       int ix = constant_pool[attribute->nestmembers->classes[i] - 1].class.name_index;
-      fputs(indent, stdout);
-      fputs("      ", stdout);
+      debugs(indent);
+      debugs("      ");
       print_constant(&constant_pool[ix - 1]);
     }
   }

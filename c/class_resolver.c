@@ -200,8 +200,8 @@ struct class_entry * class_resolver_lookup_class(int class_hash_table_length,
                                                  int class_name_length)
 {
   debugf("class_resolver_lookup_class: ");
-  for (int i = 0; i < class_name_length; i++) { fputc(class_name[i], stdout); }
-  fputc('\n', stdout);
+  for (int i = 0; i < class_name_length; i++) { debugc(class_name[i]); }
+  debugc('\n');
 
   struct hash_table_entry * e = hash_table_find(class_hash_table_length,
                                                 class_hash_table,
@@ -248,8 +248,8 @@ struct field_entry * class_resolver_lookup_field(int fields_hash_table_length,
                                                  int field_name_length)
 {
   debugf("class_resolver_lookup_field: ");
-  for (int i = 0; i < field_name_length; i++) { fputc(field_name[i], stdout); }
-  fputc('\n', stdout);
+  for (int i = 0; i < field_name_length; i++) { debugc(field_name[i]); }
+  debugc('\n');
 
   struct hash_table_entry * e = hash_table_find(fields_hash_table_length,
                                                 fields_hash_table,
@@ -302,10 +302,10 @@ struct method_info * class_resolver_lookup_method(int methods_hash_table_length,
                                                   int method_descriptor_length)
 {
   debugf("class_resolver_lookup_method: ");
-  for (int i = 0; i < method_name_length; i++) { fputc(method_name[i], stdout); }
-  fputc(' ', stdout);
-  for (int i = 0; i < method_descriptor_length; i++) { fputc(method_descriptor[i], stdout); }
-  fputc('\n', stdout);
+  for (int i = 0; i < method_name_length; i++) { debugc(method_name[i]); }
+  debugc(' ');
+  for (int i = 0; i < method_descriptor_length; i++) { debugc(method_descriptor[i]); }
+  debugc('\n');
 
   struct hash_table_entry * e = hash_table_find2(methods_hash_table_length,
                                                  methods_hash_table,

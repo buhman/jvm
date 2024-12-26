@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdarg.h>
 
 #include "parse.h"
@@ -8,8 +7,10 @@
 #include "sh7091_scif.h"
 
 enum format_type {
+  FORMAT_BASE10_UNSIGNED,
   FORMAT_BASE10,
   FORMAT_BASE10_64,
+  FORMAT_POINTER,
   FORMAT_BASE16,
   FORMAT_STRING,
   FORMAT_CHAR,
@@ -28,7 +29,10 @@ static const char * parse_fill_pad(const char * format, struct format * ft)
 {
   if (*format == 0)
     return format;
-  ft->fill_char = *format++;
+  if (*format >= '1' || *format <= '9')
+    ft->fill_char = ' ';
+  else
+    ft->fill_char = *format++;
   format = parse_base10(format, &ft->pad_length);
   return parse_escape(format, ft);
 }
@@ -38,11 +42,17 @@ static const char * parse_escape(const char * format, struct format * ft)
   switch (*format) {
   case 0:
     return format;
+  case 'u':
+    ft->type = FORMAT_BASE10_UNSIGNED;
+    return format + 1;
   case 'd':
     ft->type = FORMAT_BASE10;
     return format + 1;
   case 'l':
     ft->type = FORMAT_BASE10_64;
+    return format + 1;
+  case 'p':
+    ft->type = FORMAT_POINTER;
     return format + 1;
   case 'x':
     ft->type = FORMAT_BASE16;
@@ -61,12 +71,17 @@ static const char * parse_escape(const char * format, struct format * ft)
   }
 }
 
-struct output_buffer global_output_buffer = {0};
-
 void print_string(const char * s, int length)
 {
   for (int i = 0; i < length; i++) {
     print_char(s[i]);
+  }
+}
+
+void print_cstring(const char * s)
+{
+  while (*s != 0) {
+    print_char(*s++);
   }
 }
 
@@ -85,12 +100,20 @@ void _printf(const char * format, ...)
         struct format ft = {0};
         format = parse_escape(format + 1, &ft);
         switch (ft.type) {
+        case FORMAT_BASE10_UNSIGNED:
+          {
+            uint32_t num = va_arg(args, uint32_t);
+            char s[10];
+            int offset = unparse_base10_unsigned(s, num, ft.pad_length, ft.fill_char);
+            print_string(s, offset);
+          }
+          break;
         case FORMAT_BASE10:
           {
             int32_t num = va_arg(args, int32_t);
             char s[10];
             int offset = unparse_base10(s, num, ft.pad_length, ft.fill_char);
-            print_trings(s, offset);
+            print_string(s, offset);
           }
           break;
         case FORMAT_BASE10_64:
@@ -101,6 +124,12 @@ void _printf(const char * format, ...)
             print_string(s, offset);
           }
           break;
+        case FORMAT_POINTER:
+          {
+            print_char('0');
+            print_char('x');
+          }
+          [[fallthrough]];
         case FORMAT_BASE16:
           {
             uint32_t num = va_arg(args, uint32_t);

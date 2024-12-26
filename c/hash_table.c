@@ -42,8 +42,8 @@ void print_key(const uint8_t * key, int key_length)
 {
   debugf("key: ");
   for (int i = 0; i < key_length; i++)
-    fputc(key[i], stdout);
-  fputc('\n', stdout);
+    debugc(key[i]);
+  debugc('\n');
 }
 
 void hash_table_add(int hash_table_length,
@@ -104,7 +104,6 @@ struct hash_table_entry * hash_table_find(int hash_table_length,
     }
     e = e->next;
   }
-  fflush(stdout);
   return nullptr;
 }
 

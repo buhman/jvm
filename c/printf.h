@@ -1,11 +1,34 @@
 #pragma once
 
-#if defined(__linux__)
-#include "printf_hosted.h"
-#elif defined(_WIN32)
-#include "printf_hosted.h"
-#elif defined(__APPLE__)
-#include "printf_hosted.h"
+#if defined(__dreamcast__)
+#include "sh7091_scif.h"
 #else
-#include "printf_dreamcast.h"
+#include <stdio.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+static inline void print_char(char c)
+{
+#if defined(__dreamcast__)
+  scif_character(c);
+#else
+  fputc(c, stderr);
+#endif
+}
+
+void print_string(const char * s, int length);
+void print_cstring(const char * s);
+
+void _printf(const char * format, ...);
+
+#define printf(...) _printf(__VA_ARGS__)
+#define debugf(...) _printf(__VA_ARGS__)
+#define debugc(c) print_char(c)
+#define debugs(s) print_cstring(s)
+
+#ifdef __cplusplus
+}
 #endif
