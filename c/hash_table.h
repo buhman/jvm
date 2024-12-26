@@ -38,6 +38,7 @@ struct hash_table_entry * hash_table_find2(int hash_table_length,
                                            const uint8_t * key2,
                                            int key2_length);
 
+/*
 void hash_table_add_int(int hash_table_length,
                         struct hash_table_entry * entry,
                         int key,
@@ -46,3 +47,4 @@ void hash_table_add_int(int hash_table_length,
 struct hash_table_entry * hash_table_find_int(int hash_table_length,
                                               struct hash_table_entry * entry,
                                               int key);
+*/

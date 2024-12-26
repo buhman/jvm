@@ -18,6 +18,9 @@ struct arena class_arena = {
 
 void * malloc_class_arena(uint32_t size)
 {
+  if (size == 0)
+    return nullptr;
+
   assert((class_arena.ix & (~3)) == class_arena.ix);
   void * ptr = &class_arena.mem[class_arena.ix];
   size = (size + 3) & (~3);

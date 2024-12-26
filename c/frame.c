@@ -133,13 +133,19 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
 
           struct constant * name_constant = &class_file->constant_pool[field_info->name_index - 1];
           assert(name_constant->tag == CONSTANT_Utf8);
-          struct field_entry * field_entry = class_resolver_lookup_field(class_entry,
+
+          int fields_hash_table_length = class_entry->fields.length;
+          struct hash_table_entry * fields_hash_table = class_entry->fields.entry;
+
+          struct field_entry * field_entry = class_resolver_lookup_field(fields_hash_table_length,
+                                                                         fields_hash_table,
                                                                          name_constant->utf8.bytes,
                                                                          name_constant->utf8.length);
-          assert(field_entry != nullptr);
-          field_entry->value32 = constantvalue->integer.bytes;
-          printf("  constantvalue: %d\n", field_entry->value32);
+          assert(field_info != nullptr);
+          class_entry->static_fields[field_entry->static_index] = constantvalue->integer.bytes;
+          printf("  constantvalue: %d\n", constantvalue->integer.bytes);
           break;
+
         }
       }
     }
@@ -152,7 +158,11 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
   const uint8_t * method_descriptor = (const uint8_t *)"()V";
   int method_descriptor_length = 3;
 
-  struct method_info * method_info = class_resolver_lookup_method(class_entry,
+  int methods_hash_table_length = class_entry->methods.length;
+  struct hash_table_entry * methods_hash_table = class_entry->methods.entry;
+
+  struct method_info * method_info = class_resolver_lookup_method(methods_hash_table_length,
+                                                                  methods_hash_table,
                                                                   method_name,
                                                                   method_name_length,
                                                                   method_descriptor,

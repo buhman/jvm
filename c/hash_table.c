@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "malloc.h"
 #include "hash_table.h"
 
@@ -41,6 +43,7 @@ void hash_table_add(int hash_table_length,
                     int key_length,
                     void * value)
 {
+  assert(hash_table_length != 0);
   uint32_t hash = fnv_1(fnv_offset_basis, key, key_length) & (hash_table_length - 1);
   struct hash_table_entry * e = &entry[hash];
 
@@ -78,6 +81,7 @@ struct hash_table_entry * hash_table_find(int hash_table_length,
                                           const uint8_t * key,
                                           int key_length)
 {
+  assert(hash_table_length != 0);
   uint32_t hash = fnv_1(fnv_offset_basis, key, key_length) & (hash_table_length - 1);
   struct hash_table_entry * e = &entry[hash];
 
@@ -115,6 +119,7 @@ void hash_table_add2(int hash_table_length,
                      int key2_length,
                      void * value)
 {
+  assert(hash_table_length != 0);
   uint32_t hash = fnv_offset_basis;
   hash = fnv_1(hash, key1, key1_length);
   hash = fnv_1(hash, key2, key2_length);
@@ -146,6 +151,7 @@ struct hash_table_entry * hash_table_find2(int hash_table_length,
                                            const uint8_t * key2,
                                            int key2_length)
 {
+  assert(hash_table_length != 0);
   uint32_t hash = fnv_offset_basis;
   hash = fnv_1(hash, key1, key1_length);
   hash = fnv_1(hash, key2, key2_length);
@@ -167,6 +173,7 @@ struct hash_table_entry * hash_table_find2(int hash_table_length,
   return nullptr;
 }
 
+/*
 void hash_table_add_int(int hash_table_length,
                         struct hash_table_entry * entry,
                         int key,
@@ -188,3 +195,4 @@ struct hash_table_entry * hash_table_find_int(int hash_table_length,
                          (const uint8_t *)&key,
                          4);
 }
+*/

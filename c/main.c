@@ -24,7 +24,12 @@ int main(int argc, const char * argv[])
   int method_name_length = string_length(method_name);
   const char * method_descriptor = "()V";
   int method_descriptor_length = string_length(method_descriptor);
-  struct method_info * method_info = class_resolver_lookup_method(class_entry,
+
+  int methods_hash_table_length = class_entry->methods.length;
+  struct hash_table_entry * methods_hash_table = class_entry->methods.entry;
+
+  struct method_info * method_info = class_resolver_lookup_method(methods_hash_table_length,
+                                                                  methods_hash_table,
                                                                   (const uint8_t *)method_name,
                                                                   method_name_length,
                                                                   (const uint8_t *)method_descriptor,
