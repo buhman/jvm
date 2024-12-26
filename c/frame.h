@@ -153,3 +153,7 @@ void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, st
 void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info);
 void vm_method_return(struct vm * vm);
 void vm_execute(struct vm * vm);
+void vm_start(int class_hash_table_length,
+              struct hash_table_entry * class_hash_table,
+              const uint8_t * main_class,
+              int main_class_length);
