@@ -1,6 +1,5 @@
+#include "assert.h"
 #include "malloc.h"
-
-#include <assert.h>
 
 struct arena {
   uint8_t * mem;

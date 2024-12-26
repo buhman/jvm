@@ -1,9 +1,21 @@
-#include <assert.h>
-
+#include "assert.h"
 #include "malloc.h"
 #include "hash_table.h"
+#include "printf.h"
 
 static const uint32_t fnv_offset_basis = 0x811c9dc5;
+
+int32_t hash_table_next_power_of_two(int32_t n)
+{
+  n--;
+  n |= n >> 1;
+  n |= n >> 2;
+  n |= n >> 4;
+  n |= n >> 8;
+  n |= n >> 16;
+  n++;
+  return n;
+}
 
 static uint32_t fnv_1(uint32_t hash, const uint8_t * buf, int length)
 {
@@ -26,9 +38,6 @@ void hash_table_init(int hash_table_length,
   }
 }
 
-
-#include <stdio.h>
-
 void print_key(const uint8_t * key, int key_length)
 {
   printf("key: ");
@@ -44,6 +53,7 @@ void hash_table_add(int hash_table_length,
                     void * value)
 {
   assert(hash_table_length != 0);
+  assert((hash_table_length & (hash_table_length - 1)) == 0);
   uint32_t hash = fnv_1(fnv_offset_basis, key, key_length) & (hash_table_length - 1);
   struct hash_table_entry * e = &entry[hash];
 
@@ -82,17 +92,19 @@ struct hash_table_entry * hash_table_find(int hash_table_length,
                                           int key_length)
 {
   assert(hash_table_length != 0);
+  assert((hash_table_length & (hash_table_length - 1)) == 0);
   uint32_t hash = fnv_1(fnv_offset_basis, key, key_length) & (hash_table_length - 1);
   struct hash_table_entry * e = &entry[hash];
 
   while (e != nullptr && e->key != nullptr) {
-    printf("key find: %p ", e->key);
-    print_key(e->key, e->key_length);
+    //printf("key find: %p ", e->key);
+    //print_key(e->key, e->key_length);
     if (e->key_length == key_length && key_equal(key, e->key, e->key_length)) {
       return e;
     }
     e = e->next;
   }
+  fflush(stdout);
   return nullptr;
 }
 
@@ -120,6 +132,7 @@ void hash_table_add2(int hash_table_length,
                      void * value)
 {
   assert(hash_table_length != 0);
+  assert((hash_table_length & (hash_table_length - 1)) == 0);
   uint32_t hash = fnv_offset_basis;
   hash = fnv_1(hash, key1, key1_length);
   hash = fnv_1(hash, key2, key2_length);
@@ -152,6 +165,7 @@ struct hash_table_entry * hash_table_find2(int hash_table_length,
                                            int key2_length)
 {
   assert(hash_table_length != 0);
+  assert((hash_table_length & (hash_table_length - 1)) == 0);
   uint32_t hash = fnv_offset_basis;
   hash = fnv_1(hash, key1, key1_length);
   hash = fnv_1(hash, key2, key2_length);

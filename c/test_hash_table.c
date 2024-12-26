@@ -145,11 +145,7 @@ static uint32_t _strlen(const char * s)
   return si - s;
 }
 
-void print_key(const uint8_t * key, int key_length)
-{
-  for (int i = 0; i < key_length; i++)
-    fputc(key[i], stdout);
-}
+void print_key(const uint8_t * key, int key_length);
 
 int main()
 {

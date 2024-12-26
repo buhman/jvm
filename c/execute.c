@@ -1,10 +1,9 @@
-#include <stdio.h>
-
 #include "execute.h"
 #include "memory_allocator.h"
 #include "bswap.h"
 #include "class_resolver.h"
 #include "execute_helper.h"
+#include "printf.h"
 
 void op_aaload(struct vm * vm)
 {

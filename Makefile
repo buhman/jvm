@@ -43,7 +43,7 @@ main: $(MAIN_OBJ)
 	$(CC) $(ARCH) $^ -o $@
 
 clean:
-	rm -f main print_class c/*.o
+	rm -f main print_class c/*.o c/*.d
 
 .SUFFIXES:
 .INTERMEDIATE:

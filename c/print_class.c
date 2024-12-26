@@ -1,8 +1,7 @@
-#include <stdio.h>
-#include <assert.h>
-
+#include "assert.h"
 #include "debug_class_file.h"
 #include "file.h"
+#include "printf.h"
 
 int main(int argc, char * argv[])
 {

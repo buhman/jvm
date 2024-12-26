@@ -9,6 +9,8 @@ struct hash_table_entry {
   struct hash_table_entry * next;
 };
 
+int32_t hash_table_next_power_of_two(int32_t n);
+
 void hash_table_init(int hash_table_length,
                      struct hash_table_entry * entry);
 

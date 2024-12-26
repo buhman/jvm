@@ -1,16 +1,14 @@
 #include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
 
+#include "assert.h"
 #include "class_file.h"
-#include "file.h"
 #include "hash_table.h"
 #include "malloc.h"
 #include "class_resolver.h"
 #include "string.h"
 #include "debug_class_file.h"
 #include "memory_allocator.h"
+#include "printf.h"
 
 static void class_resolver_create_interfaces_hash_table(struct class_entry * class_entry)
 {
@@ -53,7 +51,7 @@ static int field_size(struct class_file * class_file, struct field_info * field_
 static int32_t class_resolver_create_fields_hash_table(struct class_entry * class_entry)
 {
   struct class_file * class_file = class_entry->class_file;
-  int fields_hash_table_length = class_file->fields_count * 2;
+  int fields_hash_table_length = hash_table_next_power_of_two(class_file->fields_count * 2);
   uint32_t fields_hash_table_size = (sizeof (struct hash_table_entry)) * fields_hash_table_length;
   struct hash_table_entry * fields_hash_table = malloc_class_arena(fields_hash_table_size);
   uint32_t field_entry_size = (sizeof (struct field_entry)) * class_file->fields_count;
@@ -97,7 +95,7 @@ static int32_t class_resolver_create_fields_hash_table(struct class_entry * clas
 static void class_resolver_create_methods_hash_table(struct class_entry * class_entry)
 {
   struct class_file * class_file = class_entry->class_file;
-  int methods_hash_table_length = class_file->methods_count * 2;
+  int methods_hash_table_length = hash_table_next_power_of_two(class_file->methods_count * 2);
   uint32_t methods_hash_table_size = (sizeof (struct hash_table_entry)) * methods_hash_table_length;
   struct hash_table_entry * methods_hash_table = malloc_class_arena(methods_hash_table_size);
   for (int i = 0; i < class_file->methods_count; i++) {
@@ -149,30 +147,20 @@ static void class_resolver_allocate_attribute_entry(struct class_entry * class_e
   class_entry->attribute_entry = attribute_entry;
 }
 
-struct hash_table_entry * class_resolver_load_from_filenames(const char * filenames[], int length, int * hash_table_length)
+struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t * class_names[],
+                                                           const int class_names_length[],
+                                                           uint8_t * buffers[],
+                                                           int length,
+                                                           int * hash_table_length)
 {
-  int class_hash_table_length = length * 2;
+  int class_hash_table_length = hash_table_next_power_of_two(hash_table_next_power_of_two(length * 2));
   uint32_t class_hash_table_size = (sizeof (struct hash_table_entry)) * class_hash_table_length;
   struct hash_table_entry * class_hash_table = malloc_class_arena(class_hash_table_size);
   uint32_t class_entry_size = (sizeof (struct class_entry)) * length;
   struct class_entry * class_entry = malloc_class_arena(class_entry_size);
 
   for (int i = 0; i < length; i++) {
-    uint32_t filename_length = string_length(filenames[i]);
-    const char * suffix = ".class";
-    uint32_t suffix_length = string_length(suffix);
-    const char * filename_suffix = &filenames[i][filename_length - suffix_length];
-    if (filename_length <= suffix_length || !string_equal(suffix, filename_suffix)) {
-      printf("invalid class filename: %s\n", filenames[i]);
-      continue;
-    }
-    uint32_t class_name_length = filename_length - suffix_length;
-
-    printf("load class: %s\n", filenames[i]);
-
-    uint8_t * buf = file_read(filenames[i]);
-    struct class_file * class_file = class_file_parse(buf);
-    free(buf);
+    struct class_file * class_file = class_file_parse(buffers[i]);
 
     assert(class_file->magic == 0xcafebabe);
 
@@ -181,8 +169,8 @@ struct hash_table_entry * class_resolver_load_from_filenames(const char * filena
 
     hash_table_add(class_hash_table_length,
                    class_hash_table,
-                   (const uint8_t *)filenames[i],
-                   class_name_length,
+                   class_names[i],
+                   class_names_length[i],
                    &class_entry[i]);
 
     // make hash table for interfaces

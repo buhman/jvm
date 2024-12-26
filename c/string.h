@@ -9,6 +9,14 @@ static inline int string_length(const char * s)
   return si - s;
 }
 
+static inline void string_copy(char * dst, const char * src)
+{
+  while (*src != 0) {
+    *dst++ = *src++;
+  }
+  *dst = 0;
+}
+
 static inline bool string_equal(const char * a, const char * b)
 {
   int i = 0;

@@ -1,7 +1,4 @@
-#ifdef DEBUG
-#include <assert.h>
-#endif
-
+#include "assert.h"
 #include "class_file.h"
 #include "malloc.h"
 #include "bytes.h"

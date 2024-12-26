@@ -1,7 +1,6 @@
 #pragma once
 
-#include <assert.h>
-
+#include "assert.h"
 #include "class_file.h"
 #include "class_resolver.h"
 

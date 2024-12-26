@@ -1,7 +1,6 @@
 #include <stdint.h>
-#include <assert.h>
-#include <stdio.h>
 
+#include "assert.h"
 #include "class_file.h"
 #include "memory.h"
 #include "debug_class_file.h"
@@ -9,6 +8,7 @@
 #include "decode.h"
 #include "frame.h"
 #include "class_resolver.h"
+#include "printf.h"
 
 struct Code_attribute * get_code_attribute(int code_name_index,
                                            int attributes_count,

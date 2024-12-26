@@ -1,10 +1,10 @@
 #include <stdint.h>
-#include <assert.h>
-#include <stdio.h>
 
+#include "assert.h"
 #include "decode.h"
 #include "execute.h"
 #include "bswap.h"
+#include "printf.h"
 
 static inline uint32_t _u4(const uint8_t * buf)
 {

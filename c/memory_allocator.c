@@ -1,5 +1,7 @@
-#include <assert.h>
 #include <stdint.h>
+
+#include "assert.h"
+#include "printf.h"
 
 #define block_power (5UL)
 #define block_size (1UL << block_power)
@@ -30,8 +32,6 @@ static inline uint32_t find_contiguous_blocks(uint32_t blocks, int * zero_crossi
   }
   return blocks;
 }
-
-#include <stdio.h>
 
 void * memory_allocate(uint32_t size)
 {

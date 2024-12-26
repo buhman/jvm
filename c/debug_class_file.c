@@ -1,13 +1,13 @@
-#include <stdio.h>
-#include <assert.h>
 #include <stdint.h>
-#include <string.h>
 #include <inttypes.h>
 
+#include "assert.h"
 #include "class_file.h"
 #include "bytes.h"
 #include "decode.h"
 #include "debug_class_file.h"
+#include "printf.h"
+#include "string.h"
 
 void print_utf8_string(struct constant * constant)
 {
@@ -163,9 +163,9 @@ void print_attribute(const char * indent, struct attribute_info * attribute, str
     fputs(indent, stdout);
     printf("attributes:\n");
     for (int i = 0; i < attribute->code->attributes_count; i++) {
-      char indent2[strlen(indent) + 2 + 1];
-      strcpy(indent2, indent);
-      strcpy(indent2 + strlen(indent), "    ");
+      char indent2[string_length(indent) + 2 + 1];
+      string_copy(indent2, indent);
+      string_copy(indent2 + string_length(indent), "    ");
       fputs(indent, stdout);
       printf("  attribute %d:\n", i);
       print_attribute(indent2, &attribute->code->attributes[i], constant_pool);

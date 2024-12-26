@@ -5,7 +5,7 @@
 
 #include "file.h"
 
-uint8_t * file_read(const char * path)
+uint8_t * file_read(const char * path, size_t * file_size)
 {
   int ret;
   FILE * f = fopen(path, "rb");
@@ -20,6 +20,8 @@ uint8_t * file_read(const char * path)
   uint8_t * buf = malloc(size);
   size_t read = fread(buf, 1, size, f);
   assert(read == size);
+
+  *file_size = size;
 
   return buf;
 }
