@@ -220,7 +220,7 @@ void print_class_file(struct class_file * class_file)
   debugf("constants:\n");
   for (int i = 0; i < class_file->constant_pool_count - 1; i++) {
     if (class_file->constant_pool[i].tag != 0) {
-      debugf("% 3d: ", i + 1);
+      debugf("%4d: ", i + 1);
       print_constant(&class_file->constant_pool[i]);
     }
   }

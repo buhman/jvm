@@ -225,14 +225,50 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
       hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"write", method_name_constant->utf8.length);
     if (write) {
       if (nargs == 1) {
+        assert(return_type == 'V');
         native_java_io_printstream_write_1(args);
         return;
       } else if (nargs == 2) {
+        assert(return_type == 'V');
         native_java_io_printstream_write_2(args);
         return;
       }
     }
   }
+
+  int java_misc_memory_length = 16;
+  bool java_misc_memory =
+    class_name_constant->utf8.length == java_misc_memory_length &&
+    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/misc/Memory", class_name_constant->utf8.length);
+  if (java_misc_memory) {
+    if (method_name_constant->utf8.length == 5) {
+      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"putU", 4)) {
+        assert(nargs == 2);
+        assert(return_type == 'V');
+        switch (method_name_constant->utf8.bytes[4]) {
+        case '4': native_java_misc_memory_putU4_2(args); break;
+        case '2': native_java_misc_memory_putU2_2(args); break;
+        case '1': native_java_misc_memory_putU1_2(args); break;
+        default: assert(false);
+        }
+        return;
+      }
+      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"getU", 4)) {
+        assert(nargs == 1);
+        assert(return_type == 'I');
+        uint32_t value;
+        switch (method_name_constant->utf8.bytes[4]) {
+        case '4': value = native_java_misc_memory_getU4_1(args); break;
+        case '2': value = native_java_misc_memory_getU2_1(args); break;
+        case '1': value = native_java_misc_memory_getU1_1(args); break;
+        default: assert(false);
+        }
+        operand_stack_push_u32(vm->current_frame, value);
+        return;
+      }
+    }
+  }
+
   assert(false);
 }
 
