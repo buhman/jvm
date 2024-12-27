@@ -451,17 +451,20 @@ void vm_execute(struct vm * vm)
     assert(vm->current_frame->pc < vm->current_frame->code->code_length);
     print_vm_stack(vm);
     decode_print_instruction(vm->current_frame->code->code, vm->current_frame->pc);
-    uint32_t old_pc = vm->current_frame->pc;
-    struct method_info * old_method = vm->current_frame->method;
+    //uint32_t old_pc = vm->current_frame->pc;
+    //struct method_info * old_method = vm->current_frame->method;
     decode_execute_instruction(vm, vm->current_frame->code->code, vm->current_frame->pc);
     if (vm->frame_stack.ix == 1) {
       debugf("terminate\n");
       break;
     }
+    /*
     if (vm->current_frame->method == old_method && vm->current_frame->pc == old_pc) {
       // if the instruction did not branch, increment pc
       vm->current_frame->pc = vm->current_frame->next_pc;
     }
+    */
+    vm->current_frame->pc = vm->current_frame->next_pc;
   }
 }
 

@@ -890,7 +890,7 @@ uint32_t decode_print_instruction(const uint8_t * code, uint32_t pc)
       TABLESWITCH_ARGS;
       debugf("%4d: tableswitch   {\n", pc);
       TABLESWITCH_PRINT_ARGS();
-      debugf("}\n");
+      debugf("}\n\n");
       return TABLESWITCH_NEXT_PC;
     }
     case 171: // lookupswitch
@@ -898,7 +898,7 @@ uint32_t decode_print_instruction(const uint8_t * code, uint32_t pc)
       LOOKUPSWITCH_ARGS;
       debugf("%4d: lookupswitch  {\n", pc);
       LOOKUPSWITCH_PRINT_ARGS();
-      debugf("}\n");
+      debugf("}\n\n");
       return LOOKUPSWITCH_NEXT_PC;
     }
     case 172: // ireturn
@@ -1039,7 +1039,7 @@ uint32_t decode_print_instruction(const uint8_t * code, uint32_t pc)
     case 196: // wide
     {
       WIDE_ARGS;
-      debugf("%4d: wide          {\n", pc);
+      debugf("%4d: wide          {", pc);
       WIDE_PRINT_ARGS();
       debugf("}\n");
       return WIDE_NEXT_PC;
@@ -2330,8 +2330,7 @@ void decode_execute_instruction(struct vm * vm, const uint8_t * code, uint32_t p
     case 196: // wide
     {
       WIDE_ARGS;
-      vm->current_frame->next_pc = WIDE_NEXT_PC;
-      op_wide(vm);
+      WIDE_IMPL();
       break;
     }
     case 197: // multianewarray

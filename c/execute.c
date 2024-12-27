@@ -763,12 +763,12 @@ void op_getstatic(struct vm * vm, uint32_t index)
 
 void op_goto(struct vm * vm, int32_t branch)
 {
-  vm->current_frame->pc = vm->current_frame->pc + branch;
+  vm->current_frame->next_pc = vm->current_frame->pc + branch;
 }
 
 void op_goto_w(struct vm * vm, int32_t branch)
 {
-  vm->current_frame->pc = vm->current_frame->pc + branch;
+  vm->current_frame->next_pc = vm->current_frame->pc + branch;
 }
 
 void op_i2b(struct vm * vm)
@@ -897,7 +897,7 @@ void op_if_acmpeq(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 == value2) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -906,7 +906,7 @@ void op_if_acmpne(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 != value2) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -915,7 +915,7 @@ void op_if_icmpeq(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 == value2) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -924,7 +924,7 @@ void op_if_icmpge(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 >= value2) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -933,7 +933,7 @@ void op_if_icmpgt(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 > value2) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -942,7 +942,7 @@ void op_if_icmple(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 <= value2) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -951,7 +951,7 @@ void op_if_icmplt(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 < value2) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -960,7 +960,7 @@ void op_if_icmpne(struct vm * vm, int32_t branch)
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
   if (value1 != value2) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -968,7 +968,7 @@ void op_ifeq(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value == 0) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -976,7 +976,7 @@ void op_ifge(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value >= 0) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -984,7 +984,7 @@ void op_ifgt(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value > 0) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -992,7 +992,7 @@ void op_ifle(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value <= 0) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -1000,7 +1000,7 @@ void op_iflt(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value < 0) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -1008,7 +1008,7 @@ void op_ifne(struct vm * vm, int32_t branch)
 {
   int32_t value = operand_stack_pop_u32(vm->current_frame);
   if (value != 0) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -1016,7 +1016,7 @@ void op_ifnonnull(struct vm * vm, int32_t branch)
 {
   void * value = (void *)operand_stack_pop_u32(vm->current_frame);
   if (value != nullptr) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -1024,7 +1024,7 @@ void op_ifnull(struct vm * vm, int32_t branch)
 {
   void * value = (void *)operand_stack_pop_u32(vm->current_frame);
   if (value == nullptr) {
-    vm->current_frame->pc = vm->current_frame->pc + branch;
+    vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
 }
 
@@ -1474,11 +1474,11 @@ void op_lookupswitch(struct vm * vm, int32_t defaultbyte, int32_t npairs, const 
     int32_t match = BE_BSWAP32(table[i * 2]);
     if (key == match) {
       int32_t offset = BE_BSWAP32(table[i * 2 + 1]);
-      vm->current_frame->pc = vm->current_frame->pc + offset;
+      vm->current_frame->next_pc = vm->current_frame->pc + offset;
       return;
     }
   }
-  vm->current_frame->pc = vm->current_frame->pc + defaultbyte;
+  vm->current_frame->next_pc = vm->current_frame->pc + defaultbyte;
 }
 
 void op_lor(struct vm * vm)
@@ -1868,14 +1868,9 @@ void op_tableswitch(struct vm * vm, int32_t defaultbyte, int32_t lowbyte, int32_
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   if (index < lowbyte || index > highbyte) {
-    vm->current_frame->pc = vm->current_frame->pc + defaultbyte;
+    vm->current_frame->next_pc = vm->current_frame->pc + defaultbyte;
   } else {
     int32_t offset = BE_BSWAP32(table[index - lowbyte]);
-    vm->current_frame->pc = vm->current_frame->pc + offset;
+    vm->current_frame->next_pc = vm->current_frame->pc + offset;
   }
-}
-
-void op_wide(struct vm * vm)
-{
-  assert(!"op_wide");
 }

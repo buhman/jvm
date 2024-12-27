@@ -170,6 +170,10 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buff
     struct constant * class_name_constant = &class_file->constant_pool[class_constant->class.name_index - 1];
     assert(class_name_constant->tag == CONSTANT_Utf8);
 
+    debugf("hash table entry for class: ");
+    print_utf8_string(class_name_constant);
+    debugf("\n");
+
     hash_table_add(class_hash_table_length,
                    class_hash_table,
                    class_name_constant->utf8.bytes,

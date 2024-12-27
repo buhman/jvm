@@ -119,11 +119,12 @@ def generate_print_fixed_width_instruction(instruction):
     yield f"return pc + {1 + instruction.arguments_size};"
 
 def generate_print_variable_width_instruction(instruction):
+    n = '' if instruction.mnemonic == "wide" else '\\n'
     mnemonic = instruction.mnemonic.ljust(13)
     yield f"{instruction.mnemonic.upper()}_ARGS;"
-    yield f'debugf("%4d: {mnemonic} {{\\n", pc);'
+    yield f'debugf("%4d: {mnemonic} {{{n}", pc);'
     yield f"{instruction.mnemonic.upper()}_PRINT_ARGS();"
-    yield 'debugf("}\\n");'
+    yield f'debugf("}}{n}\\n");'
     yield f"return {instruction.mnemonic.upper()}_NEXT_PC;"
 
 def generate_print_decoder():
@@ -167,14 +168,18 @@ def generate_execute_fixed_width_instruction(instruction):
 
 def generate_execute_variable_width_instruction(instruction):
     yield f"{instruction.mnemonic.upper()}_ARGS;"
-    yield f"vm->current_frame->next_pc = {instruction.mnemonic.upper()}_NEXT_PC;"
     argument_values = ", ".join(
         argument
         for argument in instruction.arguments
     )
+    if instruction.mnemonic != "wide":
+        yield f"vm->current_frame->next_pc = {instruction.mnemonic.upper()}_NEXT_PC;"
     if argument_values:
         argument_values = ", " + argument_values
-    yield f"op_{instruction.mnemonic}(vm{argument_values});"
+    if instruction.mnemonic == "wide":
+        yield "WIDE_IMPL();"
+    else:
+        yield f"op_{instruction.mnemonic}(vm{argument_values});"
 
 def generate_execute_decoder():
     yield "void decode_execute_instruction(struct vm * vm, const uint8_t * code, uint32_t pc)"

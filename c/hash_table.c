@@ -69,9 +69,6 @@ void hash_table_add(int hash_table_length,
 
   uint8_t * key_copy = malloc_class_arena(key_length);
   for (int i = 0; i < key_length; i++) key_copy[i] = key[i];
-  debugf("key copy: %p ", key_copy);
-  print_key(key_copy, key_length);
-
   e->key = key_copy;
   e->key_length = key_length;
   e->value = value;
