@@ -103,7 +103,8 @@ static inline int32_t aligned_s4(const void * buf)
   uint32_t opcode = code[pc + 1];               \
   uint32_t index = _u2(&code[pc + 2]);          \
   uint32_t wide_next_pc = pc + 4;               \
-  int32_t _const;
+  int32_t _const;                               \
+  (void)_const;
 
 #define WIDE_IMPL()                             \
   switch (opcode) {                             \

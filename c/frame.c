@@ -299,6 +299,7 @@ void vm_method_call(struct vm * vm, struct class_entry * class_entry, struct met
   }
 
   vm->current_frame->pc = 0;
+  vm->current_frame->next_pc = 0;
   vm->current_frame->class_entry = class_entry;
   vm->current_frame->method = method_info;
 

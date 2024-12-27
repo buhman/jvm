@@ -1,6 +1,7 @@
 package java.io;
 
 import java.lang.String;
+import java.lang.Integer;
 
 public class PrintStream
 {
@@ -25,11 +26,20 @@ public class PrintStream
         write(newline);
     }
 
+    public void println(int n) {
+        write(Integer.toString(n).getBytes());
+        write(newline);
+    }
+
     public void print(byte[] buf) {
         write(buf);
     }
 
     public void print(String s) {
         write(s.getBytes());
+    }
+
+    public void print(int n) {
+        write(Integer.toString(n).getBytes());
     }
 }
