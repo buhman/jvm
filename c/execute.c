@@ -1467,9 +1467,18 @@ void op_lneg(struct vm * vm)
   operand_stack_push_u64(vm->current_frame, result);
 }
 
-void op_lookupswitch(struct vm * vm)
+void op_lookupswitch(struct vm * vm, int32_t defaultbyte, int32_t npairs, const int32_t * table)
 {
-  assert(!"op_lookupswitch");
+  int32_t key = operand_stack_pop_u32(vm->current_frame);
+  for (int i = 0; i < npairs; i++) {
+    int32_t match = BE_BSWAP32(table[i * 2]);
+    if (key == match) {
+      int32_t offset = BE_BSWAP32(table[i * 2 + 1]);
+      vm->current_frame->pc = vm->current_frame->pc + offset;
+      return;
+    }
+  }
+  vm->current_frame->pc = vm->current_frame->pc + defaultbyte;
 }
 
 void op_lor(struct vm * vm)

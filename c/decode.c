@@ -82,11 +82,22 @@ static inline int32_t aligned_s4(const void * buf)
 #define TABLESWITCH_NEXT_PC \
   (args + (3 * 4) + ((highbyte - lowbyte + 1) * 4))
 
-#define LOOKUPSWITCH_ARGS assert(false);
+#define LOOKUPSWITCH_ARGS                            \
+  uint32_t args = ((pc + 1) + 3) & (~3);             \
+  int32_t defaultbyte = aligned_s4(&code[args + 0]); \
+  int32_t npairs = aligned_s4(&code[args + 4]);      \
+  const int32_t * table = (const int32_t *)&code[args + 8];
 
-#define LOOKUPSWITCH_PRINT_ARGS()
+#define LOOKUPSWITCH_PRINT_ARGS()                                       \
+  do {                                                                  \
+    for (int i = 0; i < npairs; i++) {                                  \
+      debugf("  %d: %d\n", aligned_s4(&table[i * 2]), aligned_s4(&table[i * 2 + 1])); \
+    }                                                                   \
+    debugf("default: %d\n", defaultbyte);                               \
+  } while (0);
 
-#define LOOKUPSWITCH_NEXT_PC 0
+#define LOOKUPSWITCH_NEXT_PC \
+  (args + (2 * 4) + (npairs * 2 * 4))
 
 #define WIDE_ARGS assert(false);
 

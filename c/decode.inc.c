@@ -2165,7 +2165,7 @@ void decode_execute_instruction(struct vm * vm, const uint8_t * code, uint32_t p
     {
       LOOKUPSWITCH_ARGS;
       vm->current_frame->next_pc = LOOKUPSWITCH_NEXT_PC;
-      op_lookupswitch(vm);
+      op_lookupswitch(vm, defaultbyte, npairs, table);
       break;
     }
     case 172: // ireturn

@@ -177,7 +177,7 @@ void op_lload_2(struct vm * vm);
 void op_lload_3(struct vm * vm);
 void op_lmul(struct vm * vm);
 void op_lneg(struct vm * vm);
-void op_lookupswitch(struct vm * vm);
+void op_lookupswitch(struct vm * vm, int32_t defaultbyte, int32_t npairs, const int32_t * table);
 void op_lor(struct vm * vm);
 void op_lrem(struct vm * vm);
 void op_lreturn(struct vm * vm);
