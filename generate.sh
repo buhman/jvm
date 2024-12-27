@@ -1,5 +1,7 @@
 python gen_decoder.py > c/decode.inc.c
 
 python regs/holly.py ../dreamcast/regs/holly.csv > sega/dreamcast/holly/Holly.java
-python regs/core_bits.py ../dreamcast/regs/core_bits.csv > sega/dreamcast/holly/HollyBits.java
-python regs/ta_bits.py ../dreamcast/regs/ta_bits.csv > sega/dreamcast/holly/TABits.java
+
+python regs/bits_gen.py ../dreamcast/regs/core_bits.csv holly CoreBits > sega/dreamcast/holly/CoreBits.java
+python regs/bits_gen.py ../dreamcast/regs/ta_bits.csv   holly TABits   > sega/dreamcast/holly/TABits.java
+python regs/bits_gen.py ../dreamcast/regs/isp_tsp.csv   holly ISPTSP   > sega/dreamcast/holly/ISPTSP.java
