@@ -66,7 +66,7 @@ void op_anewarray(struct vm * vm, uint32_t index)
   int32_t count = operand_stack_pop_u32(vm->current_frame);
   int32_t size = 4 * count + 4;
   int32_t * arrayref = memory_allocate(size);
-  assert(arrayref != 0);
+  assert(arrayref != nullptr);
   arrayref[0] = count;
 
   /* All components of the new array are initialized to null, the default value
@@ -687,6 +687,7 @@ void op_getfield(struct vm * vm, uint32_t index)
   debugf("putfield instance_index %d\n", field_entry->instance_index);
 
   int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  assert(objectref != nullptr);
   int32_t * objectfields = &objectref[1];
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
@@ -1093,7 +1094,20 @@ void op_ineg(struct vm * vm)
 
 void op_instanceof(struct vm * vm, uint32_t index)
 {
-  assert(!"op_instanceof");
+  struct class_entry * class_entry =
+    class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
+                                                 vm->class_hash_table.entry,
+                                                 vm->current_frame->class_entry,
+                                                 index);
+  assert(class_entry != nullptr);
+
+  int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  if (objectref == nullptr) {
+    operand_stack_push_u32(vm->current_frame, 0);
+  } else {
+    int32_t value = objectref[0] == (int32_t)class_entry;
+    operand_stack_push_u32(vm->current_frame, value);
+  }
 }
 
 void op_invokedynamic(struct vm * vm, uint32_t index)
@@ -1603,6 +1617,7 @@ static int32_t * _multiarray(int32_t * dims, int num_dimensions, int level, uint
   int32_t element_size = field_size_array(*type);
   int32_t size = element_size * count + 4;
   int32_t * arrayref = memory_allocate(size);
+  assert(arrayref != nullptr);
   arrayref[0] = count;
 
   int32_t u32_count = (size - 4 + 3) / 4;
@@ -1720,8 +1735,7 @@ void op_newarray(struct vm * vm, uint32_t atype)
   int32_t count = operand_stack_pop_u32(vm->current_frame);
   int32_t size = element_size * count + 4;
   int32_t * arrayref = memory_allocate(size);
-
-  assert(arrayref != 0);
+  assert(arrayref != nullptr);
   arrayref[0] = count;
 
   /* Each of the elements of the new array is initialized to the default initial
@@ -1785,6 +1799,7 @@ void op_putfield(struct vm * vm, uint32_t index)
     {
       uint32_t value = operand_stack_pop_u32(vm->current_frame);
       int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+      assert(objectref != nullptr);
       int32_t * objectfields = &objectref[1];
       objectfields[field_entry->instance_index] = value;
     }
@@ -1795,6 +1810,7 @@ void op_putfield(struct vm * vm, uint32_t index)
       uint32_t high = operand_stack_pop_u32(vm->current_frame);
       uint32_t low = operand_stack_pop_u32(vm->current_frame);
       int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+      assert(objectref != nullptr);
       int32_t * objectfields = &objectref[1];
       objectfields[field_entry->instance_index + 1] = high;
       objectfields[field_entry->instance_index] = low;
