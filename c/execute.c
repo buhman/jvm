@@ -140,6 +140,7 @@ void op_bastore(struct vm * vm)
   int8_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  debugf("%d %d\n", arrayref[0], index);
   assert(arrayref[0] > 0 && index < arrayref[0]);
   int8_t * bytearray = (int8_t *)&arrayref[1];
   bytearray[index] = value;
@@ -1027,9 +1028,9 @@ void op_ifnull(struct vm * vm, int32_t branch)
   }
 }
 
-void op_iinc(struct vm * vm, uint32_t index, uint32_t _const)
+void op_iinc(struct vm * vm, uint32_t index, int32_t _const)
 {
-  uint32_t value = vm->current_frame->local_variable[index];
+  int32_t value = vm->current_frame->local_variable[index];
   value += _const;
   vm->current_frame->local_variable[index] = value;
 }
@@ -1227,6 +1228,11 @@ void op_istore_0(struct vm * vm)
 void op_istore_1(struct vm * vm)
 {
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
+  debugf("istore_1: %d\n", value);
+  if (value == 1) {
+    debugf("istore1_1 == 1: %d\n", value);
+    (void)(value);
+  }
   vm->current_frame->local_variable[1] = value;
 }
 

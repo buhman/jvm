@@ -679,8 +679,8 @@ uint32_t decode_print_instruction(const uint8_t * code, uint32_t pc)
     case 132: // iinc
     {
       uint32_t index = _u1(&code[pc + 1]);
-      uint32_t _const = _u1(&code[pc + 2]);
-      debugf("%4d: iinc          %u, %u\n", pc, index, _const);
+      int32_t _const = _s1(&code[pc + 2]);
+      debugf("%4d: iinc          %u, %d\n", pc, index, _const);
       return pc + 3;
     }
     case 133: // i2l
@@ -1910,7 +1910,7 @@ void decode_execute_instruction(struct vm * vm, const uint8_t * code, uint32_t p
     case 132: // iinc
     {
       uint32_t index = _u1(&code[pc + 1]);
-      uint32_t _const = _u1(&code[pc + 2]);
+      int32_t _const = _s1(&code[pc + 2]);
       vm->current_frame->next_pc = pc + 3;
       op_iinc(vm, index, _const);
       break;

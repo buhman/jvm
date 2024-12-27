@@ -1,7 +1,7 @@
-%.class: %.java
-	javac $<
+#%.class: %.java
+#	javac $<
 
-java/%.class: java/%.java
+%.class: %.java
 	javac --source 8 --target 8 --boot-class-path . $<
 
 OBJ = \

@@ -1,6 +1,6 @@
 all: $(patsubst %.cpp,%.elf,$(wildcard example/*.cpp))
 
-OPT = -O0
+OPT = -O3
 
 MAKEFILE_PATH := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 LIB ?= $(MAKEFILE_PATH)/dreamcast
@@ -9,6 +9,7 @@ CFLAGS += -DDEBUG
 #CFLAGS += -DDEBUG_PRINT
 CFLAGS += -I$(MAKEFILE_PATH)
 CFLAGS += -I$(MAKEFILE_PATH)/dreamcast/
+CFLAGS += -Wno-error=strict-aliasing -fno-strict-aliasing
 CARCH = -m4-single -ml
 
 include dreamcast/base.mk
@@ -47,11 +48,14 @@ LIBGCC_OBJ = \
 	libgcc/_div_table.o
 
 CLASS_FILES = \
-	p/Native.class.o \
+	p/DreamcastVideo.class.o \
 	java/lang/String.class.o \
+	java/lang/Integer.class.o \
 	java/lang/System.class.o \
 	java/io/PrintStream.class.o \
-	java/lang/Object.class.o
+	java/lang/Object.class.o \
+	sega/dreamcast/holly/Holly.class.o \
+	java/misc/Memory.class.o
 
 main.elf: LDSCRIPT = $(LIB)/main.lds
 main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_FILES)

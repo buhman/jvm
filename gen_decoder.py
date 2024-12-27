@@ -49,7 +49,7 @@ def parse_arguments(types, arguments):
 
         assert size in {1, 2, 4}
         assert signed is not None
-        if name in {"byte", "branch"}:
+        if name in {"byte", "branch", "_const"}:
             assert signed == True, name
         else:
             assert signed == False, name

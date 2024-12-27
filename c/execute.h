@@ -125,7 +125,7 @@ void op_iflt(struct vm * vm, int32_t branch);
 void op_ifne(struct vm * vm, int32_t branch);
 void op_ifnonnull(struct vm * vm, int32_t branch);
 void op_ifnull(struct vm * vm, int32_t branch);
-void op_iinc(struct vm * vm, uint32_t index, uint32_t _const);
+void op_iinc(struct vm * vm, uint32_t index, int32_t _const);
 void op_iload(struct vm * vm, uint32_t index);
 void op_iload_0(struct vm * vm);
 void op_iload_1(struct vm * vm);
