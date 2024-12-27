@@ -11,5 +11,5 @@ if __name__ == "__main__":
     rows = read_input(sys.argv[1])
     group = group_by_register_enum(map(parse_row, rows))
     render, out = renderer(indent_length=4)
-    render(generate_registers("holly", "HollyBits", group))
+    render(generate_registers("holly", "CoreBits", group))
     sys.stdout.write(out.getvalue())

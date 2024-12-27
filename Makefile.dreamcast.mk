@@ -48,14 +48,15 @@ LIBGCC_OBJ = \
 	libgcc/_div_table.o
 
 CLASS_FILES = \
-	p/DreamcastVideo.class.o \
-	java/lang/String.class.o \
-	java/lang/Integer.class.o \
-	java/lang/System.class.o \
 	java/io/PrintStream.class.o \
+	java/lang/Integer.class.o \
 	java/lang/Object.class.o \
+	java/lang/String.class.o \
+	java/lang/System.class.o \
+	java/misc/Memory.class.o \
+	p/DreamcastVideo2.class.o \
 	sega/dreamcast/holly/Holly.class.o \
-	java/misc/Memory.class.o
+	sega/dreamcast/holly/CoreBits.class.o
 
 main.elf: LDSCRIPT = $(LIB)/main.lds
 main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_FILES)

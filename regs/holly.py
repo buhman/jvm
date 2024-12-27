@@ -8,7 +8,6 @@ def generate_register(base_address, register):
 
 def generate_classes(package_name, base_address, blocks):
     yield f"package sega.dreamcast.{package_name};"
-    yield ""
     for block, registers in blocks:
         yield f"public class {block.capitalize()} {{"
         for register in registers:

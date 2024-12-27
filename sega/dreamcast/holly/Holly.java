@@ -1,6 +1,5 @@
 package sega.dreamcast.holly;
 
-
 public class Holly {
     public static final int ID = 0xa05f8000;
     public static final int REVISION = 0xa05f8004;

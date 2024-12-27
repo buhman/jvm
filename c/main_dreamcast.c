@@ -7,32 +7,34 @@
 
 #include "sh7091_scif.h"
 
-#include "p/DreamcastVideo.class.h"
-#include "java/lang/String.class.h"
-#include "java/lang/Integer.class.h"
-#include "java/lang/System.class.h"
 #include "java/io/PrintStream.class.h"
+#include "java/lang/Integer.class.h"
 #include "java/lang/Object.class.h"
-#include "sega/dreamcast/holly/Holly.class.h"
+#include "java/lang/String.class.h"
+#include "java/lang/System.class.h"
 #include "java/misc/Memory.class.h"
+#include "p/DreamcastVideo2.class.h"
+#include "sega/dreamcast/holly/Holly.class.h"
+#include "sega/dreamcast/holly/CoreBits.class.h"
 
 void main()
 {
   scif_init(0);
 
   const uint8_t * class_file_buffers[] = {
-    (const uint8_t *)&_binary_p_DreamcastVideo_class_start,
-    (const uint8_t *)&_binary_java_lang_String_class_start,
-    (const uint8_t *)&_binary_java_lang_Integer_class_start,
-    (const uint8_t *)&_binary_java_lang_System_class_start,
     (const uint8_t *)&_binary_java_io_PrintStream_class_start,
+    (const uint8_t *)&_binary_java_lang_Integer_class_start,
     (const uint8_t *)&_binary_java_lang_Object_class_start,
-    (const uint8_t *)&_binary_sega_dreamcast_holly_Holly_class_start,
+    (const uint8_t *)&_binary_java_lang_String_class_start,
+    (const uint8_t *)&_binary_java_lang_System_class_start,
     (const uint8_t *)&_binary_java_misc_Memory_class_start,
+    (const uint8_t *)&_binary_p_DreamcastVideo2_class_start,
+    (const uint8_t *)&_binary_sega_dreamcast_holly_Holly_class_start,
+    (const uint8_t *)&_binary_sega_dreamcast_holly_CoreBits_class_start,
   };
   int class_file_buffers_length = (sizeof (class_file_buffers)) / (sizeof (class_file_buffers[0]));
 
-  const uint8_t * main_class = (const uint8_t *)"p/DreamcastVideo";
+  const uint8_t * main_class = (const uint8_t *)"p/DreamcastVideo2";
   int main_class_length = string_length((const char *)main_class);
 
   int class_hash_table_length;

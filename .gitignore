@@ -6,6 +6,7 @@
 *.class
 *.out
 *.elf
+*.bin
 main
 print_class
 __pycache__
