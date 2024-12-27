@@ -4,6 +4,7 @@
 #include "class_resolver.h"
 #include "execute_helper.h"
 #include "printf.h"
+#include "field_size.h"
 
 void op_aaload(struct vm * vm)
 {
@@ -1596,9 +1597,45 @@ void op_monitorexit(struct vm * vm)
   assert(!"op_monitorexit");
 }
 
+static int32_t * _multiarray(int32_t * dims, int num_dimensions, int level, uint8_t * type)
+{
+  int32_t count = dims[level];
+  int32_t element_size = field_size_array(*type);
+  int32_t size = element_size * count + 4;
+  int32_t * arrayref = memory_allocate(size);
+  arrayref[0] = count;
+
+  int32_t u32_count = (size - 4 + 3) / 4;
+  for (int i = 0; i < u32_count; i++) {
+    if (level == num_dimensions - 1) {
+      arrayref[i + 1] = 0;
+    } else {
+      assert(*type == '[');
+      arrayref[1 + i] = (int32_t)_multiarray(dims, num_dimensions, level + 1, type + 1);
+    }
+  }
+  return arrayref;
+}
+
 void op_multianewarray(struct vm * vm, uint32_t index, uint32_t dimensions)
 {
-  assert(!"op_multianewarray");
+  struct constant * class_constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
+  assert(class_constant->tag == CONSTANT_Class);
+  struct constant * type_constant = &vm->current_frame->class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  assert(type_constant->tag == CONSTANT_Utf8);
+
+  // The run-time constant pool entry at the index must be a symbolic reference
+  // to a class, array, or interface type
+  uint8_t * type = type_constant->utf8.bytes;
+  assert(*type == '[');
+
+  assert(dimensions > 0);
+  int32_t dims[dimensions];
+  for (int i = 0; i < dimensions; i++) {
+    dims[dimensions - i - 1] = operand_stack_pop_u32(vm->current_frame);
+  }
+  int32_t * arrayref = _multiarray(dims, dimensions, 0, type + 1);
+  operand_stack_push_u32(vm->current_frame, (uint32_t)arrayref);
 }
 
 void op_new(struct vm * vm, uint32_t index)

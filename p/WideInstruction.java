@@ -18,7 +18,7 @@ class WideInstruction {
         k27, k28, k29, k30, k31, k32, k33, k34, k35, k36, k37, k38, k39, k40, k41, k42, k43,
         k44, k45, k46, k47, k48, k49, k50, k51, k52, k53, k54, k55, k56, k57 = 42;
 
-        for (int i = 0; i < 256; i += 1024) {
+        for (int i = 0; i < 2560; i += 1024) {
             k57 += 360;
         }
 

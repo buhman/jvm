@@ -9,6 +9,7 @@
 #include "debug_class_file.h"
 #include "memory_allocator.h"
 #include "printf.h"
+#include "field_size.h"
 
 static void class_resolver_create_interfaces_hash_table(struct class_entry * class_entry)
 {
@@ -23,29 +24,13 @@ static void class_resolver_create_interfaces_hash_table(struct class_entry * cla
   */
 }
 
-static int field_size(struct class_file * class_file, struct field_info * field_info)
+static int field_info_field_size(struct class_file * class_file, struct field_info * field_info)
 {
   struct constant * field_descriptor_constant = &class_file->constant_pool[field_info->descriptor_index - 1];
   #ifdef DEBUG
   assert(field_descriptor_constant->tag == CONSTANT_Utf8);
   #endif
-
-  switch (field_descriptor_constant->utf8.bytes[0]) {
-  case 'B': [[fallthrough]];
-  case 'C': [[fallthrough]];
-  case 'F': [[fallthrough]];
-  case 'I': [[fallthrough]];
-  case 'L': [[fallthrough]];
-  case 'S': [[fallthrough]];
-  case 'Z': [[fallthrough]];
-  case '[':
-    return 1;
-  case 'D': [[fallthrough]];
-  case 'J':
-    return 2;
-  default:
-    assert(false);
-  }
+  return field_size(field_descriptor_constant->utf8.bytes[0]);
 }
 
 static int32_t class_resolver_create_fields_hash_table(struct class_entry * class_entry)
@@ -72,10 +57,10 @@ static int32_t class_resolver_create_fields_hash_table(struct class_entry * clas
 
     if (field_info->access_flags & FIELD_ACC_STATIC) {
       field_entry[i].static_index = static_index;
-      static_index += field_size(class_file, field_info);
+      static_index += field_info_field_size(class_file, field_info);
     } else {
       field_entry[i].instance_index = instance_index;
-      instance_index += field_size(class_file, field_info);
+      instance_index += field_info_field_size(class_file, field_info);
     }
     field_entry[i].field_info = field_info;
 
