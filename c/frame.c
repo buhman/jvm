@@ -214,23 +214,25 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
   struct constant * method_name_constant = &class_entry->class_file->constant_pool[method_info->name_index - 1];
   print_constant(method_name_constant);
 
-  int java_io_printstream_length = 19;
-  bool java_io_printstream =
-    class_name_constant->utf8.length == java_io_printstream_length &&
-    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/io/PrintStream", class_name_constant->utf8.length);
-  if (java_io_printstream) {
-    int write_length = 5;
-    bool write =
-      method_name_constant->utf8.length == write_length &&
-      hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"write", method_name_constant->utf8.length);
-    if (write) {
-      if (nargs == 1) {
-        assert(return_type == 'V');
-        native_java_io_printstream_write_1(args);
+
+  int java_lang_math_length = 14;
+  bool java_lang_math =
+    class_name_constant->utf8.length == java_lang_math_length &&
+    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/lang/Math", class_name_constant->utf8.length);
+  if (java_lang_math) {
+    if (method_name_constant->utf8.length == 3) {
+      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"sin", 3)) {
+        assert(nargs == 1);
+        assert(return_type == 'F');
+        uint32_t value = native_java_lang_math_sin_1(args);
+        operand_stack_push_u32(vm->current_frame, value);
         return;
-      } else if (nargs == 2) {
-        assert(return_type == 'V');
-        native_java_io_printstream_write_2(args);
+      }
+      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"cos", 3)) {
+        assert(nargs == 1);
+        assert(return_type == 'F');
+        uint32_t value = native_java_lang_math_cos_1(args);
+        operand_stack_push_u32(vm->current_frame, value);
         return;
       }
     }
@@ -264,6 +266,28 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
         default: assert(false);
         }
         operand_stack_push_u32(vm->current_frame, value);
+        return;
+      }
+    }
+  }
+
+  int java_io_printstream_length = 19;
+  bool java_io_printstream =
+    class_name_constant->utf8.length == java_io_printstream_length &&
+    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/io/PrintStream", class_name_constant->utf8.length);
+  if (java_io_printstream) {
+    int write_length = 5;
+    bool write =
+      method_name_constant->utf8.length == write_length &&
+      hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"write", method_name_constant->utf8.length);
+    if (write) {
+      if (nargs == 1) {
+        assert(return_type == 'V');
+        native_java_io_printstream_write_1(args);
+        return;
+      } else if (nargs == 2) {
+        assert(return_type == 'V');
+        native_java_io_printstream_write_2(args);
         return;
       }
     }

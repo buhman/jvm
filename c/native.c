@@ -62,3 +62,17 @@ uint32_t native_java_misc_memory_getU1_1(uint32_t * args)
   uint8_t value = *address;
   return value;
 }
+
+uint32_t native_java_lang_math_sin_1(uint32_t * args)
+{
+  float arg = ((float *)args)[0];
+  float value = __builtin_sinf(arg);
+  return *((uint32_t *)&value);
+}
+
+uint32_t native_java_lang_math_cos_1(uint32_t * args)
+{
+  float arg = ((float *)args)[0];
+  float value = __builtin_cosf(arg);
+  return *((uint32_t *)&value);
+}

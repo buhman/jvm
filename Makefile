@@ -7,7 +7,8 @@ CC ?= gcc
 ARCH = -m32
 CFLAGS += -Wall -Werror -Wfatal-errors -Wno-error=unused-variable -fstack-protector -std=c2x -g
 CFLAGS += -DDEBUG
-#CFLAGS += -DDEBUG_PRINT
+CFLAGS += -DDEBUG_PRINT
+LDFLAGS = -lm
 OPT ?= -O0
 DEPFLAGS = -MMD -MP
 
@@ -15,10 +16,10 @@ DEPFLAGS = -MMD -MP
 	$(CC) $(ARCH) $(CFLAGS) $(OPT) $(DEPFLAGS) -MF ${<}.d -c $< -o $@
 
 print_class: $(OBJ) $(PRINT_CLASS_OBJ)
-	$(CC) $(ARCH) $^ -o $@
+	$(CC) $(ARCH) $(LDFLAGS) $^ -o $@
 
 main: $(OBJ) $(MAIN_HOSTED_OBJ)
-	$(CC) $(ARCH) $^ -o $@
+	$(CC) $(ARCH) $(LDFLAGS) $^ -o $@
 
 clean:
 	rm -f main print_class c/*.o c/*.d *.elf *.bin
