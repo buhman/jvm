@@ -41,9 +41,7 @@ public class CoreBits {
     public static int vo_border_col__blue(int n) {
         return (n & 255) << 0;
     }
-    public static int fb_r_ctrl__vclk_div__pclk_vclk_2(int n) {
-        return (n >> 23) & 1;
-    }
+    public static final int fb_r_ctrl__vclk_div__pclk_vclk_2 = 0 << 23;
     public static final int fb_r_ctrl__vclk_div__pclk_vclk_1 = 1 << 23;
     public static final int fb_r_ctrl__fb_strip_buf_en = 1 << 22;
     public static int fb_r_ctrl__fb_stripsize(int n) {
@@ -57,9 +55,7 @@ public class CoreBits {
     }
     public static final int fb_r_ctrl__fb_line_double = 1 << 1;
     public static final int fb_r_ctrl__fb_enable = 1 << 0;
-    public static int fb_r_ctrl__fb_depth__0555_rgb_16bit(int n) {
-        return (n >> 2) & 3;
-    }
+    public static final int fb_r_ctrl__fb_depth__0555_rgb_16bit = 0 << 2;
     public static final int fb_r_ctrl__fb_depth__565_rgb_16bit = 1 << 2;
     public static final int fb_r_ctrl__fb_depth__888_rgb_24bit_packed = 2 << 2;
     public static final int fb_r_ctrl__fb_depth__0888_rgb_32bit = 3 << 2;
@@ -70,9 +66,7 @@ public class CoreBits {
         return (n & 255) << 8;
     }
     public static final int fb_w_ctrl__fb_dither = 1 << 3;
-    public static int fb_w_ctrl__fb_packmode__0555_krgb_16bit(int n) {
-        return (n >> 0) & 7;
-    }
+    public static final int fb_w_ctrl__fb_packmode__0555_krgb_16bit = 0 << 0;
     public static final int fb_w_ctrl__fb_packmode__565_rgb_16bit = 1 << 0;
     public static final int fb_w_ctrl__fb_packmode__4444_argb_16bit = 2 << 0;
     public static final int fb_w_ctrl__fb_packmode__1555_argb_16bit = 3 << 0;
@@ -115,9 +109,7 @@ public class CoreBits {
     public static int fb_y_clip__fb_y_clip_min(int n) {
         return (n & 1023) << 0;
     }
-    public static int fpu_shad_scale__simple_shadow_enable__parameter_selection_volume_mode(int n) {
-        return (n >> 8) & 1;
-    }
+    public static final int fpu_shad_scale__simple_shadow_enable__parameter_selection_volume_mode = 0 << 8;
     public static final int fpu_shad_scale__simple_shadow_enable__intensity_volume_mode = 1 << 8;
     public static int fpu_shad_scale__scale_factor_for_shadows(int n) {
         return (n & 255) << 0;
@@ -125,9 +117,7 @@ public class CoreBits {
     public static int fpu_cull_val__culling_comparison_value(int n) {
         return (n & 2147483647) << 0;
     }
-    public static int fpu_param_cfg__region_header_type__type_1(int n) {
-        return (n >> 21) & 1;
-    }
+    public static final int fpu_param_cfg__region_header_type__type_1 = 0 << 21;
     public static final int fpu_param_cfg__region_header_type__type_2 = 1 << 21;
     public static int fpu_param_cfg__tsp_parameter_burst_threshold(int n) {
         return (n & 63) << 14;
@@ -175,9 +165,7 @@ public class CoreBits {
     public static int sdram_refresh__refresh_counter_value(int n) {
         return (n & 255) << 0;
     }
-    public static int sdram_arb_cfg__override_value__priority_only(int n) {
-        return (n >> 18) & 15;
-    }
+    public static final int sdram_arb_cfg__override_value__priority_only = 0 << 18;
     public static final int sdram_arb_cfg__override_value__rendered_data = 1 << 18;
     public static final int sdram_arb_cfg__override_value__texture_vq_index = 2 << 18;
     public static final int sdram_arb_cfg__override_value__texture_normal_data_and_vq_codebook = 3 << 18;
@@ -189,9 +177,7 @@ public class CoreBits {
     public static final int sdram_arb_cfg__override_value__isp_pointer_data = 9 << 18;
     public static final int sdram_arb_cfg__override_value__isp_parameters = 10 << 18;
     public static final int sdram_arb_cfg__override_value__crt_controller = 11 << 18;
-    public static int sdram_arb_cfg__arbiter_priority_control__priority_arbitration_only(int n) {
-        return (n >> 16) & 3;
-    }
+    public static final int sdram_arb_cfg__arbiter_priority_control__priority_arbitration_only = 0 << 16;
     public static final int sdram_arb_cfg__arbiter_priority_control__override_value_field = 1 << 16;
     public static final int sdram_arb_cfg__arbiter_priority_control__round_robin_counter = 2 << 16;
     public static int sdram_arb_cfg__arbiter_crt_page_break_latency_count_value(int n) {
@@ -290,9 +276,7 @@ public class CoreBits {
     public static int spg_hblank_int__line_comp_val(int n) {
         return (n & 1023) << 0;
     }
-    public static int spg_hblank_int__hblank_int_mode__output_equal_line_comp_val(int n) {
-        return (n >> 12) & 3;
-    }
+    public static final int spg_hblank_int__hblank_int_mode__output_equal_line_comp_val = 0 << 12;
     public static final int spg_hblank_int__hblank_int_mode__output_every_line_comp_val = 1 << 12;
     public static final int spg_hblank_int__hblank_int_mode__output_every_line = 2 << 12;
     public static int spg_vblank_int__vblank_out_interrupt_line_number(int n) {
@@ -301,30 +285,20 @@ public class CoreBits {
     public static int spg_vblank_int__vblank_in_interrupt_line_number(int n) {
         return (n & 1023) << 0;
     }
-    public static int spg_control__csync_on_h__hsync(int n) {
-        return (n >> 9) & 1;
-    }
+    public static final int spg_control__csync_on_h__hsync = 0 << 9;
     public static final int spg_control__csync_on_h__csync = 1 << 9;
-    public static int spg_control__sync_direction__input(int n) {
-        return (n >> 8) & 1;
-    }
+    public static final int spg_control__sync_direction__input = 0 << 8;
     public static final int spg_control__sync_direction__output = 1 << 8;
     public static final int spg_control__pal = 1 << 7;
     public static final int spg_control__ntsc = 1 << 6;
     public static final int spg_control__force_field2 = 1 << 5;
     public static final int spg_control__interlace = 1 << 4;
     public static final int spg_control__spg_lock = 1 << 3;
-    public static int spg_control__mcsync_pol__active_low(int n) {
-        return (n >> 2) & 1;
-    }
+    public static final int spg_control__mcsync_pol__active_low = 0 << 2;
     public static final int spg_control__mcsync_pol__active_high = 1 << 2;
-    public static int spg_control__mvsync_pol__active_low(int n) {
-        return (n >> 1) & 1;
-    }
+    public static final int spg_control__mvsync_pol__active_low = 0 << 1;
     public static final int spg_control__mvsync_pol__active_high = 1 << 1;
-    public static int spg_control__mhsync_pol__active_low(int n) {
-        return (n >> 0) & 1;
-    }
+    public static final int spg_control__mhsync_pol__active_low = 0 << 0;
     public static final int spg_control__mhsync_pol__active_high = 1 << 0;
     public static int spg_hblank__hbend(int n) {
         return (n & 1023) << 16;
@@ -356,13 +330,9 @@ public class CoreBits {
     public static int spg_width__hswidth(int n) {
         return (n & 127) << 0;
     }
-    public static int text_control__code_book_endian__little_endian(int n) {
-        return (n >> 17) & 1;
-    }
+    public static final int text_control__code_book_endian__little_endian = 0 << 17;
     public static final int text_control__code_book_endian__big_endian = 1 << 17;
-    public static int text_control__index_endian__little_endian(int n) {
-        return (n >> 16) & 1;
-    }
+    public static final int text_control__index_endian__little_endian = 0 << 16;
     public static final int text_control__index_endian__big_endian = 1 << 16;
     public static int text_control__bank_bit(int n) {
         return (n & 31) << 8;
@@ -376,9 +346,7 @@ public class CoreBits {
     }
     public static final int vo_control__pixel_double = 1 << 8;
     public static final int vo_control__blank_video = 1 << 3;
-    public static int vo_control__field_mode__use_field_flag_from_spg(int n) {
-        return (n >> 4) & 15;
-    }
+    public static final int vo_control__field_mode__use_field_flag_from_spg = 0 << 4;
     public static final int vo_control__field_mode__use_inverse_of_field_flag_from_spg = 1 << 4;
     public static final int vo_control__field_mode__field_1_fixed = 2 << 4;
     public static final int vo_control__field_mode__field_2_fixed = 3 << 4;
@@ -387,17 +355,11 @@ public class CoreBits {
     public static final int vo_control__field_mode__field_1_when_hsync_becomes_active_in_the_middle_of_the_vsync_active_edge = 6 << 4;
     public static final int vo_control__field_mode__field_2_when_hsync_becomes_active_in_the_middle_of_the_vsync_active_edge = 7 << 4;
     public static final int vo_control__field_mode__inverted_at_the_active_edge_of_vsync = 8 << 4;
-    public static int vo_control__blank_pol__active_low(int n) {
-        return (n >> 2) & 1;
-    }
+    public static final int vo_control__blank_pol__active_low = 0 << 2;
     public static final int vo_control__blank_pol__active_high = 1 << 2;
-    public static int vo_control__vsync_pol__active_low(int n) {
-        return (n >> 1) & 1;
-    }
+    public static final int vo_control__vsync_pol__active_low = 0 << 1;
     public static final int vo_control__vsync_pol__active_high = 1 << 1;
-    public static int vo_control__hsync_pol__active_low(int n) {
-        return (n >> 0) & 1;
-    }
+    public static final int vo_control__hsync_pol__active_low = 0 << 0;
     public static final int vo_control__hsync_pol__active_high = 1 << 0;
     public static int vo_startx__horizontal_start_position(int n) {
         return (n & 1023) << 0;
@@ -408,18 +370,14 @@ public class CoreBits {
     public static int vo_starty__vertical_start_position_on_field_1(int n) {
         return (n & 1023) << 0;
     }
-    public static int scaler_ctl__field_select__field_1(int n) {
-        return (n >> 18) & 1;
-    }
+    public static final int scaler_ctl__field_select__field_1 = 0 << 18;
     public static final int scaler_ctl__field_select__field_2 = 1 << 18;
     public static final int scaler_ctl__interlace = 1 << 17;
     public static final int scaler_ctl__horizontal_scaling_enable = 1 << 16;
     public static int scaler_ctl__vertical_scale_factor(int n) {
         return (n & 65535) << 0;
     }
-    public static int pal_ram_ctrl__pixel_format__argb1555(int n) {
-        return (n >> 0) & 3;
-    }
+    public static final int pal_ram_ctrl__pixel_format__argb1555 = 0 << 0;
     public static final int pal_ram_ctrl__pixel_format__rgb565 = 1 << 0;
     public static final int pal_ram_ctrl__pixel_format__argb4444 = 2 << 0;
     public static final int pal_ram_ctrl__pixel_format__argb8888 = 3 << 0;

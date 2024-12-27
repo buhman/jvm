@@ -25,37 +25,25 @@ public class TABits {
     public static int ta_glob_tile_clip__tile_x_num(int n) {
         return (n & 31) << 0;
     }
-    public static int ta_alloc_ctrl__opb_mode__increasing_addresses(int n) {
-        return (n >> 20) & 1;
-    }
+    public static final int ta_alloc_ctrl__opb_mode__increasing_addresses = 0 << 20;
     public static final int ta_alloc_ctrl__opb_mode__decreasing_addresses = 1 << 20;
-    public static int ta_alloc_ctrl__pt_opb__no_list(int n) {
-        return (n >> 16) & 3;
-    }
+    public static final int ta_alloc_ctrl__pt_opb__no_list = 0 << 16;
     public static final int ta_alloc_ctrl__pt_opb__8x4byte = 1 << 16;
     public static final int ta_alloc_ctrl__pt_opb__16x4byte = 2 << 16;
     public static final int ta_alloc_ctrl__pt_opb__32x4byte = 3 << 16;
-    public static int ta_alloc_ctrl__tm_opb__no_list(int n) {
-        return (n >> 12) & 3;
-    }
+    public static final int ta_alloc_ctrl__tm_opb__no_list = 0 << 12;
     public static final int ta_alloc_ctrl__tm_opb__8x4byte = 1 << 12;
     public static final int ta_alloc_ctrl__tm_opb__16x4byte = 2 << 12;
     public static final int ta_alloc_ctrl__tm_opb__32x4byte = 3 << 12;
-    public static int ta_alloc_ctrl__t_opb__no_list(int n) {
-        return (n >> 8) & 3;
-    }
+    public static final int ta_alloc_ctrl__t_opb__no_list = 0 << 8;
     public static final int ta_alloc_ctrl__t_opb__8x4byte = 1 << 8;
     public static final int ta_alloc_ctrl__t_opb__16x4byte = 2 << 8;
     public static final int ta_alloc_ctrl__t_opb__32x4byte = 3 << 8;
-    public static int ta_alloc_ctrl__om_opb__no_list(int n) {
-        return (n >> 4) & 3;
-    }
+    public static final int ta_alloc_ctrl__om_opb__no_list = 0 << 4;
     public static final int ta_alloc_ctrl__om_opb__8x4byte = 1 << 4;
     public static final int ta_alloc_ctrl__om_opb__16x4byte = 2 << 4;
     public static final int ta_alloc_ctrl__om_opb__32x4byte = 3 << 4;
-    public static int ta_alloc_ctrl__o_opb__no_list(int n) {
-        return (n >> 0) & 3;
-    }
+    public static final int ta_alloc_ctrl__o_opb__no_list = 0 << 0;
     public static final int ta_alloc_ctrl__o_opb__8x4byte = 1 << 0;
     public static final int ta_alloc_ctrl__o_opb__16x4byte = 2 << 0;
     public static final int ta_alloc_ctrl__o_opb__32x4byte = 3 << 0;
@@ -63,13 +51,9 @@ public class TABits {
     public static int ta_yuv_tex_base__base_address(int n) {
         return (n & 16777208) << 0;
     }
-    public static int ta_yuv_tex_ctrl__yuv_form__yuv420(int n) {
-        return (n >> 24) & 1;
-    }
+    public static final int ta_yuv_tex_ctrl__yuv_form__yuv420 = 0 << 24;
     public static final int ta_yuv_tex_ctrl__yuv_form__yuv422 = 1 << 24;
-    public static int ta_yuv_tex_ctrl__yuv_tex__one_texture(int n) {
-        return (n >> 16) & 1;
-    }
+    public static final int ta_yuv_tex_ctrl__yuv_tex__one_texture = 0 << 16;
     public static final int ta_yuv_tex_ctrl__yuv_tex__multiple_textures = 1 << 16;
     public static int ta_yuv_tex_ctrl__yuv_v_size(int n) {
         return (n & 63) << 8;
