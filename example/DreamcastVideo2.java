@@ -76,11 +76,7 @@ class DreamcastVideo2 {
         vtx[2].y = -0.5f;
     }
 
-    public static void transform_vertex(Vec2 v, boolean end_of_strip) {
-        DreamcastVideo2.vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
-        if (end_of_strip)
-            DreamcastVideo2.vt0.parameter_control_word |= TAParameter.para_control__end_of_strip;
-
+    public static void transform_vertex(Vec2 v) {
         float x0 = v.x * Math.cos(theta) - v.y * Math.sin(theta);
         float y0 = v.x * Math.sin(theta) + v.y * Math.cos(theta);
         float x = x0 * 240 + 320;
@@ -88,7 +84,6 @@ class DreamcastVideo2 {
 
         DreamcastVideo2.vt0.x = x;
         DreamcastVideo2.vt0.y = y;
-        Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
     }
 
     public static void transfer_scene() {
@@ -97,7 +92,11 @@ class DreamcastVideo2 {
 
         // vertex parameters
         for (int i = 0; i < 3; i++) {
-            transform_vertex(vtx[i], (i == 2));
+            DreamcastVideo2.vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
+            if (i == 2)
+                DreamcastVideo2.vt0.parameter_control_word |= TAParameter.para_control__end_of_strip;
+            transform_vertex(vtx[i]);
+            Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
         }
 
         // end of list
@@ -106,6 +105,7 @@ class DreamcastVideo2 {
 
     public static void main() {
         Core.init();
+        Core.fb_init(framebuffer_width, framebuffer_height);
 
         int ta_alloc =
               TABits.ta_alloc_ctrl__opb_mode__increasing_addresses
@@ -126,8 +126,6 @@ class DreamcastVideo2 {
 
         int opb_size_total = opb_size[0].total();
         int num_render_passes = opb_size.length;
-
-        Core.fb_init(framebuffer_width, framebuffer_height);
 
         RegionArray.region_array(framebuffer_width / 32,
                                  framebuffer_height / 32,
