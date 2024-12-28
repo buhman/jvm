@@ -2,7 +2,7 @@ package sega.dreamcast.holly;
 
 
 public class TAGlobalParameter {
-    public class end_of_list {
+    public static class end_of_list {
         public int parameter_control_word;
         public int _res0;
         public int _res1;
@@ -23,7 +23,7 @@ public class TAGlobalParameter {
             this._res6 = 0;
         }
     }
-    public class user_tile_clip {
+    public static class user_tile_clip {
         public int parameter_control_word;
         public int _res0;
         public int _res1;
@@ -48,7 +48,7 @@ public class TAGlobalParameter {
             this.user_clip_y_max = user_clip_y_max;
         }
     }
-    public class object_list_set {
+    public static class object_list_set {
         public int parameter_control_word;
         public int object_pointer;
         public int _res0;
@@ -74,7 +74,7 @@ public class TAGlobalParameter {
             this.bounding_box_y_max = bounding_box_y_max;
         }
     }
-    public class polygon_type_0 {
+    public static class polygon_type_0 {
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word;
@@ -100,7 +100,7 @@ public class TAGlobalParameter {
             this.next_address_for_sort_dma = next_address_for_sort_dma;
         }
     }
-    public class polygon_type_1 {
+    public static class polygon_type_1 {
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word;
@@ -128,7 +128,7 @@ public class TAGlobalParameter {
             this.face_color_b = face_color_b;
         }
     }
-    public class polygon_type_2 {
+    public static class polygon_type_2 {
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word;
@@ -178,7 +178,7 @@ public class TAGlobalParameter {
             this.face_offset_color_b = face_offset_color_b;
         }
     }
-    public class polygon_type_3 {
+    public static class polygon_type_3 {
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word_0;
@@ -206,7 +206,7 @@ public class TAGlobalParameter {
             this.next_address_for_sort_dma = next_address_for_sort_dma;
         }
     }
-    public class polygon_type_4 {
+    public static class polygon_type_4 {
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word_0;
@@ -258,7 +258,7 @@ public class TAGlobalParameter {
             this.face_color_b_1 = face_color_b_1;
         }
     }
-    public class sprite {
+    public static class sprite {
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word;
@@ -286,7 +286,7 @@ public class TAGlobalParameter {
             this.next_address_for_sort_dma = next_address_for_sort_dma;
         }
     }
-    public class modifier_volume {
+    public static class modifier_volume {
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int _res0;

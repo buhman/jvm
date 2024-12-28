@@ -40,7 +40,7 @@ def render_constructor(get_type, declaration):
                     if f.array_length > 1]
 
 def render_declaration(get_type, declaration):
-    yield f"public class {declaration.name} {{"
+    yield f"public static class {declaration.name} {{"
     yield from render_fields(get_type, declaration.fields)
     yield from render_constructor(get_type, declaration)
     yield "}"

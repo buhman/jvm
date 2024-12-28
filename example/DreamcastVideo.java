@@ -1,4 +1,4 @@
-package p;
+package example;
 
 import sega.dreamcast.holly.Holly;
 import java.misc.Memory;

@@ -2,7 +2,7 @@ package sega.dreamcast.holly;
 
 
 public class TAVertexParameter {
-    public class polygon_type_0 {
+    public static class polygon_type_0 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -27,7 +27,7 @@ public class TAVertexParameter {
             this._res2 = 0;
         }
     }
-    public class polygon_type_1 {
+    public static class polygon_type_1 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -55,7 +55,7 @@ public class TAVertexParameter {
             this.base_color_b = base_color_b;
         }
     }
-    public class polygon_type_2 {
+    public static class polygon_type_2 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -80,7 +80,7 @@ public class TAVertexParameter {
             this._res2 = 0;
         }
     }
-    public class polygon_type_3 {
+    public static class polygon_type_3 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -108,7 +108,7 @@ public class TAVertexParameter {
             this.offset_color = offset_color;
         }
     }
-    public class polygon_type_4 {
+    public static class polygon_type_4 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -135,7 +135,7 @@ public class TAVertexParameter {
             this.offset_color = offset_color;
         }
     }
-    public class polygon_type_5 {
+    public static class polygon_type_5 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -185,7 +185,7 @@ public class TAVertexParameter {
             this.offset_color_b = offset_color_b;
         }
     }
-    public class polygon_type_6 {
+    public static class polygon_type_6 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -234,7 +234,7 @@ public class TAVertexParameter {
             this.offset_color_b = offset_color_b;
         }
     }
-    public class polygon_type_7 {
+    public static class polygon_type_7 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -262,7 +262,7 @@ public class TAVertexParameter {
             this.offset_intensity = offset_intensity;
         }
     }
-    public class polygon_type_8 {
+    public static class polygon_type_8 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -289,7 +289,7 @@ public class TAVertexParameter {
             this.offset_intensity = offset_intensity;
         }
     }
-    public class polygon_type_9 {
+    public static class polygon_type_9 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -315,7 +315,7 @@ public class TAVertexParameter {
             this._res1 = 0;
         }
     }
-    public class polygon_type_10 {
+    public static class polygon_type_10 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -341,7 +341,7 @@ public class TAVertexParameter {
             this._res1 = 0;
         }
     }
-    public class polygon_type_11 {
+    public static class polygon_type_11 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -389,7 +389,7 @@ public class TAVertexParameter {
             this._res3 = 0;
         }
     }
-    public class polygon_type_12 {
+    public static class polygon_type_12 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -435,7 +435,7 @@ public class TAVertexParameter {
             this._res5 = 0;
         }
     }
-    public class polygon_type_13 {
+    public static class polygon_type_13 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -483,7 +483,7 @@ public class TAVertexParameter {
             this._res3 = 0;
         }
     }
-    public class polygon_type_14 {
+    public static class polygon_type_14 {
         public int parameter_control_word;
         public float x;
         public float y;
@@ -529,7 +529,7 @@ public class TAVertexParameter {
             this._res5 = 0;
         }
     }
-    public class sprite_type_0 {
+    public static class sprite_type_0 {
         public int parameter_control_word;
         public float a_x;
         public float a_y;
@@ -577,7 +577,7 @@ public class TAVertexParameter {
             this._res3 = 0;
         }
     }
-    public class sprite_type_1 {
+    public static class sprite_type_1 {
         public int parameter_control_word;
         public float a_x;
         public float a_y;
@@ -628,7 +628,7 @@ public class TAVertexParameter {
             this.c_u_c_v = c_u_c_v;
         }
     }
-    public class modifier_volume {
+    public static class modifier_volume {
         public int parameter_control_word;
         public float a_x;
         public float a_y;

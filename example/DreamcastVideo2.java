@@ -1,4 +1,4 @@
-package p;
+package example;
 
 import sega.dreamcast.holly.Background;
 import sega.dreamcast.holly.Core;
@@ -10,91 +10,17 @@ import sega.dreamcast.holly.TAFIFOPolygonConverter;
 import sega.dreamcast.holly.TAParameter;
 import sega.dreamcast.holly.TextureMemoryAllocation;
 import sega.dreamcast.holly.ISPTSP;
+import sega.dreamcast.holly.TAVertexParameter;
+import sega.dreamcast.holly.TAGlobalParameter;
 import sega.dreamcast.systembus.Systembus;
 import sega.dreamcast.systembus.SystembusBits;
 import sega.dreamcast.MemoryMap;
 import java.misc.Memory;
 
-class end_of_list {
-    public int parameter_control_word;
-    public int _res0;
-    public int _res1;
-    public int _res2;
-    public int _res3;
-    public int _res4;
-    public int _res5;
-    public int _res6;
-    public end_of_list(int parameter_control_word
-                       ) {
-        this.parameter_control_word = parameter_control_word;
-        this._res0 = 0;
-        this._res1 = 0;
-        this._res2 = 0;
-        this._res3 = 0;
-        this._res4 = 0;
-        this._res5 = 0;
-        this._res6 = 0;
-    }
-}
-
-class polygon_type_0 {
-    public int parameter_control_word;
-    public int isp_tsp_instruction_word;
-    public int tsp_instruction_word;
-    public int texture_control_word;
-    public int _res0;
-    public int _res1;
-    public int data_size_for_sort_dma;
-    public int next_address_for_sort_dma;
-    public polygon_type_0(int parameter_control_word,
-                          int isp_tsp_instruction_word,
-                          int tsp_instruction_word,
-                          int texture_control_word,
-                          int data_size_for_sort_dma,
-                          int next_address_for_sort_dma
-                          ) {
-        this.parameter_control_word = parameter_control_word;
-        this.isp_tsp_instruction_word = isp_tsp_instruction_word;
-        this.tsp_instruction_word = tsp_instruction_word;
-        this.texture_control_word = texture_control_word;
-        this._res0 = 0;
-        this._res1 = 0;
-        this.data_size_for_sort_dma = data_size_for_sort_dma;
-        this.next_address_for_sort_dma = next_address_for_sort_dma;
-    }
-}
-
-class vertex_polygon_type_0 {
-    public int parameter_control_word;
-    public float x;
-    public float y;
-    public float z;
-    public int _res0;
-    public int _res1;
-    public int base_color;
-    public int _res2;
-    public vertex_polygon_type_0(int parameter_control_word,
-                                 float x,
-                                 float y,
-                                 float z,
-                                 int base_color
-                                 ) {
-        this.parameter_control_word = parameter_control_word;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this._res0 = 0;
-        this._res1 = 0;
-        this.base_color = base_color;
-        this._res2 = 0;
-    }
-}
-
-
 class DreamcastVideo2 {
-    public static polygon_type_0 pt0;
-    public static vertex_polygon_type_0 vt0;
-    public static end_of_list eol;
+    public static TAGlobalParameter.polygon_type_0 gt0;
+    public static TAVertexParameter.polygon_type_0 vt0;
+    public static TAGlobalParameter.end_of_list eol;
 
     static {
         int parameter_control_word = TAParameter.para_control__para_type__polygon_or_modifier_volume
@@ -112,47 +38,44 @@ class DreamcastVideo2 {
         int data_size_for_sort_dma = 0;
         int next_address_for_sort_dma = 0;
 
-        pt0 = new polygon_type_0(parameter_control_word,
-                                 isp_tsp_instruction_word,
-                                 tsp_instruction_word,
-                                 texture_control_word,
-                                 data_size_for_sort_dma,
-                                 next_address_for_sort_dma);
+        gt0 = new TAGlobalParameter.polygon_type_0(parameter_control_word,
+                                                   isp_tsp_instruction_word,
+                                                   tsp_instruction_word,
+                                                   texture_control_word,
+                                                   data_size_for_sort_dma,
+                                                   next_address_for_sort_dma);
 
-        vt0 = new vertex_polygon_type_0(0, // parameter_control_word
-                                        0, // x
-                                        0, // y
-                                        0.1f, // z
-                                        0xff00ff00); // color (green)
+        vt0 = new TAVertexParameter.polygon_type_0(0,    // parameter_control_word
+                                                   0.0f, // x
+                                                   0.0f, // y
+                                                   0.1f, // z
+                                                   0xff00ff00); // color (green)
 
-        eol = new end_of_list(TAParameter.para_control__para_type__end_of_list);
+        eol = new TAGlobalParameter.end_of_list(TAParameter.para_control__para_type__end_of_list);
     }
-
-    public static int polygon_vertex_parameter_control_word(boolean end_of_strip)
-    {
-        return TAParameter.para_control__para_type__vertex_parameter
-             | (end_of_strip ? TAParameter.para_control__end_of_strip : 0);
-    }
-
 
     public static void transfer_scene() {
-        Memory.putSQ1(DreamcastVideo2.pt0, MemoryMap.ta_fifo_polygon_converter);
+        // global parameter
+        Memory.putSQ1(DreamcastVideo2.gt0, MemoryMap.ta_fifo_polygon_converter);
 
-        DreamcastVideo2.vt0.parameter_control_word = polygon_vertex_parameter_control_word(false);
+        // vertex parameters
+        DreamcastVideo2.vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
         DreamcastVideo2.vt0.x = 10.0f;
         DreamcastVideo2.vt0.y = 10.0f;
         Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
 
-        DreamcastVideo2.vt0.parameter_control_word = polygon_vertex_parameter_control_word(false);
+        DreamcastVideo2.vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
         DreamcastVideo2.vt0.x = 100.0f;
         DreamcastVideo2.vt0.y = 10.0f;
         Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
 
-        DreamcastVideo2.vt0.parameter_control_word = polygon_vertex_parameter_control_word(true);
+        DreamcastVideo2.vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter
+                                                   | TAParameter.para_control__end_of_strip;
         DreamcastVideo2.vt0.x = 100.0f;
         DreamcastVideo2.vt0.y = 100.0f;
         Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
 
+        // end of list
         Memory.putSQ1(DreamcastVideo2.eol, MemoryMap.ta_fifo_polygon_converter);
     }
 
