@@ -1,6 +1,6 @@
 all: $(patsubst %.cpp,%.elf,$(wildcard example/*.cpp))
 
-OPT = -O3
+OPT = -Og
 
 MAKEFILE_PATH := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 LIB ?= $(MAKEFILE_PATH)/dreamcast
@@ -47,16 +47,13 @@ LIBGCC_OBJ = \
 	libgcc/_fixsfdi.o \
 	libgcc/_div_table.o
 
+include classpath.mk
+
 CLASS_FILES = \
-	java/io/PrintStream.class.o \
-	java/lang/Integer.class.o \
-	java/lang/Object.class.o \
-	java/lang/String.class.o \
-	java/lang/System.class.o \
-	java/misc/Memory.class.o \
-	p/DreamcastVideo2.class.o \
-	sega/dreamcast/holly/Holly.class.o \
-	sega/dreamcast/holly/CoreBits.class.o
+	p/polygon_type_0.class.o \
+	p/vertex_polygon_type_0.class.o \
+	p/end_of_list.class.o \
+	p/DreamcastVideo2.class.o
 
 main.elf: LDSCRIPT = $(LIB)/main.lds
-main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_FILES)
+main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_FILES) $(CLASS_PATH)

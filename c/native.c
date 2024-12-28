@@ -63,14 +63,41 @@ uint32_t native_java_misc_memory_getU1_1(uint32_t * args)
   return value;
 }
 
-uint32_t native_java_lang_math_sin_1(uint32_t * args)
+extern uint32_t store_queue[0x4000000] __asm("store_queue");
+
+void native_java_misc_memory_putSQ1_2(uint32_t * args)
+{
+  #if defined(__dreamcast__)
+  uint32_t * objectref = (uint32_t *)args[0];
+  uint32_t address = (uint32_t)args[1];
+  store_queue[0] = objectref[1];
+  store_queue[1] = objectref[2];
+  store_queue[2] = objectref[3];
+  store_queue[3] = objectref[4];
+  store_queue[4] = objectref[5];
+  store_queue[5] = objectref[6];
+  store_queue[6] = objectref[7];
+  store_queue[6] = objectref[8];
+
+  *((uint32_t*)0xff000038) = ((address >> 26) & 0b111) << 2;
+
+  __asm__ volatile ("pref @%0"
+                    :                       // output
+                    : "r" (&store_queue[0]) // input
+                    : "memory");
+  #endif
+}
+
+uint32_t __attribute__ ((noinline)) __attribute__ ((optimize(0)))
+native_java_lang_math_sin_1(uint32_t * args)
 {
   float arg = ((float *)args)[0];
   float value = __builtin_sinf(arg);
   return *((uint32_t *)&value);
 }
 
-uint32_t native_java_lang_math_cos_1(uint32_t * args)
+uint32_t __attribute__ ((noinline)) __attribute__ ((optimize(0)))
+native_java_lang_math_cos_1(uint32_t * args)
 {
   float arg = ((float *)args)[0];
   float value = __builtin_cosf(arg);

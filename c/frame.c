@@ -269,6 +269,18 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
         return;
       }
     }
+    if (method_name_constant->utf8.length == 6) {
+      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"putSQ", 4)) {
+        assert(nargs == 2);
+        assert(return_type == 'V');
+        switch (method_name_constant->utf8.bytes[5]) {
+          //case '2': value = native_java_misc_memory_putSQ2_2(args); break;
+        case '1': native_java_misc_memory_putSQ1_2(args); break;
+        default: assert(false);
+        }
+        return;
+      }
+    }
   }
 
   int java_io_printstream_length = 19;

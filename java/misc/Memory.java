@@ -8,4 +8,6 @@ public class Memory {
     public static native int getU4(int address);
     public static native int getU2(int address);
     public static native int getU1(int address);
+
+    public static native void putSQ1(Object object, int address);
 }

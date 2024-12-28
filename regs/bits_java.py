@@ -8,14 +8,14 @@ def generate_bit(bit):
     else:
         name = f"{bit.register_name}__{bit.enum_name}__{bit.bit_name}".lower()
 
-    if not bit.value and not bit.mask:
+    if bit.value is None and bit.mask is None:
         yield f"public static int {name}(int n) {{"
         yield f"return (n >> {min(bit.bits)}) & {sign_extend(mask_from_bits(bit.bits), 32)};"
         yield "}"
-    elif bit.value:
+    elif bit.value is not None:
         assert (bit.value is None) ^ (bit.mask is None), bit
         yield f"public static final int {name} = {bit.value} << {min(bit.bits)};"
-    elif bit.mask:
+    elif bit.mask is not None:
         assert (bit.value is None) ^ (bit.mask is None), bit
         yield f"public static int {name}(int n) {{"
         if type(bit.mask) is str:

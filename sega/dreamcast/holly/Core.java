@@ -9,9 +9,6 @@ public class Core {
     }
 
     public static void init() {
-        int fb_w_ctrl = CoreBits.fb_w_ctrl__fb_dither
-                      | CoreBits.fb_w_ctrl__fb_packmode__565_rgb_16bit;
-
         int fpu_cull_val = 0x3f800000; // 1.0f
 
         int fpu_perp_val = 0; // 0.0f
@@ -35,7 +32,6 @@ public class Core {
         int softreset = CoreBits.softreset__pipeline_soft_reset
                       | CoreBits.softreset__ta_soft_reset;
 
-        Memory.putU4(Holly.FB_W_CTRL, fb_w_ctrl);
         Memory.putU4(Holly.FPU_CULL_VAL, fpu_cull_val);
         Memory.putU4(Holly.FPU_PERP_VAL, fpu_perp_val);
         Memory.putU4(Holly.FPU_PARAM_CFG, fpu_param_cfg);
@@ -45,6 +41,45 @@ public class Core {
 
         Memory.putU4(Holly.SOFTRESET, softreset);
         Memory.putU4(Holly.SOFTRESET, 0);
+    }
+
+    public static void fb_init(int x_size, int y_size) {
+        int y_coeff = CoreBits.y_coeff__coefficient_1(0x80)
+                    | CoreBits.y_coeff__coefficient_0_2(0x40);
+
+        // in 6.10 fixed point; 0x0400 is 1x vertical scale
+        int scaler_ctl = CoreBits.scaler_ctl__vertical_scale_factor(0x0400);
+
+        int fb_burstctrl = CoreBits.fb_burstctrl__wr_burst(0x09)
+                         | CoreBits.fb_burstctrl__vid_lat(0x3f)
+                         | CoreBits.fb_burstctrl__vid_burst(0x39);
+
+        int fb_x_clip = CoreBits.fb_x_clip__fb_x_clip_max(x_size - 1)
+                      | CoreBits.fb_x_clip__fb_x_clip_min(0);
+
+        int fb_y_clip = CoreBits.fb_y_clip__fb_y_clip_max(y_size - 1)
+                      | CoreBits.fb_y_clip__fb_y_clip_min(0);
+
+        int fb_r_size = CoreBits.fb_r_size__fb_modulus(1)
+                      | CoreBits.fb_r_size__fb_y_size(y_size - 3)
+                      | CoreBits.fb_r_size__fb_x_size((x_size * 16) / 32 - 1);
+
+        int fb_r_ctrl =
+              CoreBits.fb_r_ctrl__vclk_div__pclk_vclk_1
+            | CoreBits.fb_r_ctrl__fb_depth__565_rgb_16bit
+            | CoreBits.fb_r_ctrl__fb_enable;
+
+        int fb_w_ctrl = CoreBits.fb_w_ctrl__fb_dither
+                      | CoreBits.fb_w_ctrl__fb_packmode__565_rgb_16bit;
+
+        Memory.putU4(Holly.Y_COEFF, y_coeff);
+        Memory.putU4(Holly.SCALER_CTL, scaler_ctl);
+        Memory.putU4(Holly.FB_BURSTCTRL, fb_burstctrl);
+        Memory.putU4(Holly.FB_X_CLIP, fb_x_clip);
+        Memory.putU4(Holly.FB_Y_CLIP, fb_y_clip);
+        Memory.putU4(Holly.FB_R_SIZE, fb_r_size);
+        Memory.putU4(Holly.FB_R_CTRL, fb_r_ctrl);
+        Memory.putU4(Holly.FB_W_CTRL, fb_w_ctrl);
     }
 
     public static void start_render(int region_array_start,
@@ -75,5 +110,24 @@ public class Core {
         Memory.putU4(Holly.FB_W_SOF1, frame_address);
 
         Memory.putU4(Holly.STARTRENDER, 1);
+    }
+
+    public static void wait_end_of_render_tsp() {
+        int istnrm__end_of_render_tsp = 1 << 2;
+        while ((Memory.getU4(0xa05f6900) & istnrm__end_of_render_tsp) == 0) {
+            int isterr = Memory.getU4(0xa05f6908);
+            if (isterr != 0) {
+                System.out.print("isterr:");
+                System.out.println(isterr);
+                Memory.putU4(Holly.SOFTRESET, CoreBits.softreset__pipeline_soft_reset);
+                Memory.putU4(Holly.SOFTRESET, 0);
+                Memory.putU4(0xa05f6908, isterr);
+                break;
+            }
+        };
+        int istnrm = (1 << 2)  // istnrm__end_of_render_tsp
+                   | (1 << 1)  // istnrm__end_of_render_isp
+                   | (1 << 0); // istnrm__end_of_render_video;
+        Memory.putU4(0xa05f6900, istnrm);
     }
 }

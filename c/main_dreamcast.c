@@ -7,30 +7,22 @@
 
 #include "sh7091_scif.h"
 
-#include "java/io/PrintStream.class.h"
-#include "java/lang/Integer.class.h"
-#include "java/lang/Object.class.h"
-#include "java/lang/String.class.h"
-#include "java/lang/System.class.h"
-#include "java/misc/Memory.class.h"
+#include "main_classpath.h"
 #include "p/DreamcastVideo2.class.h"
-#include "sega/dreamcast/holly/Holly.class.h"
-#include "sega/dreamcast/holly/CoreBits.class.h"
+#include "p/vertex_polygon_type_0.class.h"
+#include "p/polygon_type_0.class.h"
+#include "p/end_of_list.class.h"
 
 void main()
 {
   scif_init(0);
 
   const uint8_t * class_file_buffers[] = {
-    (const uint8_t *)&_binary_java_io_PrintStream_class_start,
-    (const uint8_t *)&_binary_java_lang_Integer_class_start,
-    (const uint8_t *)&_binary_java_lang_Object_class_start,
-    (const uint8_t *)&_binary_java_lang_String_class_start,
-    (const uint8_t *)&_binary_java_lang_System_class_start,
-    (const uint8_t *)&_binary_java_misc_Memory_class_start,
+    #include "main_classpath.inc.c"
     (const uint8_t *)&_binary_p_DreamcastVideo2_class_start,
-    (const uint8_t *)&_binary_sega_dreamcast_holly_Holly_class_start,
-    (const uint8_t *)&_binary_sega_dreamcast_holly_CoreBits_class_start,
+    (const uint8_t *)&_binary_p_vertex_polygon_type_0_class_start,
+    (const uint8_t *)&_binary_p_polygon_type_0_class_start,
+    (const uint8_t *)&_binary_p_end_of_list_class_start,
   };
   int class_file_buffers_length = (sizeof (class_file_buffers)) / (sizeof (class_file_buffers[0]));
 
