@@ -9,6 +9,11 @@ CLASS_PATH = \
 	java/lang/String.class.o \
 	java/lang/System.class.o \
 	java/misc/Memory.class.o \
+	model/FacePNT.class.o \
+	model/ModelObject.class.o \
+	model/UntitledModel.class.o \
+	model/Vec2.class.o \
+	model/Vec3.class.o \
 	sega/dreamcast/holly/Background.class.o \
 	sega/dreamcast/holly/CoreBits.class.o \
 	sega/dreamcast/holly/Core.class.o \
