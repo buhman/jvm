@@ -61,7 +61,7 @@ class DreamcastVideo2 {
                                                    0.0f, // x
                                                    0.0f, // y
                                                    0.1f, // z
-                                                   0xff00ff00); // color (green)
+                                                   0xffff0000); // color (green)
 
         eol = new TAGlobalParameter.end_of_list(TAParameter.para_control__para_type__end_of_list);
 
@@ -142,7 +142,7 @@ class DreamcastVideo2 {
                                  TextureMemoryAllocation.region_array_start[1],
                                  TextureMemoryAllocation.object_list_start[1]);
 
-        int background_color = 0xffff00ff;
+        int background_color = 0xff00ff00;
         Background.background(TextureMemoryAllocation.background_start[0],
                               background_color);
         Background.background(TextureMemoryAllocation.background_start[1],

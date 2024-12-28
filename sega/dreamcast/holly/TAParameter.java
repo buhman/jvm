@@ -28,8 +28,8 @@ public class TAParameter {
     public static final int obj_control__16bit_uv = 1 << 0;
     public static final int obj_control__volume__with_two_volumes = 1 << 6;
     public static final int obj_control__volume__last_in_volume = 1 << 6;
-    public static final int obj_control__col_type__packed_color = 1 << 4;
+    public static final int obj_control__col_type__packed_color = 0 << 4;
     public static final int obj_control__col_type__floating_color = 1 << 4;
-    public static final int obj_control__col_type__intensity_mode_1 = 1 << 4;
-    public static final int obj_control__col_type__intensity_mode_2 = 1 << 4;
+    public static final int obj_control__col_type__intensity_mode_1 = 2 << 4;
+    public static final int obj_control__col_type__intensity_mode_2 = 3 << 4;
 }

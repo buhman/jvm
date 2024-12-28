@@ -77,7 +77,7 @@ void native_java_misc_memory_putSQ1_2(uint32_t * args)
   store_queue[4] = objectref[5];
   store_queue[5] = objectref[6];
   store_queue[6] = objectref[7];
-  store_queue[6] = objectref[8];
+  store_queue[7] = objectref[8];
 
   *((uint32_t*)0xff000038) = ((address >> 26) & 0b111) << 2;
 
