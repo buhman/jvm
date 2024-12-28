@@ -45,7 +45,8 @@ LIBGCC_OBJ = \
 	libgcc/_floatdidf.o \
 	libgcc/_sdivsi3.o \
 	libgcc/_fixsfdi.o \
-	libgcc/_div_table.o
+	libgcc/_div_table.o \
+	libgcc/_movmem_i4.o
 
 include classpath.mk
 

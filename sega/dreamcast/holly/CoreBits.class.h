@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern C {
 #endif
 
 extern uint32_t _binary_sega_dreamcast_holly_CoreBits_class_start __asm("_binary_sega_dreamcast_holly_CoreBits_class_start");

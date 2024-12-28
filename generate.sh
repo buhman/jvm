@@ -12,5 +12,3 @@ python regs/bits_gen.py ../dreamcast/regs/systembus_bits.csv systembus Systembus
 
 python regs/ta_parameters.py ../dreamcast/regs/vertex_parameter_format.csv holly TAVertexParameter > sega/dreamcast/holly/TAVertexParameter.java
 python regs/ta_parameters.py ../dreamcast/regs/global_parameter_format.csv holly TAGlobalParameter > sega/dreamcast/holly/TAGlobalParameter.java
-
-find java/ sega/ -iname '*.java' | python gen_classpath.py

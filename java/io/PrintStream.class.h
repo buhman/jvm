@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern C {
 #endif
 
 extern uint32_t _binary_java_io_PrintStream_class_start __asm("_binary_java_io_PrintStream_class_start");

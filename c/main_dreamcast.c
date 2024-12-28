@@ -7,7 +7,7 @@
 
 #include "sh7091_scif.h"
 
-#include "main_classpath.h"
+#include "classpath.h"
 #include "p/DreamcastVideo2.class.h"
 #include "p/vertex_polygon_type_0.class.h"
 #include "p/polygon_type_0.class.h"
@@ -18,7 +18,7 @@ void main()
   scif_init(0);
 
   const uint8_t * class_file_buffers[] = {
-    #include "main_classpath.inc.c"
+    #include "classpath.inc.c"
     (const uint8_t *)&_binary_p_DreamcastVideo2_class_start,
     (const uint8_t *)&_binary_p_vertex_polygon_type_0_class_start,
     (const uint8_t *)&_binary_p_polygon_type_0_class_start,

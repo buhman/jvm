@@ -10,6 +10,9 @@ import sega.dreamcast.holly.TAFIFOPolygonConverter;
 import sega.dreamcast.holly.TAParameter;
 import sega.dreamcast.holly.TextureMemoryAllocation;
 import sega.dreamcast.holly.ISPTSP;
+import sega.dreamcast.systembus.Systembus;
+import sega.dreamcast.systembus.SystembusBits;
+import sega.dreamcast.MemoryMap;
 import java.misc.Memory;
 
 class end_of_list {
@@ -89,8 +92,6 @@ class vertex_polygon_type_0 {
 
 
 class DreamcastVideo2 {
-    static final int ta_fifo_polygon_converter = 0x10000000;
-
     public static polygon_type_0 pt0;
     public static vertex_polygon_type_0 vt0;
     public static end_of_list eol;
@@ -135,24 +136,24 @@ class DreamcastVideo2 {
 
 
     public static void transfer_scene() {
-        Memory.putSQ1(DreamcastVideo2.pt0, ta_fifo_polygon_converter);
+        Memory.putSQ1(DreamcastVideo2.pt0, MemoryMap.ta_fifo_polygon_converter);
 
         DreamcastVideo2.vt0.parameter_control_word = polygon_vertex_parameter_control_word(false);
         DreamcastVideo2.vt0.x = 10.0f;
         DreamcastVideo2.vt0.y = 10.0f;
-        Memory.putSQ1(DreamcastVideo2.vt0, ta_fifo_polygon_converter);
+        Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
 
         DreamcastVideo2.vt0.parameter_control_word = polygon_vertex_parameter_control_word(false);
         DreamcastVideo2.vt0.x = 100.0f;
         DreamcastVideo2.vt0.y = 10.0f;
-        Memory.putSQ1(DreamcastVideo2.vt0, ta_fifo_polygon_converter);
+        Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
 
         DreamcastVideo2.vt0.parameter_control_word = polygon_vertex_parameter_control_word(true);
         DreamcastVideo2.vt0.x = 100.0f;
         DreamcastVideo2.vt0.y = 100.0f;
-        Memory.putSQ1(DreamcastVideo2.vt0, ta_fifo_polygon_converter);
+        Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
 
-        Memory.putSQ1(DreamcastVideo2.eol, ta_fifo_polygon_converter);
+        Memory.putSQ1(DreamcastVideo2.eol, MemoryMap.ta_fifo_polygon_converter);
     }
 
     public static void main() {
