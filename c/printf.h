@@ -25,6 +25,8 @@ void print_cstring(const char * s);
 void _printf(const char * format, ...);
 
 #define printf(...) _printf(__VA_ARGS__)
+#define printc(c) print_char(c)
+#define prints(s) print_cstring(s)
 
 #if defined(DEBUG_PRINT)
 #define debugf(...) _printf(__VA_ARGS__)

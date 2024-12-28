@@ -66,10 +66,12 @@ function classpath_h () {
     done
 }
 
+set -e
+
 find sega/ java/ -name '*.class' -exec rm -f {} \;
 find example/ sega/ java/ -name '*.java' | sort | make_class
-find sega/ java/ -name '*.class' | sort | rename_class_files
-find sega/ java/ -name '*.class' | sort | classpath_mk
-find sega/ java/ -name '*.class' | sort | classpath_inc_c
-find sega/ java/ -name '*.class' | sort | make_header
-find sega/ java/ -name '*.class' | sort | classpath_h
+find example/ sega/ java/ -name '*.class' | sort | rename_class_files
+find example/ sega/ java/ -name '*.class' | sort | classpath_mk
+find example/ sega/ java/ -name '*.class' | sort | classpath_inc_c
+find example/ sega/ java/ -name '*.class' | sort | make_header
+find example/ sega/ java/ -name '*.class' | sort | classpath_h

@@ -17,10 +17,22 @@ import sega.dreamcast.systembus.SystembusBits;
 import sega.dreamcast.MemoryMap;
 import java.misc.Memory;
 
+class Vec2 {
+    float x;
+    float y;
+}
+
 class DreamcastVideo2 {
-    public static TAGlobalParameter.polygon_type_0 gt0;
-    public static TAVertexParameter.polygon_type_0 vt0;
-    public static TAGlobalParameter.end_of_list eol;
+    static final int framebuffer_width = 640;
+    static final int framebuffer_height = 480;
+
+    static TAGlobalParameter.polygon_type_0 gt0;
+    static TAVertexParameter.polygon_type_0 vt0;
+    static TAGlobalParameter.end_of_list eol;
+
+    static Vec2[] vtx;
+
+    static float theta;
 
     static {
         int parameter_control_word = TAParameter.para_control__para_type__polygon_or_modifier_volume
@@ -52,6 +64,31 @@ class DreamcastVideo2 {
                                                    0xff00ff00); // color (green)
 
         eol = new TAGlobalParameter.end_of_list(TAParameter.para_control__para_type__end_of_list);
+
+        vtx = new Vec2[3];
+        for (int i = 0; i < 3; i++)
+            vtx[i] = new Vec2();
+        vtx[0].x =  0.0f;
+        vtx[0].y =  1.0f;
+        vtx[1].x =  0.866025f;
+        vtx[1].y = -0.5f;
+        vtx[2].x = -0.866025f;
+        vtx[2].y = -0.5f;
+    }
+
+    public static void transform_vertex(Vec2 v, boolean end_of_strip) {
+        DreamcastVideo2.vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
+        if (end_of_strip)
+            DreamcastVideo2.vt0.parameter_control_word |= TAParameter.para_control__end_of_strip;
+
+        float x0 = v.x * Math.cos(theta) - v.y * Math.sin(theta);
+        float y0 = v.x * Math.sin(theta) + v.y * Math.cos(theta);
+        float x = x0 * 240 + 320;
+        float y = -y0 * 240 + 240;
+
+        DreamcastVideo2.vt0.x = x;
+        DreamcastVideo2.vt0.y = y;
+        Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
     }
 
     public static void transfer_scene() {
@@ -59,21 +96,9 @@ class DreamcastVideo2 {
         Memory.putSQ1(DreamcastVideo2.gt0, MemoryMap.ta_fifo_polygon_converter);
 
         // vertex parameters
-        DreamcastVideo2.vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
-        DreamcastVideo2.vt0.x = 10.0f;
-        DreamcastVideo2.vt0.y = 10.0f;
-        Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
-
-        DreamcastVideo2.vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
-        DreamcastVideo2.vt0.x = 100.0f;
-        DreamcastVideo2.vt0.y = 10.0f;
-        Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
-
-        DreamcastVideo2.vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter
-                                                   | TAParameter.para_control__end_of_strip;
-        DreamcastVideo2.vt0.x = 100.0f;
-        DreamcastVideo2.vt0.y = 100.0f;
-        Memory.putSQ1(DreamcastVideo2.vt0, MemoryMap.ta_fifo_polygon_converter);
+        for (int i = 0; i < 3; i++) {
+            transform_vertex(vtx[i], (i == 2));
+        }
 
         // end of list
         Memory.putSQ1(DreamcastVideo2.eol, MemoryMap.ta_fifo_polygon_converter);
@@ -100,9 +125,6 @@ class DreamcastVideo2 {
         };
 
         int opb_size_total = opb_size[0].total();
-
-        int framebuffer_width = 640;
-        int framebuffer_height = 480;
         int num_render_passes = opb_size.length;
 
         Core.fb_init(framebuffer_width, framebuffer_height);
@@ -126,11 +148,10 @@ class DreamcastVideo2 {
         Background.background(TextureMemoryAllocation.background_start[1],
                               background_color);
 
-        //int ta = -1;
-        //int core = -2;
         int core = 0;
         int ta = 0;
         while (true) {
+            // unpipelined render loop
             TAFIFOPolygonConverter.init(TextureMemoryAllocation.isp_tsp_parameters_start[ta],
                                         TextureMemoryAllocation.isp_tsp_parameters_end[ta],
                                         TextureMemoryAllocation.object_list_start[ta],
@@ -141,6 +162,7 @@ class DreamcastVideo2 {
                                         framebuffer_height / 32);
             transfer_scene();
             TAFIFOPolygonConverter.wait_opaque_list();
+
             Core.start_render(TextureMemoryAllocation.region_array_start[ta],
                               TextureMemoryAllocation.isp_tsp_parameters_start[ta],
                               TextureMemoryAllocation.background_start[ta],
@@ -149,6 +171,8 @@ class DreamcastVideo2 {
             Core.wait_end_of_render_tsp();
             Memory.putU4(Holly.FB_R_SOF1, TextureMemoryAllocation.framebuffer_start[core]);
             core = (core + 1) % 1;
+
+            theta += Math.DEGREES_TO_RADIANS;
         }
     }
 }

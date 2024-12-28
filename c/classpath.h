@@ -1,3 +1,6 @@
+#include "example/DreamcastVideo2.class.h"
+#include "example/DreamcastVideo.class.h"
+#include "example/Vec2.class.h"
 #include "java/io/PrintStream.class.h"
 #include "java/lang/Integer.class.h"
 #include "java/lang/Math.class.h"

@@ -8,7 +8,6 @@
 #include "sh7091_scif.h"
 
 #include "classpath.h"
-#include "example/DreamcastVideo2.class.h"
 
 void main()
 {
@@ -16,7 +15,6 @@ void main()
 
   const uint8_t * class_file_buffers[] = {
     #include "classpath.inc.c"
-    (const uint8_t *)&_binary_example_DreamcastVideo2_class_start,
   };
   int class_file_buffers_length = (sizeof (class_file_buffers)) / (sizeof (class_file_buffers[0]));
 

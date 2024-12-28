@@ -50,8 +50,5 @@ LIBGCC_OBJ = \
 
 include classpath.mk
 
-CLASS_FILES = \
-	example/DreamcastVideo2.class.o
-
 main.elf: LDSCRIPT = $(LIB)/main.lds
-main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_FILES) $(CLASS_PATH)
+main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_PATH)
