@@ -48,7 +48,7 @@ int find_constantvalue_name_index(struct class_file * class_file)
   return 0;
 }
 
-static int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type)
+int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type)
 {
   assert(descriptor_constant->tag == CONSTANT_Utf8);
   assert(descriptor_constant->utf8.length >= 2);

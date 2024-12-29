@@ -1157,15 +1157,37 @@ void op_invokestatic(struct vm * vm, uint32_t index)
   vm_static_method_call(vm, method_entry->class_entry, method_entry->method_info);
 }
 
+#include "debug.h"
+
 void op_invokevirtual(struct vm * vm, uint32_t index)
 {
-  struct method_entry * method_entry =
-    class_resolver_lookup_method_from_methodref_index(vm->class_hash_table.length,
-                                                      vm->class_hash_table.entry,
-                                                      index,
-                                                      vm->current_frame->class_entry);
+  struct class_entry * origin_class_entry = vm->current_frame->class_entry;
 
-  vm_special_method_call(vm, method_entry->class_entry, method_entry->method_info);
+  struct constant * interfacemethodref_constant = &origin_class_entry->class_file->constant_pool[index - 1];
+  assert(interfacemethodref_constant->tag == CONSTANT_Methodref);
+  struct constant * nameandtype_constant = &origin_class_entry->class_file->constant_pool[interfacemethodref_constant->interfacemethodref.name_and_type_index - 1];
+  assert(nameandtype_constant->tag == CONSTANT_NameAndType);
+  struct constant * method_name_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
+  assert(method_name_constant->tag == CONSTANT_Utf8);
+  struct constant * method_descriptor_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
+  assert(method_descriptor_constant->tag == CONSTANT_Utf8);
+
+  uint8_t return_type;
+  int nargs = descriptor_nargs(method_descriptor_constant, &return_type);
+  (void)return_type;
+
+  int32_t * objectref = (int32_t *)operand_stack_peek_u32(vm->current_frame, nargs + 1);
+  assert(objectref != nullptr);
+  struct class_entry * class_entry = (struct class_entry *)objectref[0];
+
+  struct method_entry method_entry =
+    class_resolver_lookup_method_from_interfacemethodref_index(vm->class_hash_table.length,
+                                                               vm->class_hash_table.entry,
+                                                               index,
+                                                               class_entry,
+                                                               vm->current_frame->class_entry);
+
+  vm_special_method_call(vm, method_entry.class_entry, method_entry.method_info);
 }
 
 void op_ior(struct vm * vm)

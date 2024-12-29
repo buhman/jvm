@@ -19,8 +19,8 @@ public class String {
         return this.value;
     }
 
-    public static String valueOf(Object obj) {
-        return (obj == null) ? "null" : obj.toString();
+    public String toString() {
+        return this;
     }
 
     public static String valueOf(boolean b) {
@@ -41,5 +41,9 @@ public class String {
 
     public static String valueOf(double d) {
         return Double.toString(d);
+    }
+
+    public static String valueOf(Object obj) {
+        return (obj == null) ? "null" : obj.toString();
     }
 }

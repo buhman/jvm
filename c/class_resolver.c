@@ -389,7 +389,7 @@ struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(i
                                                                                struct class_entry * origin_class_entry)
 {
   struct constant * interfacemethodref_constant = &origin_class_entry->class_file->constant_pool[interfacemethodref_index - 1];
-  assert(interfacemethodref_constant->tag == CONSTANT_InterfaceMethodref);
+  assert(interfacemethodref_constant->tag == CONSTANT_InterfaceMethodref || interfacemethodref_constant->tag == CONSTANT_Methodref);
   struct constant * nameandtype_constant = &origin_class_entry->class_file->constant_pool[interfacemethodref_constant->interfacemethodref.name_and_type_index - 1];
   assert(nameandtype_constant->tag == CONSTANT_NameAndType);
   struct constant * method_name_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
