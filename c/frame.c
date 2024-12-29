@@ -283,6 +283,24 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
     }
   }
 
+  int java_misc_resource_length = 18;
+  bool java_misc_resource =
+    class_name_constant->utf8.length == java_misc_resource_length &&
+    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/misc/Resource", class_name_constant->utf8.length);
+  if (java_misc_resource) {
+    int getresource_length = 11;
+    bool getresource =
+      method_name_constant->utf8.length == getresource_length &&
+      hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"getResource", method_name_constant->utf8.length);
+    if (getresource) {
+      assert(nargs == 1);
+      assert(return_type == '[');
+      uint32_t value = java_misc_resource_getresource_1(args);
+      operand_stack_push_u32(vm->current_frame, value);
+      return;
+    }
+  }
+
   int java_io_printstream_length = 19;
   bool java_io_printstream =
     class_name_constant->utf8.length == java_io_printstream_length &&

@@ -13,4 +13,9 @@ python regs/bits_gen.py ../dreamcast/regs/systembus_bits.csv systembus Systembus
 python regs/ta_parameters.py ../dreamcast/regs/vertex_parameter_format.csv holly TAVertexParameter > sega/dreamcast/holly/TAVertexParameter.java
 python regs/ta_parameters.py ../dreamcast/regs/global_parameter_format.csv holly TAGlobalParameter > sega/dreamcast/holly/TAGlobalParameter.java
 
-PYTHONPATH=./regs/ python ../model_generator/generate_java.py ../untitled.obj UntitledModel > ./models/UntitledModel.java
+PYTHONPATH=./regs/ python ../model_generator/generate_java.py ../untitled.obj UntitledModel > ./model/UntitledModel.java
+
+
+python images/color_convert.py images/java_cup.png argb4444 images/java_cup.data
+python images/color_convert.py images/java_text.png argb4444 images/java_text.data
+python images/color_convert.py images/java_powered.png argb4444 images/java_powered.data

@@ -3,6 +3,8 @@ package sega.dreamcast.holly;
 import sega.dreamcast.holly.Holly;
 import sega.dreamcast.holly.CoreBits;
 import sega.dreamcast.holly.TABits;
+import sega.dreamcast.systembus.Systembus;
+import sega.dreamcast.systembus.SystembusBits;
 import java.misc.Memory;
 
 public class TAFIFOPolygonConverter {
@@ -45,14 +47,21 @@ public class TAFIFOPolygonConverter {
 
     public static void wait_opaque_list()
     {
-        //while ((system.ISTNRM & istnrm::end_of_transferring_opaque_list) == 0) {
-        //};
-        //system.ISTNRM = istnrm::end_of_transferring_opaque_list;
         while (true) {
-            int istnrm = Memory.getU4(0xa05f6900);
-            if ((istnrm & (1 << 7)) != 0)
+            int istnrm = Memory.getU4(Systembus.ISTNRM);
+            if ((istnrm & SystembusBits.istnrm__end_of_transferring_opaque_list) != 0)
                 break;
         }
-        Memory.putU4(0xa05f6900, (1 << 7));
+        Memory.putU4(Systembus.ISTNRM, SystembusBits.istnrm__end_of_transferring_opaque_list);
+    }
+
+    public static void wait_translucent_list()
+    {
+        while (true) {
+            int istnrm = Memory.getU4(Systembus.ISTNRM);
+            if ((istnrm & SystembusBits.istnrm__end_of_transferring_translucent_list) != 0)
+                break;
+        }
+        Memory.putU4(Systembus.ISTNRM, SystembusBits.istnrm__end_of_transferring_translucent_list);
     }
 }

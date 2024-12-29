@@ -14,3 +14,4 @@ uint32_t native_java_misc_memory_getU1_1(uint32_t * args);
 void native_java_misc_memory_putSQ1_2(uint32_t * args);
 uint32_t native_java_lang_math_sin_1(uint32_t * args);
 uint32_t native_java_lang_math_cos_1(uint32_t * args);
+uint32_t java_misc_resource_getresource_1(uint32_t * args);

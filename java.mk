@@ -21,7 +21,10 @@ OBJ = \
 
 MAIN_DREAMCAST_OBJ = \
 	c/sh7091_scif.o \
-	c/main_dreamcast.o
+	c/main_dreamcast.o \
+	images/java_text.data.o \
+	images/java_cup.data.o \
+	images/java_powered.data.o
 
 MAIN_HOSTED_OBJ = \
 	c/file.o \

@@ -64,11 +64,6 @@ public class Core {
                       | CoreBits.fb_r_size__fb_y_size(y_size - 3)
                       | CoreBits.fb_r_size__fb_x_size((x_size * 16) / 32 - 1);
 
-        int fb_r_ctrl =
-              CoreBits.fb_r_ctrl__vclk_div__pclk_vclk_1
-            | CoreBits.fb_r_ctrl__fb_depth__565_rgb_16bit
-            | CoreBits.fb_r_ctrl__fb_enable;
-
         int fb_w_ctrl = CoreBits.fb_w_ctrl__fb_dither
                       | CoreBits.fb_w_ctrl__fb_packmode__565_rgb_16bit;
 
@@ -78,8 +73,20 @@ public class Core {
         Memory.putU4(Holly.FB_X_CLIP, fb_x_clip);
         Memory.putU4(Holly.FB_Y_CLIP, fb_y_clip);
         Memory.putU4(Holly.FB_R_SIZE, fb_r_size);
-        Memory.putU4(Holly.FB_R_CTRL, fb_r_ctrl);
         Memory.putU4(Holly.FB_W_CTRL, fb_w_ctrl);
+    }
+
+    public static void fb_r_disable() {
+        Memory.putU4(Holly.FB_R_CTRL, 0);
+    }
+
+    public static void fb_r_enable() {
+        int fb_r_ctrl =
+              CoreBits.fb_r_ctrl__vclk_div__pclk_vclk_1
+            | CoreBits.fb_r_ctrl__fb_depth__565_rgb_16bit
+            | CoreBits.fb_r_ctrl__fb_enable;
+
+        Memory.putU4(Holly.FB_R_CTRL, fb_r_ctrl);
     }
 
     public static void start_render(int region_array_start,

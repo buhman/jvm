@@ -1,7 +1,6 @@
 CLASS_PATH = \
 	example/DreamcastVideo2.class.o \
 	example/DreamcastVideo.class.o \
-	example/Vec2.class.o \
 	java/io/PrintStream.class.o \
 	java/lang/Integer.class.o \
 	java/lang/Math.class.o \
@@ -9,7 +8,8 @@ CLASS_PATH = \
 	java/lang/String.class.o \
 	java/lang/System.class.o \
 	java/misc/Memory.class.o \
-	model/FacePNT.class.o \
+	java/misc/Resource.class.o \
+	model/FacePTN.class.o \
 	model/ModelObject.class.o \
 	model/UntitledModel.class.o \
 	model/Vec2.class.o \

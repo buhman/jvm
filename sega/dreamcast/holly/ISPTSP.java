@@ -54,18 +54,6 @@ public class ISPTSP {
     public static int tsp_instruction_word__mip_map_d_adjust(int n) {
         return (n & 15) << 8;
     }
-    public static int tsp_instruction_word__palette_selector4(int n) {
-        return (n & 63) << 21;
-    }
-    public static int tsp_instruction_word__palette_selector8(int n) {
-        return (n & 3) << 25;
-    }
-    public static int tsp_instruction_word__stride_select(int n) {
-        return (n >> 25) & 1;
-    }
-    public static int tsp_instruction_word__texture_address(int n) {
-        return (n & 2097151) << 0;
-    }
     public static final int tsp_instruction_word__flip_uv__none = 0 << 17;
     public static final int tsp_instruction_word__flip_uv__v = 1 << 17;
     public static final int tsp_instruction_word__flip_uv__u = 2 << 17;
@@ -98,15 +86,27 @@ public class ISPTSP {
     public static final int tsp_instruction_word__texture_v_size__256 = 5 << 0;
     public static final int tsp_instruction_word__texture_v_size__512 = 6 << 0;
     public static final int tsp_instruction_word__texture_v_size__1024 = 7 << 0;
-    public static final int tsp_instruction_word__pixel_format__1555 = 0 << 27;
-    public static final int tsp_instruction_word__pixel_format__565 = 1 << 27;
-    public static final int tsp_instruction_word__pixel_format__4444 = 2 << 27;
-    public static final int tsp_instruction_word__pixel_format__yuv422 = 3 << 27;
-    public static final int tsp_instruction_word__pixel_format__bump_map = 4 << 27;
-    public static final int tsp_instruction_word__pixel_format__4bpp_palette = 5 << 27;
-    public static final int tsp_instruction_word__pixel_format__8bpp_palette = 6 << 27;
-    public static final int tsp_instruction_word__scan_order__twiddled = 0 << 26;
-    public static final int tsp_instruction_word__scan_order__non_twiddled = 1 << 26;
     public static final int texture_control_word__mip_mapped = 1 << 31;
     public static final int texture_control_word__vq_compressed = 1 << 30;
+    public static int texture_control_word__palette_selector4(int n) {
+        return (n & 63) << 21;
+    }
+    public static int texture_control_word__palette_selector8(int n) {
+        return (n & 3) << 25;
+    }
+    public static int texture_control_word__stride_select(int n) {
+        return (n >> 25) & 1;
+    }
+    public static int texture_control_word__texture_address(int n) {
+        return (n & 2097151) << 0;
+    }
+    public static final int texture_control_word__pixel_format__1555 = 0 << 27;
+    public static final int texture_control_word__pixel_format__565 = 1 << 27;
+    public static final int texture_control_word__pixel_format__4444 = 2 << 27;
+    public static final int texture_control_word__pixel_format__yuv422 = 3 << 27;
+    public static final int texture_control_word__pixel_format__bump_map = 4 << 27;
+    public static final int texture_control_word__pixel_format__4bpp_palette = 5 << 27;
+    public static final int texture_control_word__pixel_format__8bpp_palette = 6 << 27;
+    public static final int texture_control_word__scan_order__twiddled = 0 << 26;
+    public static final int texture_control_word__scan_order__non_twiddled = 1 << 26;
 }

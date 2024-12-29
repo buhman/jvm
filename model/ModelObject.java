@@ -1,5 +1,5 @@
 package model;
 
 public class ModelObject {
-    public FacePNT[][] faces;
+    public FacePTN[][] faces;
 }

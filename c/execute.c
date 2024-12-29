@@ -10,7 +10,7 @@ void op_aaload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
+  assertvm(vm, arrayref[0] > 0 && index < arrayref[0]);
   uint32_t * referencearray = (uint32_t *)&arrayref[1];
   uint32_t value = referencearray[index];
   operand_stack_push_u32(vm->current_frame, value);

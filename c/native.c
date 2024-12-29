@@ -3,7 +3,7 @@
 
 void native_java_io_printstream_write(uint32_t * arrayref)
 {
-  uint32_t length = arrayref[0];
+  int32_t length = arrayref[0];
   char * buf = (char *)&arrayref[1];
   print_string(buf, length);
 }
@@ -102,4 +102,22 @@ native_java_lang_math_cos_1(uint32_t * args)
   float arg = ((float *)args)[0];
   float value = __builtin_cosf(arg);
   return *((uint32_t *)&value);
+}
+
+#if defined(__dreamcast__)
+#include "resources.inc.c"
+#endif
+
+uint32_t java_misc_resource_getresource_1(uint32_t * args)
+{
+  uint32_t * objectref = (uint32_t *)args[0];
+  int32_t * arrayref = (int32_t *)objectref[1];
+  int32_t name_length = (int32_t)arrayref[0];
+  uint8_t * name = (uint8_t *)&arrayref[1];
+  #if defined(__dreamcast__)
+  uint32_t resource = find_resource(name, name_length);
+  return resource;
+  #else
+  return 0;
+  #endif
 }
