@@ -73,6 +73,13 @@ static inline void operand_stack_push_u32(struct frame * frame, uint32_t value)
   frame->operand_stack_ix++;
 }
 
+static inline uint32_t operand_stack_peek_u32(struct frame * frame, int index)
+{
+  assert((frame->operand_stack_ix - index) >= 0);
+  uint32_t value = frame->operand_stack[frame->operand_stack_ix - index];
+  return value;
+}
+
 static inline uint32_t operand_stack_pop_u32(struct frame * frame)
 {
   frame->operand_stack_ix--;

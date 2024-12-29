@@ -382,28 +382,87 @@ struct method_info * class_resolver_lookup_method(int methods_hash_table_length,
   return (struct method_info *)e->value;
 }
 
+struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(int class_hash_table_length,
+                                                                               struct hash_table_entry * class_hash_table,
+                                                                               int32_t interfacemethodref_index,
+                                                                               struct class_entry * objectref_class_entry,
+                                                                               struct class_entry * origin_class_entry)
+{
+  struct constant * interfacemethodref_constant = &origin_class_entry->class_file->constant_pool[interfacemethodref_index - 1];
+  assert(interfacemethodref_constant->tag == CONSTANT_InterfaceMethodref);
+  struct constant * nameandtype_constant = &origin_class_entry->class_file->constant_pool[interfacemethodref_constant->interfacemethodref.name_and_type_index - 1];
+  assert(nameandtype_constant->tag == CONSTANT_NameAndType);
+  struct constant * method_name_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
+  assert(method_name_constant->tag == CONSTANT_Utf8);
+  struct constant * method_descriptor_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
+  assert(method_descriptor_constant->tag == CONSTANT_Utf8);
+
+  struct class_entry * class_entry = objectref_class_entry;
+
+  while (true) {
+    struct method_info * method_info = class_resolver_lookup_method(class_entry->methods.length,
+                                                                    class_entry->methods.entry,
+                                                                    method_name_constant->utf8.bytes,
+                                                                    method_name_constant->utf8.length,
+                                                                    method_descriptor_constant->utf8.bytes,
+                                                                    method_descriptor_constant->utf8.length);
+    if (method_info != nullptr) {
+      debugf("method resolved:\n");
+      debugf("  class: ");
+      debug_print__class_entry__class_name(class_entry);
+      debugf("\n  method: ");
+      debug_print__method_info__method_name(class_entry, method_info);
+      debugc('\n');
+
+      return (struct method_entry){
+        .class_entry = class_entry,
+        .method_info = method_info
+      };
+    }
+
+    if (class_entry->class_file->super_class == 0)
+      break;
+
+    struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->super_class - 1];
+    assert(class_constant->tag == CONSTANT_Class);
+    struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+    assert(class_name_constant->tag == CONSTANT_Utf8);
+    print_utf8_string(class_name_constant);
+    debugf("\n");
+
+    // lookup the method from the superclass
+    class_entry = class_resolver_lookup_class_from_class_index(class_hash_table_length,
+                                                               class_hash_table,
+                                                               class_entry,
+                                                               class_entry->class_file->super_class);
+    assert(class_entry != nullptr);
+  }
+
+  assert(!"invokeinterface method does not exist");
+}
+
 struct method_entry * class_resolver_lookup_method_from_methodref_index(int class_hash_table_length,
                                                                         struct hash_table_entry * class_hash_table,
                                                                         int32_t methodref_index,
-                                                                        struct class_entry * original_class_entry)
+                                                                        struct class_entry * origin_class_entry)
 {
-  if (original_class_entry->attribute_entry[methodref_index - 1].method_entry != nullptr) {
+  if (origin_class_entry->attribute_entry[methodref_index - 1].method_entry != nullptr) {
     debugf("class_resolver_lookup_method_from_methodref_index %d: [cached]\n", methodref_index);
-    return original_class_entry->attribute_entry[methodref_index - 1].method_entry;
+    return origin_class_entry->attribute_entry[methodref_index - 1].method_entry;
   }
 
-  struct constant * methodref_constant = &original_class_entry->class_file->constant_pool[methodref_index - 1];
+  struct constant * methodref_constant = &origin_class_entry->class_file->constant_pool[methodref_index - 1];
   assert(methodref_constant->tag == CONSTANT_Methodref);
-  struct constant * nameandtype_constant = &original_class_entry->class_file->constant_pool[methodref_constant->methodref.name_and_type_index - 1];
+  struct constant * nameandtype_constant = &origin_class_entry->class_file->constant_pool[methodref_constant->methodref.name_and_type_index - 1];
   assert(nameandtype_constant->tag == CONSTANT_NameAndType);
-  struct constant * method_name_constant = &original_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
+  struct constant * method_name_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
   assert(method_name_constant->tag == CONSTANT_Utf8);
-  struct constant * method_descriptor_constant = &original_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
+  struct constant * method_descriptor_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
   assert(method_descriptor_constant->tag == CONSTANT_Utf8);
 
   struct class_entry * class_entry = class_resolver_lookup_class_from_class_index(class_hash_table_length,
                                                                                   class_hash_table,
-                                                                                  original_class_entry,
+                                                                                  origin_class_entry,
                                                                                   methodref_constant->methodref.class_index);
 
   while (true) {
@@ -425,7 +484,7 @@ struct method_entry * class_resolver_lookup_method_from_methodref_index(int clas
       struct method_entry * method_entry = malloc_class_arena((sizeof (struct method_entry)));
       method_entry->class_entry = class_entry;
       method_entry->method_info = method_info;
-      original_class_entry->attribute_entry[methodref_index - 1].method_entry = method_entry;
+      origin_class_entry->attribute_entry[methodref_index - 1].method_entry = method_entry;
       return method_entry;
     }
 

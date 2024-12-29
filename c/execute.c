@@ -1117,7 +1117,18 @@ void op_invokedynamic(struct vm * vm, uint32_t index)
 
 void op_invokeinterface(struct vm * vm, uint32_t index, uint32_t count)
 {
-  assert(!"op_invokeinterface");
+  int32_t * objectref = (int32_t *)operand_stack_peek_u32(vm->current_frame, count);
+  assert(objectref != nullptr);
+  struct class_entry * class_entry = (struct class_entry *)objectref[0];
+
+  struct method_entry method_entry =
+    class_resolver_lookup_method_from_interfacemethodref_index(vm->class_hash_table.length,
+                                                               vm->class_hash_table.entry,
+                                                               index,
+                                                               class_entry,
+                                                               vm->current_frame->class_entry);
+
+  vm_special_method_call(vm, method_entry.class_entry, method_entry.method_info);
 }
 
 void op_invokespecial(struct vm * vm, uint32_t index)
