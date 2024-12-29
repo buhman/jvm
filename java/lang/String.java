@@ -18,4 +18,28 @@ public class String {
     public byte[] getBytes() {
         return this.value;
     }
+
+    public static String valueOf(Object obj) {
+        return (obj == null) ? "null" : obj.toString();
+    }
+
+    public static String valueOf(boolean b) {
+        return b ? "true" : "false";
+    }
+
+    public static String valueOf(int i) {
+        return Integer.toString(i);
+    }
+
+    public static String valueOf(long l) {
+        return Long.toString(l);
+    }
+
+    public static String valueOf(float f) {
+        return Float.toString(f);
+    }
+
+    public static String valueOf(double d) {
+        return Double.toString(d);
+    }
 }

@@ -2,8 +2,8 @@ package java.lang;
 
 import java.lang.DecimalDigits;
 
-public class Integer {
-    public static int stringSize(int n) {
+public class Long {
+    public static int stringSize(long n) {
         int sign_digits = 0;
         if (n < 0) {
             sign_digits = 1;
@@ -11,16 +11,16 @@ public class Integer {
         }
         int digits = 1;
         int cmp = 10;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 18; i++) {
             if (n < cmp)
                 return digits + sign_digits;
             digits += 1;
             cmp *= 10;
         }
-        return 10 + sign_digits;
+        return 19 + sign_digits;
     }
 
-    public static String toString(int n) {
+    public static String toString(long n) {
         int pos = stringSize(n);
         byte[] buf = new byte[pos];
         buf[0] = (char)'0';
@@ -31,11 +31,11 @@ public class Integer {
         }
 
         while (n >= 10) {
-            int div = n / 100;
+            long div = n / 100;
             pos -= 2;
-            int mod = n - (div * 100);
+            long mod = n - (div * 100);
 
-            short digits = DecimalDigits.DIGITS[mod];
+            short digits = DecimalDigits.DIGITS[(int)mod];
             buf[pos] = (byte)(digits >> 8);
             buf[pos+1] = (byte)(digits);
 

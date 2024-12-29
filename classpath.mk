@@ -2,7 +2,11 @@ CLASS_PATH = \
 	example/DreamcastVideo2.class.o \
 	example/DreamcastVideo.class.o \
 	java/io/PrintStream.class.o \
+	java/lang/DecimalDigits.class.o \
+	java/lang/Double.class.o \
+	java/lang/Float.class.o \
 	java/lang/Integer.class.o \
+	java/lang/Long.class.o \
 	java/lang/Math.class.o \
 	java/lang/Object.class.o \
 	java/lang/String.class.o \

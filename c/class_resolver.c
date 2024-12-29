@@ -438,7 +438,7 @@ struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(i
     assert(class_entry != nullptr);
   }
 
-  assert(!"invokeinterface method does not exist");
+  assert(!"interfacemethodref method does not exist");
 }
 
 struct method_entry * class_resolver_lookup_method_from_methodref_index(int class_hash_table_length,
@@ -505,7 +505,8 @@ struct method_entry * class_resolver_lookup_method_from_methodref_index(int clas
                                                                class_entry->class_file->super_class);
     assert(class_entry != nullptr);
   }
-  return nullptr;
+
+  assert(!"methodref method does not exist");
 }
 
 int32_t * class_resolver_lookup_string(int class_hash_table_length,
