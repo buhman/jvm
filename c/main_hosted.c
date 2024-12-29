@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
+#include "printf.h"
 #include "frame.h"
 #include "class_resolver.h"
 #include "string.h"
@@ -13,7 +13,7 @@ static struct hash_table_entry * load_from_filenames(const char * filenames[], i
   size_t file_size[length];
 
   for (int i = 0; i < length; i++) {
-    printf("load class: %s\n", filenames[i]);
+    debugf("load class: %s\n", filenames[i]);
     buffers[i] = file_read(filenames[i], &file_size[i]);
   }
 

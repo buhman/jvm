@@ -23,6 +23,10 @@ public class String {
         return this;
     }
 
+    public int length() {
+        return value.length;
+    }
+
     public static String valueOf(boolean b) {
         return b ? "true" : "false";
     }
