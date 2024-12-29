@@ -10,6 +10,7 @@
 #include "memory_allocator.h"
 #include "printf.h"
 #include "field_size.h"
+#include "debug.h"
 
 static int field_info_field_size(struct class_file * class_file, struct field_info * field_info)
 {
@@ -328,7 +329,7 @@ struct field_entry * class_resolver_lookup_field_from_fieldref_index(int fields_
                                                                      int fieldref_index)
 {
   if (class_entry->attribute_entry[fieldref_index - 1].field_entry != nullptr) {
-    debugf("class_resolver_lookup_method_from_fieldref_index %d: [cached]\n", fieldref_index);
+    debugf("class_resolver_lookup_field_from_fieldref_index %d: [cached]\n", fieldref_index);
     return class_entry->attribute_entry[fieldref_index - 1].field_entry;
   }
 
@@ -381,44 +382,71 @@ struct method_info * class_resolver_lookup_method(int methods_hash_table_length,
   return (struct method_info *)e->value;
 }
 
-struct method_info * class_resolver_lookup_method_from_methodref_index(int methods_hash_table_length,
-                                                                       struct hash_table_entry * methods_hash_table,
-                                                                       struct class_entry * class_entry,
-                                                                       int methodref_index)
+struct method_entry * class_resolver_lookup_method_from_methodref_index(int class_hash_table_length,
+                                                                        struct hash_table_entry * class_hash_table,
+                                                                        int32_t methodref_index,
+                                                                        struct class_entry * original_class_entry)
 {
-  if (class_entry->attribute_entry[methodref_index - 1].method_info != nullptr) {
+  if (original_class_entry->attribute_entry[methodref_index - 1].method_entry != nullptr) {
     debugf("class_resolver_lookup_method_from_methodref_index %d: [cached]\n", methodref_index);
-    return class_entry->attribute_entry[methodref_index - 1].method_info;
+    return original_class_entry->attribute_entry[methodref_index - 1].method_entry;
   }
 
-  struct constant * methodref_constant = &class_entry->class_file->constant_pool[methodref_index - 1];
-  #ifdef DEBUG
+  struct constant * methodref_constant = &original_class_entry->class_file->constant_pool[methodref_index - 1];
   assert(methodref_constant->tag == CONSTANT_Methodref);
-  #endif
-  struct constant * nameandtype_constant = &class_entry->class_file->constant_pool[methodref_constant->methodref.name_and_type_index - 1];
-  #ifdef DEBUG
+  struct constant * nameandtype_constant = &original_class_entry->class_file->constant_pool[methodref_constant->methodref.name_and_type_index - 1];
   assert(nameandtype_constant->tag == CONSTANT_NameAndType);
-  #endif
-  struct constant * method_name_constant = &class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
-  #ifdef DEBUG
+  struct constant * method_name_constant = &original_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
   assert(method_name_constant->tag == CONSTANT_Utf8);
-  #endif
-  struct constant * method_descriptor_constant = &class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
-  #ifdef DEBUG
+  struct constant * method_descriptor_constant = &original_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
   assert(method_descriptor_constant->tag == CONSTANT_Utf8);
-  #endif
 
-  struct method_info * method_info = class_resolver_lookup_method(methods_hash_table_length,
-                                                                  methods_hash_table,
-                                                                  method_name_constant->utf8.bytes,
-                                                                  method_name_constant->utf8.length,
-                                                                  method_descriptor_constant->utf8.bytes,
-                                                                  method_descriptor_constant->utf8.length);
+  struct class_entry * class_entry = class_resolver_lookup_class_from_class_index(class_hash_table_length,
+                                                                                  class_hash_table,
+                                                                                  original_class_entry,
+                                                                                  methodref_constant->methodref.class_index);
 
-  // cache the result
-  class_entry->attribute_entry[methodref_index - 1].method_info = method_info;
+  while (true) {
+    struct method_info * method_info = class_resolver_lookup_method(class_entry->methods.length,
+                                                                    class_entry->methods.entry,
+                                                                    method_name_constant->utf8.bytes,
+                                                                    method_name_constant->utf8.length,
+                                                                    method_descriptor_constant->utf8.bytes,
+                                                                    method_descriptor_constant->utf8.length);
+    if (method_info != nullptr) {
+      // cache the result
+      debugf("method resolved:\n");
+      debugf("  class: ");
+      debug_print__class_entry__class_name(class_entry);
+      debugf("\n  method: ");
+      debug_print__method_info__method_name(class_entry, method_info);
+      debugc('\n');
 
-  return method_info;
+      struct method_entry * method_entry = malloc_class_arena((sizeof (struct method_entry)));
+      method_entry->class_entry = class_entry;
+      method_entry->method_info = method_info;
+      original_class_entry->attribute_entry[methodref_index - 1].method_entry = method_entry;
+      return method_entry;
+    }
+
+    if (class_entry->class_file->super_class == 0)
+      break;
+
+    struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->super_class - 1];
+    assert(class_constant->tag == CONSTANT_Class);
+    struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+    assert(class_name_constant->tag == CONSTANT_Utf8);
+    print_utf8_string(class_name_constant);
+    debugf("\n");
+
+    // lookup the method from the superclass
+    class_entry = class_resolver_lookup_class_from_class_index(class_hash_table_length,
+                                                               class_hash_table,
+                                                               class_entry,
+                                                               class_entry->class_file->super_class);
+    assert(class_entry != nullptr);
+  }
+  return nullptr;
 }
 
 int32_t * class_resolver_lookup_string(int class_hash_table_length,

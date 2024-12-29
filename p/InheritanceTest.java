@@ -5,22 +5,18 @@ class A {
     static int baz = 3;
     static int bleh = 4;
 
-    /*
-    public int foo(int a, int b) {
-        return a + b;
+    public int foo(int a) {
+        return a + baz;
     }
-    */
 }
 
 class B extends A {
     static int baz = 5;
     int horse;
 
-    /*
     public int bar(int a) {
         return a * egg;
     }
-    */
 }
 
 class InheritanceTest {
@@ -58,7 +54,13 @@ class InheritanceTest {
         return b.egg * b.horse;
     }
 
+    static int method_test() {
+        B b = new B();
+        b.egg = 5;
+        return b.foo(b.bar(6));
+    }
+
     public static void main() {
-        instance_test();
+        method_test();
     }
 }

@@ -11,9 +11,14 @@ enum initialization_state {
   CLASS_INITIALIZED,
 };
 
-union attribute_entry {
+struct method_entry {
   struct class_entry * class_entry;
   struct method_info * method_info;
+};
+
+union attribute_entry {
+  struct class_entry * class_entry;
+  struct method_entry * method_entry;
   struct field_entry * field_entry;
   int32_t * string_objectref;
 };
@@ -66,10 +71,10 @@ struct method_info * class_resolver_lookup_method(int methods_hash_table_length,
                                                   int method_name_length,
                                                   const uint8_t * method_descriptor,
                                                   int method_descriptor_length);
-struct method_info * class_resolver_lookup_method_from_methodref_index(int methods_hash_table_length,
-                                                                       struct hash_table_entry * methods_hash_table,
-                                                                       struct class_entry * class_entry,
-                                                                       int methodref_index);
+struct method_entry * class_resolver_lookup_method_from_methodref_index(int class_hash_table_length,
+                                                                        struct hash_table_entry * class_hash_table,
+                                                                        int32_t methodref_index,
+                                                                        struct class_entry * original_class_entry);
 struct field_entry * class_resolver_lookup_field(int fields_hash_table_length,
                                                  struct hash_table_entry * fields_hash_table,
                                                  const uint8_t * field_name,

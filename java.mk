@@ -17,7 +17,8 @@ OBJ = \
 	c/printf.o \
 	c/parse.o \
 	c/unparse.o \
-	c/native.o
+	c/native.o \
+	c/debug.o
 
 MAIN_DREAMCAST_OBJ = \
 	c/sh7091_scif.o \

@@ -1122,39 +1122,39 @@ void op_invokeinterface(struct vm * vm, uint32_t index, uint32_t count)
 
 void op_invokespecial(struct vm * vm, uint32_t index)
 {
-  struct class_entry * class_entry;
-  struct method_info * method_info;
-  class_entry_method_info_from_constant_index(vm, index,
-                                              &class_entry,
-                                              &method_info);
+  struct method_entry * method_entry =
+    class_resolver_lookup_method_from_methodref_index(vm->class_hash_table.length,
+                                                      vm->class_hash_table.entry,
+                                                      index,
+                                                      vm->current_frame->class_entry);
 
-  vm_special_method_call(vm, class_entry, method_info);
+  vm_special_method_call(vm, method_entry->class_entry, method_entry->method_info);
 }
 
 void op_invokestatic(struct vm * vm, uint32_t index)
 {
-  struct class_entry * class_entry;
-  struct method_info * method_info;
-  class_entry_method_info_from_constant_index(vm, index,
-                                              &class_entry,
-                                              &method_info);
+  struct method_entry * method_entry =
+    class_resolver_lookup_method_from_methodref_index(vm->class_hash_table.length,
+                                                      vm->class_hash_table.entry,
+                                                      index,
+                                                      vm->current_frame->class_entry);
 
   /* On successful resolution of the method, the class or interface that
      declared the resolved method is initialized if that class or interface has
      not already been initialized (§5.5). */
 
-  vm_static_method_call(vm, class_entry, method_info);
+  vm_static_method_call(vm, method_entry->class_entry, method_entry->method_info);
 }
 
 void op_invokevirtual(struct vm * vm, uint32_t index)
 {
-  struct class_entry * class_entry;
-  struct method_info * method_info;
-  class_entry_method_info_from_constant_index(vm, index,
-                                              &class_entry,
-                                              &method_info);
+  struct method_entry * method_entry =
+    class_resolver_lookup_method_from_methodref_index(vm->class_hash_table.length,
+                                                      vm->class_hash_table.entry,
+                                                      index,
+                                                      vm->current_frame->class_entry);
 
-  vm_special_method_call(vm, class_entry, method_info);
+  vm_special_method_call(vm, method_entry->class_entry, method_entry->method_info);
 }
 
 void op_ior(struct vm * vm)
