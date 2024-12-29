@@ -232,7 +232,14 @@ void print_class_file(struct class_file * class_file)
 
   debugf("interfaces:\n");
   for (int i = 0; i < class_file->interfaces_count; i++) {
-    debugf("% 3d: %d\n", i + 1, class_file->interfaces[i]);
+    debugf("  interface %3d:\n", i);
+    int interface_index = class_file->interfaces[i];
+    debugs("    ");
+    struct constant * class_constant = &class_file->constant_pool[interface_index - 1];
+    print_constant(class_constant);
+    debugs("      ");
+    struct constant * class_name_constant = &class_file->constant_pool[class_constant->class.name_index - 1];
+    print_constant(class_name_constant);
   }
 
   debugf("fields_count %d\n", class_file->fields_count);

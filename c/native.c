@@ -118,6 +118,8 @@ uint32_t java_misc_resource_getresource_1(uint32_t * args)
   uint32_t resource = find_resource(name, name_length);
   return resource;
   #else
+  (void)name;
+  (void)name_length;
   return 0;
   #endif
 }

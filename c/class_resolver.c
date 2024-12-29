@@ -11,19 +11,6 @@
 #include "printf.h"
 #include "field_size.h"
 
-static void class_resolver_create_interfaces_hash_table(struct class_entry * class_entry)
-{
-  /*
-  struct class_file * class_file = class_entry->class_file;
-
-  uint32_t interfaces_hash_table_size = (sizeof (struct hash_table_entry)) * class_file->interfaces_count * 3 / 2;
-  struct hash_table_entry * interfaces_hash_table = malloc_class_arena(interfaces_hash_table_size);
-  for (int i = 0; i < class_file->interfaces_count; i++) {
-
-  }
-  */
-}
-
 static int field_info_field_size(struct class_file * class_file, struct field_info * field_info)
 {
   struct constant * field_descriptor_constant = &class_file->constant_pool[field_info->descriptor_index - 1];
@@ -33,37 +20,109 @@ static int field_info_field_size(struct class_file * class_file, struct field_in
   return field_size(field_descriptor_constant->utf8.bytes[0]);
 }
 
-static int32_t class_resolver_create_fields_hash_table(struct class_entry * class_entry)
+static int32_t count_superclass_instance_fields(int class_hash_table_length,
+                                                struct hash_table_entry * class_hash_table,
+                                                struct class_entry * class_entry)
 {
-  struct class_file * class_file = class_entry->class_file;
-  int fields_hash_table_length = hash_table_next_power_of_two(class_file->fields_count * 2);
+  struct class_entry * subclass_entry = class_entry;
+
+  int instance_field_count = 0;
+  while (class_entry->class_file->super_class != 0) {
+    class_entry = class_resolver_lookup_class_from_class_index(class_hash_table_length,
+                                                               class_hash_table,
+                                                               class_entry,
+                                                               class_entry->class_file->super_class);
+    assert(class_entry != nullptr);
+
+    for (int i = 0; i < class_entry->class_file->fields_count; i++) {
+      struct field_info * field_info = &class_entry->class_file->fields[i];
+      if (!(field_info->access_flags & FIELD_ACC_STATIC)) {
+        instance_field_count += 1;
+      }
+    }
+  }
+
+  struct constant * class_constant = &subclass_entry->class_file->constant_pool[subclass_entry->class_file->this_class - 1];
+  assert(class_constant->tag == CONSTANT_Class);
+  struct constant * class_name_constant = &subclass_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  assert(class_name_constant->tag == CONSTANT_Utf8);
+  debugf("count_superclass_instance_fields: ");
+  print_utf8_string(class_name_constant);
+  debugf(": %d\n", instance_field_count);
+
+  return instance_field_count;
+}
+
+static void add_superclass_instance_fields(int class_hash_table_length,
+                                           struct hash_table_entry * class_hash_table,
+                                           int fields_hash_table_length,
+                                           struct hash_table_entry * fields_hash_table,
+                                           struct class_entry * class_entry,
+                                           struct field_entry * field_entry,
+                                           int instance_index)
+{
+  while (class_entry->class_file->super_class != 0) {
+    class_entry = class_resolver_lookup_class_from_class_index(class_hash_table_length,
+                                                               class_hash_table,
+                                                               class_entry,
+                                                               class_entry->class_file->super_class);
+    assert(class_entry != nullptr);
+
+    for (int i = 0; i < class_entry->class_file->fields_count; i++) {
+      struct field_info * field_info = &class_entry->class_file->fields[i];
+      if (!(field_info->access_flags & FIELD_ACC_STATIC)) {
+        field_entry[i].instance_index = instance_index;
+        field_entry[i].field_info = field_info;
+        instance_index += field_info_field_size(class_entry->class_file, field_info);
+
+        struct constant * name_constant = &class_entry->class_file->constant_pool[field_info->name_index - 1];
+        assert(name_constant->tag == CONSTANT_Utf8);
+        debugf("hash table entry for field: ");
+        print_utf8_string(name_constant);
+        debugf(": %d\n", instance_index);
+        hash_table_add(fields_hash_table_length,
+                       fields_hash_table,
+                       name_constant->utf8.bytes,
+                       name_constant->utf8.length,
+                       (void *)&field_entry[i]);
+      }
+    }
+  }
+}
+
+static int32_t class_resolver_create_fields_hash_table(int class_hash_table_length,
+                                                       struct hash_table_entry * class_hash_table,
+                                                       struct class_entry * class_entry)
+{
+  int total_fields_count = class_entry->class_file->fields_count + count_superclass_instance_fields(class_hash_table_length,
+                                                                                                    class_hash_table,
+                                                                                                    class_entry);
+  int fields_hash_table_length = hash_table_next_power_of_two(class_entry->class_file->fields_count * 2);
   uint32_t fields_hash_table_size = (sizeof (struct hash_table_entry)) * fields_hash_table_length;
   struct hash_table_entry * fields_hash_table = malloc_class_arena(fields_hash_table_size);
-  uint32_t field_entry_size = (sizeof (struct field_entry)) * class_file->fields_count;
+
+  uint32_t field_entry_size = (sizeof (struct field_entry)) * total_fields_count;
   struct field_entry * field_entry = malloc_class_arena(field_entry_size);
 
   int32_t static_index = 0;
   int32_t instance_index = 0;
 
-  for (int i = 0; i < class_file->fields_count; i++) {
-    u2 name_index = class_file->fields[i].name_index;
-    struct constant * name_constant = &class_file->constant_pool[name_index - 1];
-    assert(name_constant->tag == CONSTANT_Utf8);
-    debugf("hash table entry for field: ");
-    print_utf8_string(name_constant);
-    debugf("\n");
-
-    struct field_info * field_info = &class_file->fields[i];
-
+  for (int i = 0; i < class_entry->class_file->fields_count; i++) {
+    struct field_info * field_info = &class_entry->class_file->fields[i];
     if (field_info->access_flags & FIELD_ACC_STATIC) {
       field_entry[i].static_index = static_index;
-      static_index += field_info_field_size(class_file, field_info);
+      static_index += field_info_field_size(class_entry->class_file, field_info);
     } else {
       field_entry[i].instance_index = instance_index;
-      instance_index += field_info_field_size(class_file, field_info);
+      instance_index += field_info_field_size(class_entry->class_file, field_info);
     }
     field_entry[i].field_info = field_info;
 
+    struct constant * name_constant = &class_entry->class_file->constant_pool[field_info->name_index - 1];
+    assert(name_constant->tag == CONSTANT_Utf8);
+    debugf("hash table entry for field: ");
+    print_utf8_string(name_constant);
+    debugf(": %d\n", i);
     hash_table_add(fields_hash_table_length,
                    fields_hash_table,
                    name_constant->utf8.bytes,
@@ -73,6 +132,15 @@ static int32_t class_resolver_create_fields_hash_table(struct class_entry * clas
 
   class_entry->fields.length = fields_hash_table_length;
   class_entry->fields.entry = fields_hash_table;
+  class_entry->instance_fields_count = instance_index;
+
+  add_superclass_instance_fields(class_hash_table_length,
+                                 class_hash_table,
+                                 fields_hash_table_length,
+                                 fields_hash_table,
+                                 class_entry,
+                                 &field_entry[class_entry->class_file->fields_count],
+                                 instance_index);
 
   return static_index;
 }
@@ -142,6 +210,7 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buff
   uint32_t class_entry_size = (sizeof (struct class_entry)) * length;
   struct class_entry * class_entry = malloc_class_arena(class_entry_size);
 
+  // populate class_hash_table first, to allow for superclass lookups
   for (int i = 0; i < length; i++) {
     struct class_file * class_file = class_file_parse(buffers[i]);
 
@@ -154,7 +223,6 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buff
     assert(class_constant->tag == CONSTANT_Class);
     struct constant * class_name_constant = &class_file->constant_pool[class_constant->class.name_index - 1];
     assert(class_name_constant->tag == CONSTANT_Utf8);
-
     debugf("hash table entry for class: ");
     print_utf8_string(class_name_constant);
     debugf("\n");
@@ -165,21 +233,23 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buff
                    class_name_constant->utf8.length,
                    &class_entry[i]);
 
-    // make hash table for interfaces
-    class_resolver_create_interfaces_hash_table(&class_entry[i]);
-
-    // make hash table for fields
-    int32_t static_field_count = class_resolver_create_fields_hash_table(&class_entry[i]);
-
     // make hash table for methods
     class_resolver_create_methods_hash_table(&class_entry[i]);
-
-    // allocate static fields
-    class_resolver_allocate_static_fields(&class_entry[i], static_field_count);
 
     // allocate attribute_entry
     class_resolver_allocate_attribute_entry(&class_entry[i]);
   };
+
+  // these functions may reference class_hash_table for superclass lookups
+  for (int i = 0; i < length; i++) {
+    // make hash table for fields
+    int32_t static_field_count = class_resolver_create_fields_hash_table(class_hash_table_length,
+                                                                         class_hash_table,
+                                                                         &class_entry[i]);
+
+    // allocate static fields
+    class_resolver_allocate_static_fields(&class_entry[i], static_field_count);
+  }
 
   *hash_table_length = class_hash_table_length;
 

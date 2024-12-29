@@ -79,7 +79,9 @@ struct hash_table_entry * hash_table_find(int hash_table_length,
                                           const uint8_t * key,
                                           int key_length)
 {
-  assert(hash_table_length != 0);
+  if (hash_table_length == 0)
+    return nullptr;
+
   assert((hash_table_length & (hash_table_length - 1)) == 0);
   uint32_t hash = fnv_1(fnv_offset_basis, key, key_length) & (hash_table_length - 1);
   struct hash_table_entry * e = &entry[hash];
@@ -151,7 +153,9 @@ struct hash_table_entry * hash_table_find2(int hash_table_length,
                                            const uint8_t * key2,
                                            int key2_length)
 {
-  assert(hash_table_length != 0);
+  if (hash_table_length == 0)
+    return nullptr;
+
   assert((hash_table_length & (hash_table_length - 1)) == 0);
   uint32_t hash = fnv_offset_basis;
   hash = fnv_1(hash, key1, key1_length);

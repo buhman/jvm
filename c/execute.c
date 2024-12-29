@@ -10,7 +10,7 @@ void op_aaload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assertvm(vm, arrayref[0] > 0 && index < arrayref[0]);
+  assert(arrayref[0] > 0 && index < arrayref[0]);
   uint32_t * referencearray = (uint32_t *)&arrayref[1];
   uint32_t value = referencearray[index];
   operand_stack_push_u32(vm->current_frame, value);
@@ -684,7 +684,7 @@ void op_getfield(struct vm * vm, uint32_t index)
                                               &field_entry,
                                               &field_descriptor_constant);
 
-  debugf("putfield instance_index %d\n", field_entry->instance_index);
+  debugf("getfield instance_index %d\n", field_entry->instance_index);
 
   int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
   assert(objectref != nullptr);
@@ -1684,7 +1684,7 @@ void op_new(struct vm * vm, uint32_t index)
      initialized to their default initial values (§2.3, §2.4). The objectref, a
      reference to the instance, is pushed onto the operand stack. */
 
-  int fields_count = class_entry->class_file->fields_count;
+  int fields_count = class_entry->instance_fields_count;
   int32_t * objectref = memory_allocate(fields_count * 2 * 4 + 4);
   assert(objectref != nullptr);
   objectref[0] = (int32_t)class_entry;

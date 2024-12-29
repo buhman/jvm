@@ -31,6 +31,7 @@ struct class_entry {
   enum initialization_state initialization_state;
   union attribute_entry * attribute_entry;
   int32_t * static_fields;
+  int32_t instance_fields_count;
 
   struct {
     int length;

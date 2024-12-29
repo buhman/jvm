@@ -199,7 +199,7 @@ class DreamcastVideo2 {
         Memory.putSQ1(vt0, MemoryMap.ta_fifo_polygon_converter);
 
         vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter
-                                                   | TAParameter.para_control__end_of_strip;
+                                   | TAParameter.para_control__end_of_strip;
         vt0.x = quad[2].x;
         vt0.y = quad[2].y;
         vt0.u = quad_uv[2].x;
@@ -293,7 +293,8 @@ class DreamcastVideo2 {
                           framebuffer_width);
         Core.wait_end_of_render_tsp();
 
-        while ((CoreBits.spg_status__vsync(Memory.getU4(Holly.SPG_STATUS)) != 0));
+        while ((CoreBits.spg_status__vsync(Memory.getU4(Holly.SPG_STATUS)) == 0));
+        while (!(CoreBits.spg_status__vsync(Memory.getU4(Holly.SPG_STATUS)) == 0));
         Core.fb_r_enable();
         Memory.putU4(Holly.FB_R_SOF1, TextureMemoryAllocation.framebuffer_start[0]);
     }
