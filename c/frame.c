@@ -10,6 +10,7 @@
 #include "printf.h"
 #include "string.h"
 #include "native.h"
+#include "fatal.h"
 
 struct Code_attribute * get_code_attribute(int code_name_index,
                                            int attributes_count,
@@ -525,15 +526,13 @@ void vm_execute(struct vm * vm)
 
 void vm_start(int class_hash_table_length,
               struct hash_table_entry * class_hash_table,
-              const uint8_t * main_class,
-              int main_class_length)
+              const uint8_t * main_class_name,
+              int main_class_name_length)
 {
   struct class_entry * class_entry = class_resolver_lookup_class(class_hash_table_length,
                                                                  class_hash_table,
-                                                                 main_class,
-                                                                 main_class_length);
-
-  assert(class_entry != nullptr);
+                                                                 main_class_name,
+                                                                 main_class_name_length);
 
   const char * method_name = "main";
   int method_name_length = string_length(method_name);

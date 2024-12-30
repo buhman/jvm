@@ -1094,20 +1094,42 @@ void op_ineg(struct vm * vm)
 
 void op_instanceof(struct vm * vm, uint32_t index)
 {
-  struct class_entry * class_entry =
+  struct class_entry * index_class_entry =
     class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
                                                  vm->class_hash_table.entry,
                                                  vm->current_frame->class_entry,
                                                  index);
-  assert(class_entry != nullptr);
+  assert(index_class_entry != nullptr);
 
   int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  if (objectref == nullptr) {
-    operand_stack_push_u32(vm->current_frame, 0);
-  } else {
-    int32_t value = objectref[0] == (int32_t)class_entry;
-    operand_stack_push_u32(vm->current_frame, value);
+  bool value = false;
+  if (objectref != nullptr) {
+    struct class_entry * class_entry = (struct class_entry *)objectref[0];
+    while (true) {
+      assert(class_entry != nullptr);
+      if (class_entry == index_class_entry) {
+        value = true;
+        break;
+      }
+      if (class_entry->class_file->super_class == 0) {
+        break;
+      }
+
+      struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->super_class - 1];
+      assert(class_constant->tag == CONSTANT_Class);
+      struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+      assert(class_name_constant->tag == CONSTANT_Utf8);
+      print_utf8_string(class_name_constant);
+      debugf("\n");
+
+      // superclass lookup
+      class_entry = class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
+                                                                 vm->class_hash_table.entry,
+                                                                 class_entry,
+                                                                 class_entry->class_file->super_class);
+    }
   }
+  operand_stack_push_u32(vm->current_frame, (uint32_t)value);
 }
 
 void op_invokedynamic(struct vm * vm, uint32_t index)
@@ -1688,19 +1710,10 @@ void op_multianewarray(struct vm * vm, uint32_t index, uint32_t dimensions)
 
 void op_new(struct vm * vm, uint32_t index)
 {
-  struct constant * class_constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
-  #ifdef DEBUG
-  assert(class_constant->tag == CONSTANT_Class);
-  #endif
-  struct constant * class_name_constant = &vm->current_frame->class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
-  #ifdef DEBUG
-  assert(class_name_constant->tag == CONSTANT_Utf8);
-  #endif
-
-  struct class_entry * class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
-                                                                 vm->class_hash_table.entry,
-                                                                 class_name_constant->utf8.bytes,
-                                                                 class_name_constant->utf8.length);
+  struct class_entry * class_entry = class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
+                                                                                  vm->class_hash_table.entry,
+                                                                                  vm->current_frame->class_entry,
+                                                                                  index);
   assert(class_entry != nullptr);
 
   /* On successful resolution of the class, it is initialized if it has not

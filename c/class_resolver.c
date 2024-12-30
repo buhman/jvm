@@ -11,6 +11,7 @@
 #include "printf.h"
 #include "field_size.h"
 #include "debug.h"
+#include "fatal.h"
 
 static int field_info_field_size(struct class_file * class_file, struct field_info * field_info)
 {
@@ -270,7 +271,10 @@ struct class_entry * class_resolver_lookup_class(int class_hash_table_length,
                                                 class_hash_table,
                                                 class_name,
                                                 class_name_length);
-  assert(e != nullptr);
+  if (e == nullptr) {
+    fatal_print__class_lookup_failed__from_string(class_name, class_name_length);
+    assert(e != nullptr);
+  }
 
   return (struct class_entry *)e->value;
 }
@@ -298,9 +302,10 @@ struct class_entry * class_resolver_lookup_class_from_class_index(int class_hash
                                                                   class_hash_table,
                                                                   class_name_constant->utf8.bytes,
                                                                   class_name_constant->utf8.length);
-
-  // cache the result
-  class_entry->attribute_entry[class_index - 1].class_entry = _class_entry;
+  if (_class_entry != nullptr) {
+    // cache the result
+    class_entry->attribute_entry[class_index - 1].class_entry = _class_entry;
+  }
 
   return _class_entry;
 }
