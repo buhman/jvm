@@ -161,8 +161,8 @@ static void class_resolver_create_methods_hash_table(struct class_entry * class_
     struct constant * descriptor_constant = &class_file->constant_pool[descriptor_index - 1];
     assert(descriptor_constant->tag == CONSTANT_Utf8);
     debugf("hash table entry for method: ");
-    print_utf8_string(name_constant);
-    debugf("\n");
+    debug_print__constant__method_name(name_constant, descriptor_constant);
+    debugc('\n');
 
     hash_table_add2(methods_hash_table_length,
                     methods_hash_table,

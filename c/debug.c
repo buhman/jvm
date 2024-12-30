@@ -30,3 +30,12 @@ void debug_print__method_info__method_name(struct class_entry * class_entry, str
   assert(method_descriptor_constant->tag == CONSTANT_Utf8);
   debug_print__constant__utf8_string(method_descriptor_constant);
 }
+
+void debug_print__constant__method_name(struct constant * name_constant, struct constant * descriptor_constant)
+{
+  assert(name_constant->tag == CONSTANT_Utf8);
+  debug_print__constant__utf8_string(name_constant);
+  debugc(' ');
+  assert(descriptor_constant->tag == CONSTANT_Utf8);
+  debug_print__constant__utf8_string(descriptor_constant);
+}
