@@ -19,7 +19,8 @@ OBJ = \
 	c/unparse.o \
 	c/native.o \
 	c/debug.o \
-	c/fatal.o
+	c/fatal.o \
+	c/parse_type.o
 
 MAIN_DREAMCAST_OBJ = \
 	c/sh7091_scif.o \

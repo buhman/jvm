@@ -5,6 +5,8 @@
 #include "execute_helper.h"
 #include "printf.h"
 #include "field_size.h"
+#include "debug.h"
+#include "parse_type.h"
 
 void op_aaload(struct vm * vm)
 {
@@ -190,7 +192,25 @@ void op_checkcast(struct vm * vm, uint32_t index)
                                                  vm->current_frame->class_entry,
                                                  index);
 
+  struct constant * class_constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
+  assert(class_constant->tag == CONSTANT_Class);
+  struct constant * class_name_constant = &vm->current_frame->class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  assert(class_name_constant->tag == CONSTANT_Utf8);
+
+  int depth = parse_type_array_depth(class_name_constant->utf8.bytes, class_name_constant->utf8.length);
+  while (depth-- > 0) {
+    if (objectref == nullptr || objectref[0] == 0)
+      assert(!"checkcast on null or zero-length array not implemented");
+    objectref = (int32_t *)objectref[1];
+  }
+  if (objectref == nullptr) {
+    assert(!"checkcast on array with null elements not implemented");
+  }
+
   struct class_entry * class_entry = (struct class_entry *)objectref[0];
+  debug_print__class_entry__class_name(index_class_entry);
+  debug_print__class_entry__class_name(class_entry);
+
   while (true) {
     assert(class_entry != nullptr);
     if (class_entry == index_class_entry) {
@@ -1139,6 +1159,22 @@ void op_instanceof(struct vm * vm, uint32_t index)
   if (objectref == nullptr) {
     operand_stack_push_u32(vm->current_frame, (uint32_t)false);
     return;
+  }
+
+  struct constant * class_constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
+  assert(class_constant->tag == CONSTANT_Class);
+  struct constant * class_name_constant = &vm->current_frame->class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  assert(class_name_constant->tag == CONSTANT_Utf8);
+
+  int depth = parse_type_array_depth(class_name_constant->utf8.bytes, class_name_constant->utf8.length);
+  printf("depth: %d\n", depth);
+  while (depth-- > 0) {
+    if (objectref == nullptr || objectref[0] == 0)
+      assert(!"instanceof on null or zero-length array not implemented");
+    objectref = (int32_t *)objectref[1];
+  }
+  if (objectref == nullptr) {
+    assert(!"instanceof on array with null elements not implemented");
   }
 
   bool value = false;

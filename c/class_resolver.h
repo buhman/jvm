@@ -41,11 +41,6 @@ struct class_entry {
   struct {
     int length;
     struct hash_table_entry * entry;
-  } interfaces;
-
-  struct {
-    int length;
-    struct hash_table_entry * entry;
   } fields;
 
   struct {

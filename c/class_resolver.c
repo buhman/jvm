@@ -12,6 +12,7 @@
 #include "field_size.h"
 #include "debug.h"
 #include "fatal.h"
+#include "parse_type.h"
 
 static int field_info_field_size(struct class_file * class_file, struct field_info * field_info)
 {
@@ -290,18 +291,18 @@ struct class_entry * class_resolver_lookup_class_from_class_index(int class_hash
   }
 
   struct constant * class_constant = &class_entry->class_file->constant_pool[class_index - 1];
-  #ifdef DEBUG
   assert(class_constant->tag == CONSTANT_Class);
-  #endif
   struct constant * class_name_constant = &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
-  #ifdef DEBUG
   assert(class_name_constant->tag == CONSTANT_Utf8);
-  #endif
+
+  struct parse_type_ret parse_type_ret = parse_type(class_name_constant->utf8.bytes,
+                                                    class_name_constant->utf8.length);
+
 
   struct class_entry * _class_entry = class_resolver_lookup_class(class_hash_table_length,
                                                                   class_hash_table,
-                                                                  class_name_constant->utf8.bytes,
-                                                                  class_name_constant->utf8.length);
+                                                                  parse_type_ret.bytes,
+                                                                  parse_type_ret.length);
   if (_class_entry != nullptr) {
     // cache the result
     class_entry->attribute_entry[class_index - 1].class_entry = _class_entry;
