@@ -179,7 +179,41 @@ void op_castore(struct vm * vm)
 
 void op_checkcast(struct vm * vm, uint32_t index)
 {
-  assert(!"op_checkcast");
+  int32_t * objectref = (int32_t *)operand_stack_peek_u32(vm->current_frame, 1);
+  if (objectref == nullptr) {
+    return;
+  }
+
+  struct class_entry * index_class_entry =
+    class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
+                                                 vm->class_hash_table.entry,
+                                                 vm->current_frame->class_entry,
+                                                 index);
+
+  struct class_entry * class_entry = (struct class_entry *)objectref[0];
+  while (true) {
+    assert(class_entry != nullptr);
+    if (class_entry == index_class_entry) {
+      return;
+    }
+    if (class_entry->class_file->super_class == 0) {
+      break;
+    }
+
+    struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->super_class - 1];
+    assert(class_constant->tag == CONSTANT_Class);
+    struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+    assert(class_name_constant->tag == CONSTANT_Utf8);
+    print_utf8_string(class_name_constant);
+    debugf("\n");
+
+    // superclass lookup
+    class_entry = class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
+                                                               vm->class_hash_table.entry,
+                                                               class_entry,
+                                                               class_entry->class_file->super_class);
+  }
+  assert(!"ClassCastException");
 }
 
 void op_d2f(struct vm * vm)
@@ -1102,32 +1136,35 @@ void op_instanceof(struct vm * vm, uint32_t index)
   assert(index_class_entry != nullptr);
 
   int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  if (objectref == nullptr) {
+    operand_stack_push_u32(vm->current_frame, (uint32_t)false);
+    return;
+  }
+
   bool value = false;
-  if (objectref != nullptr) {
-    struct class_entry * class_entry = (struct class_entry *)objectref[0];
-    while (true) {
-      assert(class_entry != nullptr);
-      if (class_entry == index_class_entry) {
-        value = true;
-        break;
-      }
-      if (class_entry->class_file->super_class == 0) {
-        break;
-      }
-
-      struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->super_class - 1];
-      assert(class_constant->tag == CONSTANT_Class);
-      struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
-      assert(class_name_constant->tag == CONSTANT_Utf8);
-      print_utf8_string(class_name_constant);
-      debugf("\n");
-
-      // superclass lookup
-      class_entry = class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
-                                                                 vm->class_hash_table.entry,
-                                                                 class_entry,
-                                                                 class_entry->class_file->super_class);
+  struct class_entry * class_entry = (struct class_entry *)objectref[0];
+  while (true) {
+    assert(class_entry != nullptr);
+    if (class_entry == index_class_entry) {
+      value = true;
+      break;
     }
+    if (class_entry->class_file->super_class == 0) {
+      break;
+    }
+
+    struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->super_class - 1];
+    assert(class_constant->tag == CONSTANT_Class);
+    struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+    assert(class_name_constant->tag == CONSTANT_Utf8);
+    print_utf8_string(class_name_constant);
+    debugf("\n");
+
+    // superclass lookup
+    class_entry = class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
+                                                               vm->class_hash_table.entry,
+                                                               class_entry,
+                                                               class_entry->class_file->super_class);
   }
   operand_stack_push_u32(vm->current_frame, (uint32_t)value);
 }
