@@ -23,28 +23,34 @@ public class DirectoryRecord extends ByteParser {
   public static final int LENGTH_OF_FILE_IDENTIFIER_END = 32;
   public static final int FILE_IDENTIFIER_START = 33;
   public static final int FILE_IDENTIFIER_END = 32;
-  public static final int lengthOfDirectoryRecord() {
+  public DirectoryRecord(byte[] array, int offset) {
+    super(array, offset);
+  }
+  public int lengthOfDirectoryRecord() {
     return getByte(LENGTH_OF_DIRECTORY_RECORD_START);
   }
-  public static final int extendedAttributeRecordLength() {
+  public int extendedAttributeRecordLength() {
     return getByte(EXTENDED_ATTRIBUTE_RECORD_LENGTH_START);
   }
-  public static final int locationOfExtent() {
-    return getIntBE(LOCATION_OF_EXTENT_START);
+  public int locationOfExtent() {
+    return getIntLE(LOCATION_OF_EXTENT_START);
   }
-  public static final int dataLength() {
-    return getIntBE(DATA_LENGTH_START);
+  public int dataLength() {
+    return getIntLE(DATA_LENGTH_START);
   }
-  public static final int fileUnitSize() {
+  public int fileFlags() {
+    return getByte(FILE_FLAGS_START);
+  }
+  public int fileUnitSize() {
     return getByte(FILE_UNIT_SIZE_START);
   }
-  public static final int interleaveGapSize() {
+  public int interleaveGapSize() {
     return getByte(INTERLEAVE_GAP_SIZE_START);
   }
-  public static final int volumeSequenceNumber() {
-    return getShortBE(VOLUME_SEQUENCE_NUMBER_START);
+  public int volumeSequenceNumber() {
+    return getShortLE(VOLUME_SEQUENCE_NUMBER_START);
   }
-  public static final int lengthOfFileIdentifier() {
+  public int lengthOfFileIdentifier() {
     return getByte(LENGTH_OF_FILE_IDENTIFIER_START);
   }
 }

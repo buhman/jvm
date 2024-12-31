@@ -57,7 +57,7 @@ public class PrimaryVolumeDescriptor extends ByteParser {
   public static final int FILE_STRUCTURE_VERSION_END = 881;
   public static final int APPLICATION_USE_START = 883;
   public static final int APPLICATION_USE_END = 1394;
-  PrimaryVolumeDescriptor(byte[] array, int offset) {
+  public PrimaryVolumeDescriptor(byte[] array, int offset) {
     super(array, offset);
   }
   public int volumeDescriptorType() {
