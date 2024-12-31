@@ -31,6 +31,11 @@ public class ByteBuffer extends Buffer {
         return this;
     }
 
+    public ByteBuffer offset(int off) {
+        offset = off;
+        return this;
+    }
+
     private static int intBE(int i0, int i1, int i2, int i3) {
         return ((i0 << 24)
               | (i1 << 16)
@@ -55,20 +60,24 @@ public class ByteBuffer extends Buffer {
               | (i1 << 8));
     }
 
+    private int ix(int pos) {
+        return offset + pos;
+    }
+
     public byte get() {
-        byte i0 = array[position];
+        byte i0 = array[ix(position)];
         position += 1;
         return i0;
     }
 
     public byte get(int pos) {
-        byte i0 = array[pos];
+        byte i0 = array[ix(pos)];
         return i0;
     }
 
     public short getShort() {
-        int i0 = array[position + 0];
-        int i1 = array[position + 1];
+        int i0 = array[ix(position) + 0];
+        int i1 = array[ix(position) + 1];
 
         position += 2;
 
@@ -80,8 +89,8 @@ public class ByteBuffer extends Buffer {
     }
 
     public short getShort(int pos) {
-        int i0 = array[pos + 0];
-        int i1 = array[pos + 1];
+        int i0 = array[ix(pos) + 0];
+        int i1 = array[ix(pos) + 1];
 
         if (bigEndian) {
             return (short)shortBE(i0, i1);
@@ -91,10 +100,10 @@ public class ByteBuffer extends Buffer {
     }
 
     public int getInt() {
-        int i0 = array[position + 0];
-        int i1 = array[position + 1];
-        int i2 = array[position + 2];
-        int i3 = array[position + 3];
+        int i0 = array[ix(position) + 0];
+        int i1 = array[ix(position) + 1];
+        int i2 = array[ix(position) + 2];
+        int i3 = array[ix(position) + 3];
 
         position += 4;
 
@@ -106,10 +115,10 @@ public class ByteBuffer extends Buffer {
     }
 
     public int getInt(int pos) {
-        int i0 = array[pos + 0];
-        int i1 = array[pos + 1];
-        int i2 = array[pos + 2];
-        int i3 = array[pos + 3];
+        int i0 = array[ix(pos) + 0];
+        int i1 = array[ix(pos) + 1];
+        int i2 = array[ix(pos) + 2];
+        int i3 = array[ix(pos) + 3];
 
         if (bigEndian) {
             return intBE(i0, i1, i2, i3);
