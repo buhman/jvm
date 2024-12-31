@@ -1,3 +1,5 @@
+#include <stdbit.h>
+
 #include "native.h"
 #include "printf.h"
 
@@ -122,4 +124,9 @@ uint32_t java_misc_resource_getresource_1(uint32_t * args)
   (void)name_length;
   return 0;
   #endif
+}
+
+uint32_t native_java_misc_memory_isbigendian()
+{
+  return (__STDC_ENDIAN_BIG__ == __STDC_ENDIAN_NATIVE__);
 }
