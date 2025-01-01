@@ -18,8 +18,13 @@ void main()
   };
   int class_file_buffers_length = (sizeof (class_file_buffers)) / (sizeof (class_file_buffers[0]));
 
-  const uint8_t * main_class = (const uint8_t *)"example/DreamcastVideo2";
+  //const uint8_t * main_class = (const uint8_t *)"example/DreamcastVideo2";
+  const uint8_t * main_class = (const uint8_t *)"example/GdromTest";
   int main_class_length = string_length((const char *)main_class);
+
+  for (int i = 0; i < main_class_length; i++)
+    scif_character(main_class[i]);
+  scif_character('\n');
 
   int class_hash_table_length;
   struct hash_table_entry * class_hash_table = class_resolver_load_from_buffers(class_file_buffers,

@@ -1,5 +1,8 @@
-def render_fields(get_type, fields):
+def render_fields(get_type, fields, want_get_byte):
     for field in fields:
+        if want_get_byte and field.name.startswith("_res"):
+            continue
+
         field_type = get_type(field.name)
         if field.array_length == 1:
             yield f"public {field_type} {field.name};"
@@ -7,7 +10,7 @@ def render_fields(get_type, fields):
             for i in range(field.array_length):
                 yield f"public {field_type} {field.name}{i};"
 
-def render_constructor(get_type, declaration):
+def render_constructor(get_type, declaration, want_get_byte):
     initializer = f"public {declaration.name}("
     padding = " " * len(initializer)
     def start(i):
@@ -32,6 +35,9 @@ def render_constructor(get_type, declaration):
         yield initializer + ') {'
 
     for i, field in enumerate(declaration.fields):
+        if want_get_byte and field.name.startswith("_res"):
+            continue
+
         value = field.name if not field.name.startswith('_res') else '0'
         value = hex(field.default) if field.default is not None else value
         s = ':' if i == 0 else ','
@@ -41,7 +47,7 @@ def render_constructor(get_type, declaration):
             max_shift = 8 * (field.array_length - 1)
             for i in range(field.array_length):
                 shift = max_shift - (i * 8)
-                yield f"this.{field.name}{i} = (byte)(({field.name} >> {shift}) & 0xff);"
+                yield f"this.{field.name}{i} = ({field.name} >> {shift}) & 0xff;"
 
     yield "}"
 
@@ -50,7 +56,7 @@ def render_constructor(get_type, declaration):
 
 def render_get_byte(fields):
     ix = 0
-    yield "public int get_byte(int ix) {"
+    yield "public int getByte(int ix) {"
     yield "switch (ix) {"
     for field in fields:
         if "_res" in field.name:
@@ -66,9 +72,9 @@ def render_get_byte(fields):
     yield "}"
 
 def render_declaration(get_type, declaration, want_get_byte):
-    yield f"public static class {declaration.name} {{"
-    yield from render_fields(get_type, declaration.fields)
-    yield from render_constructor(get_type, declaration)
+    yield f"public static class {declaration.name} implements GdromCommandPacketInterface {{"
+    yield from render_fields(get_type, declaration.fields, want_get_byte)
+    yield from render_constructor(get_type, declaration, want_get_byte)
     if want_get_byte:
         yield from render_get_byte(declaration.fields)
     yield "}"

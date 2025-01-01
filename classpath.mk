@@ -1,6 +1,8 @@
 CLASS_PATH = \
 	example/DreamcastVideo2.class.o \
 	example/DreamcastVideo.class.o \
+	example/GdromTest.class.o \
+	example/Vec2.class.o \
 	java/io/PrintStream.class.o \
 	java/lang/Boolean.class.o \
 	java/lang/Byte.class.o \
@@ -27,6 +29,23 @@ CLASS_PATH = \
 	model/Vec3.class.o \
 	sega/dreamcast/gdrom/GdromBits.class.o \
 	sega/dreamcast/gdrom/Gdrom.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_open.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_play.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_read2.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_read.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_scan.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_scd.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_seek.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_get_toc.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_req_error.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_req_mode.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_req_ses.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_req_stat.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_set_mode.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketFormat_test_unit.class.o \
+	sega/dreamcast/gdrom/GdromCommandPacketInterface.class.o \
+	sega/dreamcast/gdrom/GdromProtocol.class.o \
 	sega/dreamcast/holly/Background.class.o \
 	sega/dreamcast/holly/CoreBits.class.o \
 	sega/dreamcast/holly/Core.class.o \

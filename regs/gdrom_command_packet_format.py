@@ -6,7 +6,7 @@ from sparse_struct import parse
 from sparse_struct_java import render_declarations
 
 def get_type(field_name: str):
-    return "byte"
+    return "int"
 
 if __name__ == "__main__":
     rows = read_input_headerless(sys.argv[1])
