@@ -1,7 +1,11 @@
 CLASS_PATH = \
 	example/DreamcastVideo2.class.o \
 	example/DreamcastVideo.class.o \
+	example/Vec2.class.o \
 	java/io/PrintStream.class.o \
+	java/lang/Boolean.class.o \
+	java/lang/Byte.class.o \
+	java/lang/Character.class.o \
 	java/lang/DecimalDigits.class.o \
 	java/lang/Double.class.o \
 	java/lang/Float.class.o \
@@ -9,15 +13,21 @@ CLASS_PATH = \
 	java/lang/Long.class.o \
 	java/lang/Math.class.o \
 	java/lang/Object.class.o \
+	java/lang/Short.class.o \
 	java/lang/String.class.o \
 	java/lang/System.class.o \
 	java/misc/Memory.class.o \
 	java/misc/Resource.class.o \
+	java/nio/Buffer.class.o \
+	java/nio/ByteBuffer.class.o \
+	java/nio/ByteOrder.class.o \
 	model/FacePTN.class.o \
 	model/ModelObject.class.o \
 	model/UntitledModel.class.o \
 	model/Vec2.class.o \
 	model/Vec3.class.o \
+	sega/dreamcast/gdrom/GdromBits.class.o \
+	sega/dreamcast/gdrom/Gdrom.class.o \
 	sega/dreamcast/holly/Background.class.o \
 	sega/dreamcast/holly/CoreBits.class.o \
 	sega/dreamcast/holly/Core.class.o \
