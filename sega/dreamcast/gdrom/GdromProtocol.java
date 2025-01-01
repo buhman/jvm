@@ -7,6 +7,8 @@ public class GdromProtocol {
     static GdromCommandPacketFormat.get_toc get_toc_command;
     static short[] toc_buf;
 
+    static GdromCommandPacketFormat.cd_read cd_read_command;
+
     static {
         int single_density_area = 0;
         int maximum_toc_length = 0x0198;
@@ -14,6 +16,8 @@ public class GdromProtocol {
                                                                maximum_toc_length);
 
         toc_buf = new short[maximum_toc_length >> 1];
+
+        cd_read_command = new GdromCommandPacketFormat.cd_read(0, 0, 0);
     }
 
     public static void packetCommand(GdromCommandPacketInterface command, boolean enable_dma) {
@@ -94,5 +98,25 @@ public class GdromProtocol {
 
         // assume track 1 is the correct track
         return getFad(toc_buf, 1);
+    }
+
+    public static void cdReadSet(int data, int starting_address, int transfer_length) {
+        cd_read_command.data = data;
+        cd_read_command.starting_address0 = (starting_address >> 16) & 0xff;
+        cd_read_command.starting_address1 = (starting_address >> 8) & 0xff;
+        cd_read_command.starting_address2 = (starting_address >> 0) & 0xff;
+        cd_read_command.transfer_length0 = (transfer_length >> 16) & 0xff;
+        cd_read_command.transfer_length1 = (transfer_length >> 8) & 0xff;
+        cd_read_command.transfer_length2 = (transfer_length >> 0) & 0xff;
+    }
+
+    public static void cdReadDMA(int starting_address, int transfer_length) {
+        int data_select = 0b0010; // data
+        int expected_data_type = 0b100; // XA mode 2 form 1
+        int parameter_type = 0b0; // FAD specified
+        int data = (data_select << 4) | (expected_data_type << 1) | (parameter_type);
+
+        cdReadSet(data, starting_address, transfer_length);
+        packetCommand(cd_read_command, true); // DMA mode
     }
 }

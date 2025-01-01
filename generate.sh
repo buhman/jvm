@@ -1,8 +1,14 @@
 python gen_decoder.py > c/decode.inc.c
 
-python regs/register_gen.py ../dreamcast/regs/holly.csv      holly     0xa05f8000 > sega/dreamcast/holly/Holly.java
-python regs/register_gen.py ../dreamcast/regs/systembus.csv  systembus 0xa05f6800 > sega/dreamcast/systembus/Systembus.java
-python regs/register_gen.py ~/dreamcast/regs/gdrom.csv       gdrom     0xa05f7000 > sega/dreamcast/gdrom/Gdrom.java
+#                                                            [block name]  [package name]  [class_name]  [base_address]
+python regs/register_gen.py ../dreamcast/regs/holly.csv      holly         holly           Holly         0xa05f8000     > sega/dreamcast/holly/Holly.java
+python regs/register_gen.py ../dreamcast/regs/systembus.csv  systembus     systembus       Systembus     0xa05f6800     > sega/dreamcast/systembus/Systembus.java
+python regs/register_gen.py ../dreamcast/regs/systembus.csv  maple_if      maple           MapleIF       0xa05f6c00     > sega/dreamcast/maple/MapleIF.java
+python regs/register_gen.py ../dreamcast/regs/systembus.csv  gdrom_if      gdrom           GdromIF       0xa05f7000     > sega/dreamcast/gdrom/GdromIF.java
+python regs/register_gen.py ../dreamcast/regs/systembus.csv  g1_if         gdrom           G1IF          0xa05f7400     > sega/dreamcast/gdrom/G1IF.java
+python regs/register_gen.py ../dreamcast/regs/systembus.csv  g2_if         g2_if           G2IF          0xa05f7800     > sega/dreamcast/g2_if/G2IF.java
+python regs/register_gen.py ../dreamcast/regs/systembus.csv  pvr_if        pvr_if          PVRIF         0xa05f7c00     > sega/dreamcast/pvr_if/PVRIF.java
+python regs/register_gen.py ../dreamcast/regs/gdrom.csv      gdrom         gdrom           Gdrom         0xa05f7000     > sega/dreamcast/gdrom/Gdrom.java
 
 python regs/bits_gen.py ../dreamcast/regs/core_bits.csv      holly CoreBits    > sega/dreamcast/holly/CoreBits.java
 python regs/bits_gen.py ../dreamcast/regs/ta_bits.csv        holly TABits      > sega/dreamcast/holly/TABits.java

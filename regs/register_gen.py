@@ -6,9 +6,15 @@ import sys
 
 if __name__ == "__main__":
     rows = read_input(sys.argv[1])
-    package_name = sys.argv[2]
-    base_address = int(sys.argv[3], 16)
+    block_name = sys.argv[2]
+    package_name = sys.argv[3]
+    class_name = sys.argv[4]
+    base_address = int(sys.argv[5], 16)
     blocks = group_by_block(map(parse_row, rows))
     render, out = renderer(indent_length=4)
-    render(generate_classes(package_name, base_address, blocks))
+    render(generate_classes(block_name,
+                            package_name,
+                            class_name,
+                            base_address,
+                            blocks))
     sys.stdout.write(out.getvalue())

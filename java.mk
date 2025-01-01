@@ -2,7 +2,7 @@
 #	javac $<
 
 %.class: %.java
-	javac --source 8 --target 8 --boot-class-path . $<
+	javac -Xlint:-options --source 8 --target 8 --boot-class-path . $<
 
 OBJ = \
 	c/decode.o \

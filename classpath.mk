@@ -2,7 +2,6 @@ CLASS_PATH = \
 	example/DreamcastVideo2.class.o \
 	example/DreamcastVideo.class.o \
 	example/GdromTest.class.o \
-	example/Vec2.class.o \
 	java/io/PrintStream.class.o \
 	java/lang/Boolean.class.o \
 	java/lang/Byte.class.o \
@@ -27,6 +26,8 @@ CLASS_PATH = \
 	model/UntitledModel.class.o \
 	model/Vec2.class.o \
 	model/Vec3.class.o \
+	sega/dreamcast/g2_if/G2IF.class.o \
+	sega/dreamcast/gdrom/G1IF.class.o \
 	sega/dreamcast/gdrom/GdromBits.class.o \
 	sega/dreamcast/gdrom/Gdrom.class.o \
 	sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_open.class.o \
@@ -87,6 +88,8 @@ CLASS_PATH = \
 	sega/dreamcast/holly/TAVertexParameter_sprite_type_0.class.o \
 	sega/dreamcast/holly/TAVertexParameter_sprite_type_1.class.o \
 	sega/dreamcast/holly/TextureMemoryAllocation.class.o \
+	sega/dreamcast/maple/MapleIF.class.o \
 	sega/dreamcast/MemoryMap.class.o \
+	sega/dreamcast/pvr_if/PVRIF.class.o \
 	sega/dreamcast/systembus/SystembusBits.class.o \
 	sega/dreamcast/systembus/Systembus.class.o
