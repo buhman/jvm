@@ -1,15 +1,13 @@
-package p;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.io.IOException;
+package filesystem.iso9660;
 
 import filesystem.iso9660.PrimaryVolumeDescriptor;
 import filesystem.iso9660.DirectoryRecord;
+import filesystem.iso9660.TestExtentReader;
 
-class ISOParser {
+public class VolumeParser {
     byte[] buf;
     DirectoryRecord dr;
+    ExtentReader reader;
 
     static final int FILE_FLAGS__DIRECTORY = 2;
 
@@ -17,6 +15,16 @@ class ISOParser {
         for (int i = 0; i < length; i++) {
             System.out.print((char)buf[offset + start + i]);
         }
+    }
+
+    public void printStandardIdentifier() {
+        System.out.print("standard identifier: ");
+        int start = PrimaryVolumeDescriptor.STANDARD_IDENTIFIER_START;
+        int end = PrimaryVolumeDescriptor.STANDARD_IDENTIFIER_END;
+        for (int i = start; i <= end; i++) {
+            System.out.print((char)buf[i]);
+        }
+        System.out.println();
     }
 
     public boolean drIsSelfOrParent() {
@@ -27,47 +35,60 @@ class ISOParser {
         return (start == 0 || start == 1);
     }
 
+    public int walkDirectoryRecord(int indent, int[] child_extents, int[] child_lengths, int child_ix) {
+        if (drIsSelfOrParent()) {
+            return child_ix;
+        }
+
+        for (int i = 0; i < indent; i++)
+            System.out.print("  ");
+
+        System.out.print("offset: ");
+        System.out.print(dr.offset);
+
+        //System.out.print("; file_flags: ");
+        //System.out.print((int)dr.fileFlags());
+
+        if ((dr.fileFlags() & FILE_FLAGS__DIRECTORY) == 0) {
+            System.out.print(" [regular file] ");
+            //dr.locationOfExtent();
+            //dr.dataLength();
+        } else {
+            System.out.print(" [directory] ");
+            child_extents[child_ix] = dr.locationOfExtent();
+            child_lengths[child_ix] = dr.dataLength();
+            child_ix += 1;
+        }
+
+        System.out.print(" file_identifier: ");
+        printIdentifier(buf, dr.offset, DirectoryRecord.FILE_IDENTIFIER_START, dr.lengthOfFileIdentifier());
+        System.out.println();
+
+        return child_ix;
+    }
+
+
     public void walkDirectory(int extent, int num_extents, int indent) {
         int[] child_extents = new int[64];
         int[] child_lengths = new int[64];
         int child_ix = 0;
 
         while (num_extents > 0) {
-            int offset = extent * 2048;
+            for (int i = 0; i < indent; i++)
+                System.out.print("  ");
+            System.out.print("read extent : ");
+            System.out.println(extent);
+            reader.readInto(buf, extent);
+            dr.offset = 0;
+
             while (true) {
-                dr.offset = offset;
                 if (dr.lengthOfDirectoryRecord() == 0) {
-                    System.out.print("break\n");
                     break;
                 }
 
-                if (!drIsSelfOrParent()) {
-                    for (int i = 0; i < indent; i++)
-                        System.out.print("  ");
+                child_ix = walkDirectoryRecord(indent, child_extents, child_lengths, child_ix);
 
-                    System.out.print("offset: ");
-                    System.out.print(dr.offset);
-
-                    System.out.print("; file_flags: ");
-                    System.out.print((int)dr.fileFlags());
-
-                    if ((dr.fileFlags() & FILE_FLAGS__DIRECTORY) == 0) {
-                        System.out.print(" [regular file] ");
-                        //dr.locationOfExtent();
-                        //dr.dataLength();
-                    } else {
-                        System.out.print(" [directory] ");
-                        child_extents[child_ix] = dr.locationOfExtent();
-                        child_lengths[child_ix] = dr.dataLength();
-                        child_ix += 1;
-                    }
-
-                    System.out.print("; file_identifier: ");
-                    printIdentifier(buf, offset, DirectoryRecord.FILE_IDENTIFIER_START, dr.lengthOfFileIdentifier());
-                    System.out.println();
-                }
-
-                offset += dr.lengthOfDirectoryRecord();
+                dr.offset += dr.lengthOfDirectoryRecord();
             }
             num_extents -= 1;
             extent += 1;
@@ -80,27 +101,33 @@ class ISOParser {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        ISOParser parser = new ISOParser();
-        parser.buf = Files.readAllBytes(Paths.get("classes.iso"));
+    public void parse() {
+        int pvd_extent = 16;
 
-        int pvd_offset = 2048 * 16;
+        reader.readInto(buf, pvd_extent);
 
-        System.out.print("standard identifier: ");
-        for (int i = PrimaryVolumeDescriptor.STANDARD_IDENTIFIER_START; i <= PrimaryVolumeDescriptor.STANDARD_IDENTIFIER_END; i++) {
-            System.out.print((char)parser.buf[pvd_offset + i]);
-        }
-        System.out.println();
+        printStandardIdentifier();
 
+        dr.offset = PrimaryVolumeDescriptor.DIRECTORY_RECORD_FOR_ROOT_DIRECTORY_START;
+        System.out.print("root directory record: location: ");
+        System.out.print(dr.locationOfExtent());
+        System.out.print(" ; data length: ");
+        System.out.println(dr.dataLength());
 
-        int directory_record_for_root_directory = pvd_offset + PrimaryVolumeDescriptor.DIRECTORY_RECORD_FOR_ROOT_DIRECTORY_START;
-        System.out.println("root directory record: ");
-        parser.dr = new DirectoryRecord(parser.buf, directory_record_for_root_directory);
-        System.out.println(parser.dr.locationOfExtent());
-        System.out.println(parser.dr.dataLength());
+        int extent = dr.locationOfExtent();
+        int num_extents = dr.dataLength() >> 11; // division by 2048
+        walkDirectory(extent, num_extents, 0);
+    }
 
-        int extent = parser.dr.locationOfExtent();
-        int num_extents = parser.dr.dataLength() >> 11; // division by 2048
-        parser.walkDirectory(extent, num_extents, 0);
+    public VolumeParser(ExtentReader reader) {
+        this.reader = reader;
+        this.buf = new byte[2048];
+        this.dr = new DirectoryRecord(this.buf, 0);
+    }
+
+    public static void main(String[] args) {
+        TestExtentReader reader = new TestExtentReader();
+        VolumeParser parser = new VolumeParser(reader);
+        parser.parse();
     }
 }
