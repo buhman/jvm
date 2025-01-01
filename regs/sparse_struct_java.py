@@ -1,8 +1,11 @@
 def render_fields(get_type, fields):
     for field in fields:
         field_type = get_type(field.name)
-        assert field.array_length == 1
-        yield f"public {field_type} {field.name};"
+        if field.array_length == 1:
+            yield f"public {field_type} {field.name};"
+        else:
+            for i in range(field.array_length):
+                yield f"public {field_type} {field.name}{i};"
 
 def render_constructor(get_type, declaration):
     initializer = f"public {declaration.name}("
@@ -19,7 +22,7 @@ def render_constructor(get_type, declaration):
     for i, field in enumerate(constructor_fields):
         s = start(i)
         assert field.array_length <= 4, field
-        type = get_type(field.name) if field.array_length == 1 else "uint32_t"
+        type = get_type(field.name) if field.array_length == 1 else "int"
         comma = ',' if i + 1 < len(constructor_fields) else ''
         yield s + f"{type} {field.name}" + comma
 
@@ -32,23 +35,48 @@ def render_constructor(get_type, declaration):
         value = field.name if not field.name.startswith('_res') else '0'
         value = hex(field.default) if field.default is not None else value
         s = ':' if i == 0 else ','
-        yield f"this.{field.name} = {value};"
+        if field.array_length == 1:
+            yield f"this.{field.name} = {value};"
+        else:
+            max_shift = 8 * (field.array_length - 1)
+            for i in range(field.array_length):
+                shift = max_shift - (i * 8)
+                yield f"this.{field.name}{i} = ({field.name} >> {shift}) & 0xff;"
 
     yield "}"
 
     array_fields = [f for f in declaration.fields
                     if f.array_length > 1]
 
-def render_declaration(get_type, declaration):
+def render_get_byte(fields):
+    ix = 0
+    yield "public get_byte(int ix) {"
+    yield "switch (ix) {"
+    for field in fields:
+        if "_res" in field.name:
+            pass
+        elif field.array_length == 1:
+            yield f"case {ix}: return {field.name};"
+        else:
+            for i in range(field.array_length):
+                yield f"case {ix + i}: return {field.name}{i};"
+        ix += field.array_length
+    yield "default: return 0;"
+    yield "}"
+    yield "}"
+
+def render_declaration(get_type, declaration, want_get_byte):
     yield f"public static class {declaration.name} {{"
     yield from render_fields(get_type, declaration.fields)
     yield from render_constructor(get_type, declaration)
+    if want_get_byte:
+        yield from render_get_byte(declaration.fields)
     yield "}"
 
-def render_declarations(get_type, package_name, class_name, declarations):
+def render_declarations(get_type, package_name, class_name, declarations, want_get_byte=False):
     yield f"package sega.dreamcast.{package_name};"
     yield ""
     yield f"public class {class_name} {{"
     for declaration in declarations:
-        yield from render_declaration(get_type, declaration)
+        yield from render_declaration(get_type, declaration, want_get_byte)
     yield "}"

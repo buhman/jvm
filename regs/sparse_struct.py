@@ -67,7 +67,7 @@ def parse_type_declaration(ix, rows, expected_offset, expected_sizes):
             else:
                 assert False, row
             offset = int(_offset, 16)
-            assert offset == last_offset + expected_offset, (hex(offset), hex(last_offset))
+            assert offset == last_offset + expected_offset, (hex(offset), hex(last_offset), expected_offset)
             last_offset = offset
             if name == "":
                 name = f"_res{res_ix}"
