@@ -1,2 +1,0 @@
-package sega.dreamcast.gdrom;
-

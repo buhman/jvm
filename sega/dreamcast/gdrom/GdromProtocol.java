@@ -5,7 +5,7 @@ import sega.dreamcast.gdrom.GdromCommandPacketFormat;
 
 public class GdromProtocol {
     static GdromCommandPacketFormat.get_toc get_toc_command;
-    static short[] toc_buf;
+    static byte[] toc_buf;
 
     static GdromCommandPacketFormat.cd_read cd_read_command;
 
@@ -15,7 +15,7 @@ public class GdromProtocol {
         get_toc_command = new GdromCommandPacketFormat.get_toc(single_density_area,
                                                                maximum_toc_length);
 
-        toc_buf = new short[maximum_toc_length >> 1];
+        toc_buf = new byte[maximum_toc_length];
 
         cd_read_command = new GdromCommandPacketFormat.cd_read(0, 0, 0);
     }
@@ -53,18 +53,18 @@ public class GdromProtocol {
         }
     }
 
-    public static void readData(short[] buf, int length) {
+    public static void readData(byte[] buf, int length) {
         for (int i = 0; i < (length >> 1); i++) {
-            buf[i] = (short)Memory.getU2(Gdrom.data);
+            int data = Memory.getU2(Gdrom.data);
+            buf[i * 2] = (byte)((data >> 8) & 0xff);
+            buf[i * 2 + 1] = (byte)(data & 0xff);
         }
     }
 
-    public static int getFad(short[] buf, int i) {
-        int low = toc_buf[i * 2] & 0xffff;
-        int high = toc_buf[i * 2 + 1] & 0xffff;
-        int i0 = (high >> 8) & 0xff;
-        int i1 = high & 0xff;
-        int i2 = (low >> 8) & 0xff;
+    public static int getFad(byte[] buf, int i) {
+        int i0 = buf[0];
+        int i1 = buf[1];
+        int i2 = buf[2];
         //int i3 = low & 0xff;
 
         return (i2 << 16) | (i1 << 8) | i0;
@@ -110,11 +110,49 @@ public class GdromProtocol {
         cd_read_command.transfer_length2 = (transfer_length >> 0) & 0xff;
     }
 
+    // transfer_length is in sectors
+    public static void cdReadPIO(byte[] buf, int starting_address, int transfer_length) {
+        int data_select = 0b0010; // data
+        int expected_data_type = 0b100; // XA mode 2 form 1
+        int parameter_type = 0b0; // FAD specified
+        int data = (data_select << 4) | (expected_data_type << 1) | (parameter_type);
+
+        cdReadSet(data, starting_address, transfer_length);
+        packetCommand(cd_read_command, false); // PIO mode
+
+        int length = 0;
+
+        System.out.println("cdReadPIO");
+
+        while (true) {
+            int status = Memory.getU1(Gdrom.status);
+            if (GdromBits.status__drq(status) == 0)
+                break;
+
+            int low = Memory.getU1(Gdrom.byte_count_low);
+            int high = Memory.getU1(Gdrom.byte_count_high);
+            int byte_count = ((high & 0xff) << 8) | (low & 0xff);
+
+            readData(buf, byte_count);
+            length += byte_count;
+        }
+
+        int status = Memory.getU1(Gdrom.status);
+        System.out.print("status: ");
+        System.out.println(status);
+
+        System.out.print("read length: ");
+        System.out.println(length);
+    }
+
+    // transfer_length is in sectors
     public static void cdReadDMA(int starting_address, int transfer_length) {
         int data_select = 0b0010; // data
         int expected_data_type = 0b100; // XA mode 2 form 1
         int parameter_type = 0b0; // FAD specified
         int data = (data_select << 4) | (expected_data_type << 1) | (parameter_type);
+
+        System.out.println("cdReadDMA");
 
         cdReadSet(data, starting_address, transfer_length);
         packetCommand(cd_read_command, true); // DMA mode
