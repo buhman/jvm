@@ -1,6 +1,5 @@
 (const uint8_t *)&_binary_example_DreamcastVideo2_class_start,
 (const uint8_t *)&_binary_example_DreamcastVideo_class_start,
-(const uint8_t *)&_binary_example_Vec2_class_start,
 (const uint8_t *)&_binary_java_io_PrintStream_class_start,
 (const uint8_t *)&_binary_java_lang_Boolean_class_start,
 (const uint8_t *)&_binary_java_lang_Byte_class_start,

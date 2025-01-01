@@ -1,7 +1,6 @@
 CLASS_PATH = \
 	example/DreamcastVideo2.class.o \
 	example/DreamcastVideo.class.o \
-	example/Vec2.class.o \
 	java/io/PrintStream.class.o \
 	java/lang/Boolean.class.o \
 	java/lang/Byte.class.o \

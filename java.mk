@@ -23,8 +23,8 @@ OBJ = \
 	c/parse_type.o
 
 MAIN_DREAMCAST_OBJ = \
-	c/sh7091_scif.o \
 	c/main_dreamcast.o \
+	c/sh7091_scif.o \
 	images/java_text.data.o \
 	images/java_cup.data.o \
 	images/java_powered.data.o
