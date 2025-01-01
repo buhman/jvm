@@ -41,7 +41,7 @@ def render_constructor(get_type, declaration):
             max_shift = 8 * (field.array_length - 1)
             for i in range(field.array_length):
                 shift = max_shift - (i * 8)
-                yield f"this.{field.name}{i} = ({field.name} >> {shift}) & 0xff;"
+                yield f"this.{field.name}{i} = (byte)(({field.name} >> {shift}) & 0xff);"
 
     yield "}"
 
@@ -50,7 +50,7 @@ def render_constructor(get_type, declaration):
 
 def render_get_byte(fields):
     ix = 0
-    yield "public get_byte(int ix) {"
+    yield "public int get_byte(int ix) {"
     yield "switch (ix) {"
     for field in fields:
         if "_res" in field.name:
