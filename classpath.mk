@@ -1,7 +1,13 @@
 CLASS_PATH = \
 	example/DreamcastVideo2.class.o \
 	example/DreamcastVideo.class.o \
+	example/GdromExtentReader.class.o \
 	example/GdromTest.class.o \
+	filesystem/iso9660/ByteParser.class.o \
+	filesystem/iso9660/DirectoryRecord.class.o \
+	filesystem/iso9660/ExtentReader.class.o \
+	filesystem/iso9660/PrimaryVolumeDescriptor.class.o \
+	filesystem/iso9660/VolumeParser.class.o \
 	java/io/PrintStream.class.o \
 	java/lang/Boolean.class.o \
 	java/lang/Byte.class.o \

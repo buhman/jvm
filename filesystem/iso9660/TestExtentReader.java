@@ -6,7 +6,6 @@ import java.io.IOException;
 
 class TestExtentReader implements ExtentReader {
     byte[] all_bytes;
-
     public TestExtentReader() {
         try {
             all_bytes = Files.readAllBytes(Paths.get("classes/classes.iso"));

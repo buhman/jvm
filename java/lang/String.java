@@ -31,6 +31,10 @@ public class String {
         return b ? "true" : "false";
     }
 
+    public static String valueOf(char c) {
+        return new String(new byte[] { (byte)c });
+    }
+
     public static String valueOf(int i) {
         return Integer.toString(i);
     }

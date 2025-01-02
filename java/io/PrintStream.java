@@ -24,6 +24,10 @@ public class PrintStream
         write(String.valueOf(b));
     }
 
+    public void print(char c) {
+        write(String.valueOf(c));
+    }
+
     public void print(int i) {
         write(String.valueOf(i));
     }
@@ -55,6 +59,11 @@ public class PrintStream
 
     public void println(boolean b) {
         write(String.valueOf(b));
+        write(newline);
+    }
+
+    public void println(char c) {
+        write(String.valueOf(c));
         write(newline);
     }
 

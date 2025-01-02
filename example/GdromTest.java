@@ -3,6 +3,17 @@ package example;
 import sega.dreamcast.gdrom.GdromProtocol;
 import sega.dreamcast.gdrom.G1IF;
 import java.misc.Memory;
+import filesystem.iso9660.VolumeParser;
+import filesystem.iso9660.ExtentReader;
+
+class GdromExtentReader implements ExtentReader {
+    public void readInto(byte[] buf, int extent) {
+        int starting_address = extent + 150;
+        System.out.print("starting_address: ");
+        System.out.println(starting_address);
+        GdromProtocol.cdReadPIO(buf, starting_address, 1);
+    }
+}
 
 class GdromTest {
     static byte[] buf;
@@ -29,15 +40,20 @@ class GdromTest {
 
         int data_track_fad = GdromProtocol.tocGetDataTrackFad();
 
-        int primary_volume_descriptor = data_track_fad + 16;
+        //GdromProtocol.cdReadPIO(buf, primary_volume_descriptor, 1);
 
-        GdromProtocol.cdReadPIO(buf, primary_volume_descriptor, 1);
-
+        GdromExtentReader reader = new GdromExtentReader();
+        VolumeParser parser = new VolumeParser(data_track_fad - 150, reader);
+        System.out.println("::parser parse::");
+        parser.parse();
+        /*
         System.out.println("data:");
         for (int i = 0; i < 16; i++) {
-            System.out.print(buf[i]);
-            System.out.print(' ');
+            System.out.print(((int)buf[i]) & 0xff);
+            System.out.print(" ");
         }
         System.out.println();
+        */
+
     }
 }

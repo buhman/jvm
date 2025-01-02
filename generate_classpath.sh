@@ -1,4 +1,4 @@
-function make_class () {
+function java_to_class () {
     while read line; do
         echo "${line%.java}.class"
     done
@@ -68,10 +68,20 @@ function classpath_h () {
 
 set -e
 
-find sega/ java/ -name '*.class' -exec rm -f {} \;
-make -j$(nproc) -f Makefile.dreamcast.mk $(find model/ example/ sega/ java/ -name '*.java' | make_class)
-find model/ example/ sega/ java/ -name '*.class' | sort | rename_class_files
-find model/ example/ sega/ java/ -name '*.class' | sort | classpath_mk
-find model/ example/ sega/ java/ -name '*.class' | sort | classpath_inc_c
-find model/ example/ sega/ java/ -name '*.class' | sort | make_header
-find model/ example/ sega/ java/ -name '*.class' | sort | classpath_h
+function find_classes () {
+    find model/ example/ sega/ java/ filesystem/ -name '*.class' -not -name 'Test*' | sort
+}
+
+function find_sources () {
+    find model/ example/ sega/ java/ filesystem/ -name '*.java' -not -name 'Test*' | sort
+}
+
+find sega/ java/ filesystem/ -name '*.class' -exec rm -f {} \;
+
+make -j$(nproc) -f Makefile.dreamcast.mk $(find_sources | java_to_class)
+
+find_classes | rename_class_files
+find_classes | classpath_mk
+find_classes | classpath_inc_c
+find_classes | make_header
+find_classes | classpath_h

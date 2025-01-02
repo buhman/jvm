@@ -2,9 +2,9 @@ package filesystem.iso9660;
 
 import filesystem.iso9660.PrimaryVolumeDescriptor;
 import filesystem.iso9660.DirectoryRecord;
-import filesystem.iso9660.TestExtentReader;
 
 public class VolumeParser {
+    int fad;
     byte[] buf;
     DirectoryRecord dr;
     ExtentReader reader;
@@ -102,8 +102,10 @@ public class VolumeParser {
     }
 
     public void parse() {
-        int pvd_extent = 16;
+        int pvd_extent = this.fad + 16;
 
+        System.out.print("pvd_extent: ");
+        System.out.println(pvd_extent);
         reader.readInto(buf, pvd_extent);
 
         printStandardIdentifier();
@@ -119,15 +121,20 @@ public class VolumeParser {
         walkDirectory(extent, num_extents, 0);
     }
 
-    public VolumeParser(ExtentReader reader) {
+    public VolumeParser(int fad, ExtentReader reader) {
+        this.fad = fad;
         this.reader = reader;
         this.buf = new byte[2048];
         this.dr = new DirectoryRecord(this.buf, 0);
     }
+
+    /*
+    import filesystem.iso9660.TestExtentReader;
 
     public static void main(String[] args) {
         TestExtentReader reader = new TestExtentReader();
         VolumeParser parser = new VolumeParser(reader);
         parser.parse();
     }
+    */
 }

@@ -36,13 +36,13 @@ public class GdromProtocol {
 
         Memory.putU1(Gdrom.command, GdromBits.command__code__packet_command);
 
-        System.out.println("words:");
+        //System.out.println("words:");
         for (int i = 0; i < 6; i++) {
             int i0 = command.getByte(i * 2);
             int i1 = command.getByte(i * 2 + 1);
             // little endian
             int word = ((i1 & 0xff) << 8) | (i0 & 0xff);
-            System.out.println(word);
+            //System.out.println(word);
             Memory.putU2(Gdrom.data, word);
         }
 
@@ -56,18 +56,18 @@ public class GdromProtocol {
     public static void readData(byte[] buf, int length) {
         for (int i = 0; i < (length >> 1); i++) {
             int data = Memory.getU2(Gdrom.data);
-            buf[i * 2] = (byte)((data >> 8) & 0xff);
-            buf[i * 2 + 1] = (byte)(data & 0xff);
+            buf[i * 2] = (byte)(data);
+            buf[i * 2 + 1] = (byte)(data >> 8);
         }
     }
 
     public static int getFad(byte[] buf, int i) {
-        int i0 = buf[0];
-        int i1 = buf[1];
-        int i2 = buf[2];
-        //int i3 = low & 0xff;
+        //int i0 = ((int)buf[i * 4 + 0]) & 0xff;
+        int i1 = ((int)buf[i * 4 + 1]) & 0xff;
+        int i2 = ((int)buf[i * 4 + 2]) & 0xff;
+        int i3 = ((int)buf[i * 4 + 3]) & 0xff;
 
-        return (i2 << 16) | (i1 << 8) | i0;
+        return (i1 << 16) | (i2 << 8) | (i3 << 0);
     }
 
     public static int tocGetDataTrackFad() {
