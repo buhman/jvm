@@ -64,6 +64,8 @@ void hash_table_add(int hash_table_length,
   if (e->key != nullptr) {
     // allocate e from overflow
     e->next = malloc_class_arena((sizeof (struct hash_table_entry)));
+    e->next->key = nullptr;
+    e->next->next = nullptr;
     e = e->next;
   }
 
@@ -135,6 +137,8 @@ void hash_table_add2(int hash_table_length,
   if (e->key != nullptr) {
     // allocate e from overflow
     e->next = malloc_class_arena((sizeof (struct hash_table_entry)));
+    e->next->key = nullptr;
+    e->next->next = nullptr;
     e = e->next;
   }
 

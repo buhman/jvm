@@ -1,5 +1,10 @@
 #include "native.h"
 #include "printf.h"
+#include "string.h"
+#include "malloc.h"
+#include "memory_allocator.h"
+#include "class_resolver.h"
+#include "frame.h"
 
 void native_java_io_printstream_write(uint32_t * arrayref)
 {
@@ -127,4 +132,36 @@ uint32_t java_misc_resource_getresource_1(uint32_t * args)
 uint32_t native_java_misc_memory_isbigendian()
 {
   return (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__);
+}
+
+static uint8_t loader_buffer[0x100000];
+
+uint32_t native_jvm_internal_loader_getbuffer()
+{
+  return (uint32_t)&loader_buffer[0];
+}
+
+extern struct vm vm;
+
+void native_jvm_internal_loader_load(uint32_t * args)
+{
+  uint32_t * arrayref = (uint32_t *)args[0];
+  int32_t buffers_length = (int32_t)arrayref[0];
+  const uint8_t ** buffers = (const uint8_t **)&arrayref[1];
+
+  const uint8_t * main_class = (const uint8_t *)"Main";
+  int main_class_length = string_length((const char *)main_class);
+
+  memory_reset_free_list();
+  malloc_class_arena_reset();
+
+  int class_hash_table_length;
+  struct hash_table_entry * class_hash_table = class_resolver_load_from_buffers(buffers,
+                                                                                buffers_length,
+                                                                                &class_hash_table_length);
+
+  struct vm * vm = vm_start(class_hash_table_length,
+                            class_hash_table,
+                            main_class,
+                            main_class_length);
 }

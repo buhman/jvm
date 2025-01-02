@@ -4,6 +4,8 @@
 #include "class_resolver.h"
 #include "frame.h"
 #include "printf.h"
+#include "malloc.h"
+#include "memory_allocator.h"
 
 #include "sh7091_scif.h"
 
@@ -26,13 +28,17 @@ void main()
     scif_character(main_class[i]);
   scif_character('\n');
 
+  memory_reset_free_list();
+  malloc_class_arena_reset();
+
   int class_hash_table_length;
   struct hash_table_entry * class_hash_table = class_resolver_load_from_buffers(class_file_buffers,
                                                                                 class_file_buffers_length,
                                                                                 &class_hash_table_length);
 
-  vm_start(class_hash_table_length,
-           class_hash_table,
-           main_class,
-           main_class_length);
+  struct vm * vm = vm_start(class_hash_table_length,
+                            class_hash_table,
+                            main_class,
+                            main_class_length);
+  vm_execute(vm);
 }

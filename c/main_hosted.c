@@ -6,6 +6,8 @@
 #include "class_resolver.h"
 #include "string.h"
 #include "file.h"
+#include "malloc.h"
+#include "memory_allocator.h"
 
 static struct hash_table_entry * load_from_filenames(const char * filenames[], int length, int * hash_table_length)
 {
@@ -16,6 +18,9 @@ static struct hash_table_entry * load_from_filenames(const char * filenames[], i
     debugf("load class: %s\n", filenames[i]);
     buffers[i] = file_read(filenames[i], &file_size[i]);
   }
+
+  memory_reset_free_list();
+  malloc_class_arena_reset();
 
   struct hash_table_entry * class_hash_table = class_resolver_load_from_buffers((const uint8_t **)buffers,
                                                                                 length,
@@ -42,8 +47,11 @@ int main(int argc, const char * argv[])
   int class_hash_table_length;
   struct hash_table_entry * class_hash_table = load_from_filenames(class_filenames, num_class_filenames, &class_hash_table_length);
 
-  vm_start(class_hash_table_length,
-           class_hash_table,
-           main_class,
-           main_class_length);
+  debugf("vm_start\n");
+
+  struct vm * vm = vm_start(class_hash_table_length,
+                            class_hash_table,
+                            main_class,
+                            main_class_length);
+  vm_execute(vm);
 }

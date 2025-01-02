@@ -112,6 +112,7 @@ static int32_t class_resolver_create_fields_hash_table(int class_hash_table_leng
   int fields_hash_table_length = hash_table_next_power_of_two(class_entry->class_file->fields_count * 2);
   uint32_t fields_hash_table_size = (sizeof (struct hash_table_entry)) * fields_hash_table_length;
   struct hash_table_entry * fields_hash_table = malloc_class_arena(fields_hash_table_size);
+  hash_table_init(fields_hash_table_length, fields_hash_table);
 
   int static_index = 0;
 
@@ -159,6 +160,8 @@ static void class_resolver_create_methods_hash_table(struct class_entry * class_
   int methods_hash_table_length = hash_table_next_power_of_two(class_file->methods_count * 2);
   uint32_t methods_hash_table_size = (sizeof (struct hash_table_entry)) * methods_hash_table_length;
   struct hash_table_entry * methods_hash_table = malloc_class_arena(methods_hash_table_size);
+  hash_table_init(methods_hash_table_length, methods_hash_table);
+
   for (int i = 0; i < class_file->methods_count; i++) {
     u2 name_index = class_file->methods[i].name_index;
     struct constant * name_constant = &class_file->constant_pool[name_index - 1];
@@ -215,6 +218,8 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buff
   int class_hash_table_length = hash_table_next_power_of_two(hash_table_next_power_of_two(length * 2));
   uint32_t class_hash_table_size = (sizeof (struct hash_table_entry)) * class_hash_table_length;
   struct hash_table_entry * class_hash_table = malloc_class_arena(class_hash_table_size);
+  hash_table_init(class_hash_table_length, class_hash_table);
+
   uint32_t class_entry_size = (sizeof (struct class_entry)) * length;
   struct class_entry * class_entry = malloc_class_arena(class_entry_size);
 
@@ -233,7 +238,7 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buff
     assert(class_name_constant->tag == CONSTANT_Utf8);
     debugf("hash table entry for class: ");
     print_utf8_string(class_name_constant);
-    debugf("\n");
+    debugf(" %p\n", &class_entry[i]);
 
     hash_table_add(class_hash_table_length,
                    class_hash_table,

@@ -1274,6 +1274,7 @@ void op_invokevirtual(struct vm * vm, uint32_t index)
   int32_t * objectref = (int32_t *)operand_stack_peek_u32(vm->current_frame, nargs + 1);
   assert(objectref != nullptr);
   struct class_entry * class_entry = (struct class_entry *)objectref[0];
+  debugf("class_entry: %p\n", class_entry);
 
   struct method_entry method_entry =
     class_resolver_lookup_method_from_interfacemethodref_index(vm->class_hash_table.length,

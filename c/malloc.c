@@ -15,6 +15,11 @@ struct arena class_arena = {
   .ix = 0,
 };
 
+void malloc_class_arena_reset()
+{
+  class_arena.ix = 0;
+}
+
 void * malloc_class_arena(uint32_t size)
 {
   if (size == 0)

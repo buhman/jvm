@@ -304,7 +304,7 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
       hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"getResource", method_name_constant->utf8.length);
     if (getresource) {
       assert(nargs == 1);
-      assert(return_type == '[');
+      assert(return_type == 'I');
       uint32_t value = java_misc_resource_getresource_1(args);
       operand_stack_push_u32(vm->current_frame, value);
       return;
@@ -328,6 +328,30 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
       } else if (nargs == 2) {
         assert(return_type == 'V');
         native_java_io_printstream_write_2(args);
+        return;
+      }
+    }
+  }
+
+  int jvm_internal_loader_length = 19;
+  bool jvm_internal_loader =
+    class_name_constant->utf8.length == jvm_internal_loader_length &&
+    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"jvm/internal/Loader", class_name_constant->utf8.length);
+  if (jvm_internal_loader) {
+    if (method_name_constant->utf8.length == 4) {
+      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"load", 4)) {
+        assert(nargs == 1);
+        assert(return_type == 'V');
+        native_jvm_internal_loader_load(args);
+        return;
+      }
+    }
+    if (method_name_constant->utf8.length == 9) {
+      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"getBuffer", 9)) {
+        assert(nargs == 0);
+        assert(return_type == 'I');
+        uint32_t value = native_jvm_internal_loader_getbuffer();
+        operand_stack_push_u32(vm->current_frame, value);
         return;
       }
     }
@@ -533,10 +557,10 @@ void vm_execute(struct vm * vm)
   }
 }
 
-void vm_start(int class_hash_table_length,
-              struct hash_table_entry * class_hash_table,
-              const uint8_t * main_class_name,
-              int main_class_name_length)
+struct vm * vm_start(int class_hash_table_length,
+                     struct hash_table_entry * class_hash_table,
+                     const uint8_t * main_class_name,
+                     int main_class_name_length)
 {
   struct class_entry * class_entry = class_resolver_lookup_class(class_hash_table_length,
                                                                  class_hash_table,
@@ -559,7 +583,7 @@ void vm_start(int class_hash_table_length,
                                                                   method_descriptor_length);
   assert(method_info != nullptr);
 
-  struct vm vm;
+  static struct vm vm;
   vm.class_hash_table.entry = class_hash_table;
   vm.class_hash_table.length = class_hash_table_length;
 
@@ -583,5 +607,6 @@ void vm_start(int class_hash_table_length,
   entry_frame->operand_stack_ix = 0;
 
   vm_static_method_call(&vm, class_entry, method_info);
-  vm_execute(&vm);
+
+  return &vm;
 }
