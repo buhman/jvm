@@ -13,6 +13,7 @@ struct resource {
 };
 
 static struct resource resources[] = {
+  /*
   {
     .name = (const uint8_t *)"images/java_text",
     .name_length = 16,
@@ -25,6 +26,7 @@ static struct resource resources[] = {
     .buf = (const int32_t *)&_binary_images_java_cup_data_start,
     .buf_length = (int32_t)&_binary_images_java_cup_data_size
   },
+  */
   {
     .name = (const uint8_t *)"images/java_powered",
     .name_length = 19,

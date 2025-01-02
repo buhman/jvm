@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -eu pipefail
+
 function java_to_class () {
     while read line; do
         echo "${line%.java}.class"
@@ -66,7 +70,55 @@ function classpath_h () {
     done
 }
 
-set -e
+declare -a boot_classes=(
+    example/GdromExtentReader.class
+    example/GdromTest.class
+    filesystem/iso9660/ByteParser.class
+    filesystem/iso9660/DirectoryRecord.class
+    filesystem/iso9660/ExtentReader.class
+    filesystem/iso9660/PrimaryVolumeDescriptor.class
+    filesystem/iso9660/VolumeParser.class
+    java/io/PrintStream.class
+    java/lang/Boolean.class
+    java/lang/Byte.class
+    java/lang/Character.class
+    java/lang/DecimalDigits.class
+    java/lang/Integer.class
+    java/lang/Object.class
+    java/lang/Short.class
+    java/lang/String.class
+    java/lang/System.class
+    java/misc/Memory.class
+    sega/dreamcast/gdrom/G1IF.class
+    sega/dreamcast/gdrom/GdromBits.class
+    sega/dreamcast/gdrom/Gdrom.class
+    sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_read.class
+    sega/dreamcast/gdrom/GdromCommandPacketFormat.class
+    sega/dreamcast/gdrom/GdromCommandPacketFormat_get_toc.class
+    sega/dreamcast/gdrom/GdromCommandPacketInterface.class
+    sega/dreamcast/gdrom/GdromProtocol.class
+)
+
+function boot_classes () {
+    local length=${#boot_classes[@]}
+
+    for ((i=0;i<length;i++)); do
+        local class="${boot_classes[i]}"
+        echo "$class"
+    done
+}
+
+function boot_sources () {
+    local length=${#boot_classes[@]}
+
+    for ((i=0;i<length;i++)); do
+        local class="${boot_classes[i]}"
+        local source="${class%.class}.java"
+        if [ -f "$source" ]; then
+           echo "$source"
+        fi
+    done
+}
 
 function find_classes () {
     find model/ example/ sega/ java/ filesystem/ -name '*.class' -not -name 'Test*' | sort
@@ -76,12 +128,18 @@ function find_sources () {
     find model/ example/ sega/ java/ filesystem/ -name '*.java' -not -name 'Test*' | sort
 }
 
+
 find sega/ java/ filesystem/ -name '*.class' -exec rm -f {} \;
+make -j$(nproc) -f Makefile.dreamcast.mk $(boot_sources | java_to_class)
+boot_classes | rename_class_files
+boot_classes | classpath_mk
+boot_classes | classpath_inc_c
+boot_classes | make_header
+boot_classes | classpath_h
 
-make -j$(nproc) -f Makefile.dreamcast.mk $(find_sources | java_to_class)
-
-find_classes | rename_class_files
-find_classes | classpath_mk
-find_classes | classpath_inc_c
-find_classes | make_header
-find_classes | classpath_h
+#make -j$(nproc) -f Makefile.dreamcast.mk $(find_sources | java_to_class)
+#find_classes | rename_class_files
+#find_classes | classpath_mk
+#find_classes | classpath_inc_c
+#find_classes | make_header
+#find_classes | classpath_h

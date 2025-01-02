@@ -15,6 +15,7 @@ CARCH = -m4-single -ml
 include dreamcast/base.mk
 include dreamcast/common.mk
 include dreamcast/headers.mk
+include dreamcast/ip.mk
 
 include java.mk
 
@@ -49,6 +50,38 @@ LIBGCC_OBJ = \
 	libgcc/_movmem_i4.o
 
 include classpath.mk
+
+GDROM_JVM_BOOT_OBJ = \
+	$(LIB)/example/gdrom_jvm_boot.o \
+	$(LIB)/sh7091/serial.o
+
+
+boot.elf: LDSCRIPT = $(LIB)/ip.lds
+boot.elf: $(IP_OBJ) $(START_OBJ) $(GDROM_JVM_BOOT_OBJ)
+
+zero.bin:
+	dd if=/dev/zero of=$@ bs=2048 count=1
+
+jvm.iso: boot.bin main.bin
+	mkisofs \
+		-C 0,11702 \
+		-sysid     "SEGA SEGAKATANA" \
+		-volid     "SAMPLE_GAME_TITLE" \
+		-volset    "SAMPLE_GAME_TITLE" \
+		-publisher "SEGA ENTERPRISES, LTD." \
+		-preparer  "CRI CD CRAFT VER.2.27" \
+		-copyright "COPYRIGH.TXT" \
+		-abstract  "ABSTRACT.TXT" \
+		-biblio    "BIBLIOGR.TXT" \
+		-G boot.bin \
+		-o $@ \
+		-graft-points \
+		/0JVM.BIN=./main.bin \
+		/1ST_READ.BIN=zero.bin \
+		/=$(LIB)/COPYRIGH.TXT \
+		/=$(LIB)/ABSTRACT.TXT \
+		/=$(LIB)/BIBLIOGR.TXT
+
 
 main.elf: LDSCRIPT = $(LIB)/main.lds
 main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_PATH)
