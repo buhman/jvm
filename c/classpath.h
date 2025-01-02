@@ -1,4 +1,3 @@
-#include "example/GdromExtentReader.class.h"
 #include "example/GdromTest.class.h"
 #include "example/GdromDirectoryRecordHandler.class.h"
 #include "filesystem/iso9660/ByteParser.class.h"
@@ -16,6 +15,7 @@
 #include "sega/dreamcast/gdrom/G1IF.class.h"
 #include "sega/dreamcast/gdrom/GdromBits.class.h"
 #include "sega/dreamcast/gdrom/Gdrom.class.h"
+#include "sega/dreamcast/gdrom/GdromExtentReader.class.h"
 #include "sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_read.class.h"
 #include "sega/dreamcast/gdrom/GdromCommandPacketFormat.class.h"
 #include "sega/dreamcast/gdrom/GdromCommandPacketFormat_get_toc.class.h"

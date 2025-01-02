@@ -71,7 +71,6 @@ function classpath_h () {
 }
 
 declare -a boot_classes=(
-    example/GdromExtentReader.class
     example/GdromTest.class
     example/GdromDirectoryRecordHandler.class
     filesystem/iso9660/ByteParser.class
@@ -89,6 +88,7 @@ declare -a boot_classes=(
     sega/dreamcast/gdrom/G1IF.class
     sega/dreamcast/gdrom/GdromBits.class
     sega/dreamcast/gdrom/Gdrom.class
+    sega/dreamcast/gdrom/GdromExtentReader.class
     sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_read.class
     sega/dreamcast/gdrom/GdromCommandPacketFormat.class
     sega/dreamcast/gdrom/GdromCommandPacketFormat_get_toc.class

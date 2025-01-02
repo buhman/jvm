@@ -1,5 +1,4 @@
 CLASS_PATH = \
-	example/GdromExtentReader.class.o \
 	example/GdromTest.class.o \
 	example/GdromDirectoryRecordHandler.class.o \
 	filesystem/iso9660/ByteParser.class.o \
@@ -17,6 +16,7 @@ CLASS_PATH = \
 	sega/dreamcast/gdrom/G1IF.class.o \
 	sega/dreamcast/gdrom/GdromBits.class.o \
 	sega/dreamcast/gdrom/Gdrom.class.o \
+	sega/dreamcast/gdrom/GdromExtentReader.class.o \
 	sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_read.class.o \
 	sega/dreamcast/gdrom/GdromCommandPacketFormat.class.o \
 	sega/dreamcast/gdrom/GdromCommandPacketFormat_get_toc.class.o \

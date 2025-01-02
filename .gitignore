@@ -4,6 +4,7 @@
 *.gch
 *.csv
 *.class
+*.class.h
 *.out
 *.elf
 *.bin

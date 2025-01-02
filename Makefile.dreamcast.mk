@@ -82,7 +82,6 @@ jvm.iso: boot.bin main.bin zero.bin
 		/=$(LIB)/ABSTRACT.TXT \
 		/=$(LIB)/BIBLIOGR.TXT \
 		/=example/GdromDirectoryRecordHandler.class \
-		/=example/GdromExtentReader.class \
 		/=example/GdromTest.class \
 		/=filesystem/iso9660/ByteParser.class \
 		/=filesystem/iso9660/DirectoryRecord.class \
@@ -100,6 +99,7 @@ jvm.iso: boot.bin main.bin zero.bin
 		/=sega/dreamcast/gdrom/G1IF.class \
 		/=sega/dreamcast/gdrom/GdromBits.class \
 		/=sega/dreamcast/gdrom/Gdrom.class \
+		/=sega/dreamcast/gdrom/GdromExtentReader.class \
 		/=sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_read.class \
 		/=sega/dreamcast/gdrom/GdromCommandPacketFormat.class \
 		/=sega/dreamcast/gdrom/GdromCommandPacketFormat_get_toc.class \

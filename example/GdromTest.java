@@ -1,22 +1,13 @@
 package example;
 
+import sega.dreamcast.gdrom.GdromExtentReader;
 import sega.dreamcast.gdrom.GdromProtocol;
 import sega.dreamcast.gdrom.G1IF;
 import java.misc.Memory;
 import filesystem.iso9660.VolumeParser;
-import filesystem.iso9660.ExtentReader;
 import filesystem.iso9660.DirectoryRecordHandler;
 import filesystem.iso9660.DirectoryRecord;
 import jvm.internal.Loader;
-
-class GdromExtentReader implements ExtentReader {
-    public void readInto(byte[] buf, int extent) {
-        int starting_address = extent + 150;
-        System.out.print("starting_address: ");
-        System.out.println(starting_address);
-        GdromProtocol.cdReadPIO(buf, starting_address, 1);
-    }
-}
 
 class GdromDirectoryRecordHandler implements DirectoryRecordHandler {
     int address;
@@ -47,7 +38,7 @@ class GdromDirectoryRecordHandler implements DirectoryRecordHandler {
         Memory.putU4(G1IF.GDST, 1);
     }
 
-    public boolean drIsClass(DirectoryRecord dr) {
+    public boolean isClassExt(DirectoryRecord dr) {
         int length = dr.lengthOfFileIdentifier();
 
         if (length < 6)
@@ -73,32 +64,21 @@ class GdromDirectoryRecordHandler implements DirectoryRecordHandler {
         int extent = dr.locationOfExtent(); // sector number
         int length = dr.dataLength(); // bytes
 
-        if (drIsClass(dr)) {
-            System.out.println("class found");
-        } else {
-            System.out.println("is not class");
+        if (!isClassExt(dr)) {
             return;
         }
 
         // round up to nearest multiple of 2048
         length = (length + 2047) & ~(2047);
 
-        System.out.print("start G1 DMA: address:");
-        System.out.print(address);
-        System.out.print(" length: ");
-        System.out.println(length);
-
-        System.out.println("read dma");
-
         Memory.putU4(G1IF.GDEN, 0);
 
         int sectors = length >> 11; // division by 2048
         GdromProtocol.cdReadDMA(extent + 150, sectors);
 
-        System.out.println("start dma");
         startG1DMA(address, length);
 
-        System.out.println("wait gdst");
+        //System.out.println("wait gdst");
         while ((Memory.getU4(G1IF.GDST) & 1) != 0);
         System.out.println("transfer complete");
 

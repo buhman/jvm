@@ -1,4 +1,3 @@
-(const uint8_t *)&_binary_example_GdromExtentReader_class_start,
 (const uint8_t *)&_binary_example_GdromTest_class_start,
 (const uint8_t *)&_binary_example_GdromDirectoryRecordHandler_class_start,
 (const uint8_t *)&_binary_filesystem_iso9660_ByteParser_class_start,
@@ -16,6 +15,7 @@
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_G1IF_class_start,
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_GdromBits_class_start,
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_Gdrom_class_start,
+(const uint8_t *)&_binary_sega_dreamcast_gdrom_GdromExtentReader_class_start,
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_GdromCommandPacketFormat_cd_read_class_start,
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_GdromCommandPacketFormat_class_start,
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_GdromCommandPacketFormat_get_toc_class_start,
