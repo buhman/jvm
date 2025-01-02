@@ -6,5 +6,5 @@ public class Loader {
 
     public static native int getBuffer();
 
-    public static native void load(int[] buffers);
+    public static native void load(int[] buffers, int num_buffers);
 }

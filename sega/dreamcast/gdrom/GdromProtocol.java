@@ -46,11 +46,13 @@ public class GdromProtocol {
             Memory.putU2(Gdrom.data, word);
         }
 
+        /*
         while (true) {
             int status = Memory.getU1(Gdrom.status);
             if (GdromBits.status__bsy(status) == 0)
                 break;
         }
+        */
     }
 
     public static void readData(byte[] buf, int length) {
@@ -152,9 +154,18 @@ public class GdromProtocol {
         int parameter_type = 0b0; // FAD specified
         int data = (data_select << 4) | (expected_data_type << 1) | (parameter_type);
 
-        System.out.println("cdReadDMA");
+        System.out.print("cdReadDMA: extent: ");
+        System.out.print(starting_address);
+        System.out.print(" transfer length (sectors): ");
+        System.out.println(transfer_length);
 
+        System.out.println("cdReadSet");
         cdReadSet(data, starting_address, transfer_length);
+        System.out.println("packetCommand");
         packetCommand(cd_read_command, true); // DMA mode
+
+        int status = Memory.getU1(Gdrom.status);
+        System.out.print("status: ");
+        System.out.println(status);
     }
 }

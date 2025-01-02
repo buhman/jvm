@@ -21,7 +21,7 @@ import model.ModelObject;
 import java.misc.Memory;
 import java.misc.Resource;
 
-class DreamcastVideo2 {
+public class DreamcastVideo2 {
     static final int framebuffer_width = 640;
     static final int framebuffer_height = 480;
 
@@ -235,6 +235,7 @@ class DreamcastVideo2 {
     public static void transfer_textures() {
         int texture = TextureMemoryAllocation.texture_regions[1][0] + 512;
 
+        /*
         // java_cup
         int[] java_cup = Resource.getResource("images/java_cup");
         int java_cup_length = (java_cup == null) ? 0 : java_cup.length;
@@ -256,11 +257,13 @@ class DreamcastVideo2 {
             Memory.putU4(MemoryMap.texture_memory64 + texture, java_text[i]);
             texture += 4;
         }
+        */
     }
 
     public static void transfer_java_powered() {
         int texture = TextureMemoryAllocation.texture_regions[1][0] + 512 + (512 * 512 * 2 * 2);
 
+        /*
         // java_powered
         int[] java_powered = Resource.getResource("images/java_powered");
         int java_powered_length = (java_powered == null) ? 0 : java_powered.length;
@@ -271,6 +274,7 @@ class DreamcastVideo2 {
             Memory.putU4(MemoryMap.texture_memory64 + texture, java_powered[i]);
             texture += 4;
         }
+        */
     }
 
     public static void boot_splash(int ta_alloc, int opb_size_total) {

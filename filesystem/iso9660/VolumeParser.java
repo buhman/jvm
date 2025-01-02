@@ -8,6 +8,7 @@ public class VolumeParser {
     byte[] buf;
     DirectoryRecord dr;
     ExtentReader reader;
+    DirectoryRecordHandler handler;
 
     static final int FILE_FLAGS__DIRECTORY = 2;
 
@@ -49,10 +50,9 @@ public class VolumeParser {
         //System.out.print("; file_flags: ");
         //System.out.print((int)dr.fileFlags());
 
-        if ((dr.fileFlags() & FILE_FLAGS__DIRECTORY) == 0) {
+        int file_flags = dr.fileFlags();
+        if ((file_flags & FILE_FLAGS__DIRECTORY) == 0) {
             System.out.print(" [regular file] ");
-            //dr.locationOfExtent();
-            //dr.dataLength();
         } else {
             System.out.print(" [directory] ");
             child_extents[child_ix] = dr.locationOfExtent();
@@ -63,6 +63,10 @@ public class VolumeParser {
         System.out.print(" file_identifier: ");
         printIdentifier(buf, dr.offset, DirectoryRecord.FILE_IDENTIFIER_START, dr.lengthOfFileIdentifier());
         System.out.println();
+
+        if ((file_flags & FILE_FLAGS__DIRECTORY) == 0) {
+            handler.handle(dr);
+        }
 
         return child_ix;
     }
@@ -121,9 +125,10 @@ public class VolumeParser {
         walkDirectory(extent, num_extents, 0);
     }
 
-    public VolumeParser(int fad, ExtentReader reader) {
+    public VolumeParser(int fad, ExtentReader reader, DirectoryRecordHandler handler) {
         this.fad = fad;
         this.reader = reader;
+        this.handler = handler;
         this.buf = new byte[2048];
         this.dr = new DirectoryRecord(this.buf, 0);
     }

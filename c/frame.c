@@ -340,7 +340,7 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
   if (jvm_internal_loader) {
     if (method_name_constant->utf8.length == 4) {
       if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"load", 4)) {
-        assert(nargs == 1);
+        assert(nargs == 2);
         assert(return_type == 'V');
         native_jvm_internal_loader_load(args);
         return;

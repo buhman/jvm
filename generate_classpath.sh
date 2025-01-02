@@ -73,19 +73,16 @@ function classpath_h () {
 declare -a boot_classes=(
     example/GdromExtentReader.class
     example/GdromTest.class
+    example/GdromDirectoryRecordHandler.class
     filesystem/iso9660/ByteParser.class
     filesystem/iso9660/DirectoryRecord.class
     filesystem/iso9660/ExtentReader.class
     filesystem/iso9660/PrimaryVolumeDescriptor.class
     filesystem/iso9660/VolumeParser.class
     java/io/PrintStream.class
-    java/lang/Boolean.class
-    java/lang/Byte.class
-    java/lang/Character.class
     java/lang/DecimalDigits.class
     java/lang/Integer.class
     java/lang/Object.class
-    java/lang/Short.class
     java/lang/String.class
     java/lang/System.class
     java/misc/Memory.class
@@ -97,6 +94,7 @@ declare -a boot_classes=(
     sega/dreamcast/gdrom/GdromCommandPacketFormat_get_toc.class
     sega/dreamcast/gdrom/GdromCommandPacketInterface.class
     sega/dreamcast/gdrom/GdromProtocol.class
+    jvm/internal/Loader.class
 )
 
 function boot_classes () {
@@ -120,6 +118,52 @@ function boot_sources () {
     done
 }
 
+declare -a application_classes=(
+    Main.class
+    example/DreamcastVideo2.class
+    model/FacePTN.class
+    model/ModelObject.class
+    model/UntitledModel.class
+    model/Vec2.class
+    model/Vec3.class
+    sega/dreamcast/holly/Background.class
+    sega/dreamcast/holly/Core.class
+    sega/dreamcast/holly/CoreBits.class
+    sega/dreamcast/holly/ISPTSP.class
+    sega/dreamcast/holly/RegionArray.class
+    sega/dreamcast/holly/RegionArray_OPBSize.class
+    sega/dreamcast/holly/TABits.class
+    sega/dreamcast/holly/TAFIFOPolygonConverter.class
+    sega/dreamcast/holly/TAGlobalParameter.class
+    sega/dreamcast/holly/TAGlobalParameter_end_of_list.class
+    sega/dreamcast/holly/TAGlobalParameter_polygon_type_0.class
+    sega/dreamcast/holly/TAVertexParameter.class
+    sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class
+    sega/dreamcast/holly/TextureMemoryAllocation.class
+    java/lang/Math.class
+)
+
+function application_classes () {
+    local length=${#application_classes[@]}
+
+    for ((i=0;i<length;i++)); do
+        local class="${application_classes[i]}"
+        echo "$class"
+    done
+}
+
+function application_sources () {
+    local length=${#application_classes[@]}
+
+    for ((i=0;i<length;i++)); do
+        local class="${application_classes[i]}"
+        local source="${class%.class}.java"
+        if [ -f "$source" ]; then
+           echo "$source"
+        fi
+    done
+}
+
 function find_classes () {
     find model/ example/ sega/ java/ filesystem/ -name '*.class' -not -name 'Test*' | sort
 }
@@ -129,17 +173,17 @@ function find_sources () {
 }
 
 
-find sega/ java/ filesystem/ -name '*.class' -exec rm -f {} \;
-make -j$(nproc) -f Makefile.dreamcast.mk $(boot_sources | java_to_class)
-boot_classes | rename_class_files
+find . -name '*.class' -exec rm -f {} \;
+
+make -f Makefile.dreamcast.mk $(boot_sources | java_to_class)
+find . -name '*.class' | rename_class_files
 boot_classes | classpath_mk
 boot_classes | classpath_inc_c
 boot_classes | make_header
 boot_classes | classpath_h
 
-#make -j$(nproc) -f Makefile.dreamcast.mk $(find_sources | java_to_class)
-#find_classes | rename_class_files
-#find_classes | classpath_mk
-#find_classes | classpath_inc_c
-#find_classes | make_header
-#find_classes | classpath_h
+make -f Makefile.dreamcast.mk $(application_sources | java_to_class)
+find . -name '*.class' | rename_class_files
+
+boot_classes | sort > classes.txt
+application_classes | sort >> classes.txt

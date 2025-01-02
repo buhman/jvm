@@ -1,7 +1,7 @@
 package filesystem.iso9660;
 
 public class ByteParser {
-    byte[] array;
+    public byte[] array;
     public int offset;
 
     public ByteParser(byte[] array, int offset) {
