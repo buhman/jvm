@@ -12,6 +12,8 @@ import sega.dreamcast.holly.TextureMemoryAllocation;
 import sega.dreamcast.holly.ISPTSP;
 import sega.dreamcast.holly.TAVertexParameter;
 import sega.dreamcast.holly.TAGlobalParameter;
+import sega.dreamcast.holly.VideoOutput;
+import sega.dreamcast.holly.VideoOutputMode;
 import sega.dreamcast.MemoryMap;
 import model.UntitledModel;
 import model.Vec3;
@@ -299,7 +301,8 @@ public class DreamcastVideo2 {
 
         while ((CoreBits.spg_status__vsync(Memory.getU4(Holly.SPG_STATUS)) == 0));
         while (!(CoreBits.spg_status__vsync(Memory.getU4(Holly.SPG_STATUS)) == 0));
-        Core.fb_r_enable();
+        VideoOutput.set_framebuffer_resolution(640, 480);
+        VideoOutput.set_mode(VideoOutputMode.vga);
         Memory.putU4(Holly.FB_R_SOF1, TextureMemoryAllocation.framebuffer_start[0]);
     }
 
@@ -338,7 +341,6 @@ public class DreamcastVideo2 {
                                  TextureMemoryAllocation.object_list_start[0]);
 
         Core.init();
-        Core.fb_init(framebuffer_width, framebuffer_height);
 
         boot_splash(ta_alloc, opb_size_total);
 

@@ -13,6 +13,7 @@
 (const uint8_t *)&_binary_java_lang_System_class_start,
 (const uint8_t *)&_binary_java_misc_Memory_class_start,
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_G1IF_class_start,
+(const uint8_t *)&_binary_sega_dreamcast_gdrom_GdromIF_class_start,
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_GdromBits_class_start,
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_Gdrom_class_start,
 (const uint8_t *)&_binary_sega_dreamcast_gdrom_GdromExtentReader_class_start,

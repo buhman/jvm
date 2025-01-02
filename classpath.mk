@@ -14,6 +14,7 @@ CLASS_PATH = \
 	java/lang/System.class.o \
 	java/misc/Memory.class.o \
 	sega/dreamcast/gdrom/G1IF.class.o \
+	sega/dreamcast/gdrom/GdromIF.class.o \
 	sega/dreamcast/gdrom/GdromBits.class.o \
 	sega/dreamcast/gdrom/Gdrom.class.o \
 	sega/dreamcast/gdrom/GdromExtentReader.class.o \

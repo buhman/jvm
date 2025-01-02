@@ -86,6 +86,7 @@ declare -a boot_classes=(
     java/lang/System.class
     java/misc/Memory.class
     sega/dreamcast/gdrom/G1IF.class
+    sega/dreamcast/gdrom/GdromIF.class
     sega/dreamcast/gdrom/GdromBits.class
     sega/dreamcast/gdrom/Gdrom.class
     sega/dreamcast/gdrom/GdromExtentReader.class
@@ -129,6 +130,8 @@ declare -a application_classes=(
     sega/dreamcast/holly/Background.class
     sega/dreamcast/holly/Core.class
     sega/dreamcast/holly/CoreBits.class
+    sega/dreamcast/holly/VideoOutput.class
+    sega/dreamcast/holly/VideoOutputMode.class
     sega/dreamcast/holly/ISPTSP.class
     sega/dreamcast/holly/RegionArray.class
     sega/dreamcast/holly/RegionArray_OPBSize.class

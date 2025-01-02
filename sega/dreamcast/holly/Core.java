@@ -43,52 +43,6 @@ public class Core {
         Memory.putU4(Holly.SOFTRESET, 0);
     }
 
-    public static void fb_init(int x_size, int y_size) {
-        int y_coeff = CoreBits.y_coeff__coefficient_1(0x80)
-                    | CoreBits.y_coeff__coefficient_0_2(0x40);
-
-        // in 6.10 fixed point; 0x0400 is 1x vertical scale
-        int scaler_ctl = CoreBits.scaler_ctl__vertical_scale_factor(0x0400);
-
-        int fb_burstctrl = CoreBits.fb_burstctrl__wr_burst(0x09)
-                         | CoreBits.fb_burstctrl__vid_lat(0x3f)
-                         | CoreBits.fb_burstctrl__vid_burst(0x39);
-
-        int fb_x_clip = CoreBits.fb_x_clip__fb_x_clip_max(x_size - 1)
-                      | CoreBits.fb_x_clip__fb_x_clip_min(0);
-
-        int fb_y_clip = CoreBits.fb_y_clip__fb_y_clip_max(y_size - 1)
-                      | CoreBits.fb_y_clip__fb_y_clip_min(0);
-
-        int fb_r_size = CoreBits.fb_r_size__fb_modulus(1)
-                      | CoreBits.fb_r_size__fb_y_size(y_size - 3)
-                      | CoreBits.fb_r_size__fb_x_size((x_size * 16) / 32 - 1);
-
-        int fb_w_ctrl = CoreBits.fb_w_ctrl__fb_dither
-                      | CoreBits.fb_w_ctrl__fb_packmode__565_rgb_16bit;
-
-        Memory.putU4(Holly.Y_COEFF, y_coeff);
-        Memory.putU4(Holly.SCALER_CTL, scaler_ctl);
-        Memory.putU4(Holly.FB_BURSTCTRL, fb_burstctrl);
-        Memory.putU4(Holly.FB_X_CLIP, fb_x_clip);
-        Memory.putU4(Holly.FB_Y_CLIP, fb_y_clip);
-        Memory.putU4(Holly.FB_R_SIZE, fb_r_size);
-        Memory.putU4(Holly.FB_W_CTRL, fb_w_ctrl);
-    }
-
-    public static void fb_r_disable() {
-        Memory.putU4(Holly.FB_R_CTRL, 0);
-    }
-
-    public static void fb_r_enable() {
-        int fb_r_ctrl =
-              CoreBits.fb_r_ctrl__vclk_div__pclk_vclk_1
-            | CoreBits.fb_r_ctrl__fb_depth__565_rgb_16bit
-            | CoreBits.fb_r_ctrl__fb_enable;
-
-        Memory.putU4(Holly.FB_R_CTRL, fb_r_ctrl);
-    }
-
     public static void start_render(int region_array_start,
                                     int isp_tsp_parameters_start,
                                     int background_start,

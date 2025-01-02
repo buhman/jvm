@@ -13,6 +13,7 @@
 #include "java/lang/System.class.h"
 #include "java/misc/Memory.class.h"
 #include "sega/dreamcast/gdrom/G1IF.class.h"
+#include "sega/dreamcast/gdrom/GdromIF.class.h"
 #include "sega/dreamcast/gdrom/GdromBits.class.h"
 #include "sega/dreamcast/gdrom/Gdrom.class.h"
 #include "sega/dreamcast/gdrom/GdromExtentReader.class.h"
