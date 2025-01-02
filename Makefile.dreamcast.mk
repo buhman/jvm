@@ -129,7 +129,8 @@ jvm.iso: boot.bin main.bin zero.bin
 		sega/dreamcast/holly/TAVertexParameter.class \
 		sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class \
 		sega/dreamcast/holly/TextureMemoryAllocation.class \
-		java/lang/Math.class
+		java/lang/Math.class \
+		java/misc/Resource.class
 
 main.elf: LDSCRIPT = $(LIB)/main.lds
 main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_PATH)

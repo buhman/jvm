@@ -144,6 +144,7 @@ declare -a application_classes=(
     sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class
     sega/dreamcast/holly/TextureMemoryAllocation.class
     java/lang/Math.class
+    java/misc/Resource.class
 )
 
 function application_classes () {

@@ -304,7 +304,7 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
       hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"getResource", method_name_constant->utf8.length);
     if (getresource) {
       assert(nargs == 1);
-      assert(return_type == 'I');
+      assert(return_type == '[');
       uint32_t value = java_misc_resource_getresource_1(args);
       operand_stack_push_u32(vm->current_frame, value);
       return;

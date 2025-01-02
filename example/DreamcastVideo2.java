@@ -265,7 +265,6 @@ public class DreamcastVideo2 {
     public static void transfer_java_powered() {
         int texture = TextureMemoryAllocation.texture_regions[1][0] + 512 + (512 * 512 * 2 * 2);
 
-        /*
         // java_powered
         int[] java_powered = Resource.getResource("images/java_powered");
         int java_powered_length = (java_powered == null) ? 0 : java_powered.length;
@@ -276,7 +275,6 @@ public class DreamcastVideo2 {
             Memory.putU4(MemoryMap.texture_memory64 + texture, java_powered[i]);
             texture += 4;
         }
-        */
     }
 
     public static void boot_splash(int ta_alloc, int opb_size_total) {
