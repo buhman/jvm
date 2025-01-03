@@ -20,7 +20,7 @@ void main()
   };
   int class_file_buffers_length = (sizeof (class_file_buffers)) / (sizeof (class_file_buffers[0]));
 
-  //const uint8_t * main_class = (const uint8_t *)"example/DreamcastVideo2";
+  //const uint8_t * main_class = (const uint8_t *)"example/JavaCube";
   const uint8_t * main_class = (const uint8_t *)"example/GdromClassLoader";
   int main_class_length = string_length((const char *)main_class);
 

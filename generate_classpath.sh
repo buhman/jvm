@@ -121,7 +121,7 @@ function boot_sources () {
 
 declare -a application_classes=(
     Main.class
-    example/DreamcastVideo2.class
+    example/JavaCube.class
     model/FacePTN.class
     model/ModelObject.class
     model/UntitledModel.class
