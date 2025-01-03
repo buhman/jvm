@@ -71,7 +71,7 @@ function classpath_h () {
 }
 
 declare -a boot_classes=(
-    example/GdromTest.class
+    example/GdromClassLoader.class
     example/GdromDirectoryRecordHandler.class
     filesystem/iso9660/ByteParser.class
     filesystem/iso9660/DirectoryRecord.class

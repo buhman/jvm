@@ -1,4 +1,4 @@
-#include "example/GdromTest.class.h"
+#include "example/GdromClassLoader.class.h"
 #include "example/GdromDirectoryRecordHandler.class.h"
 #include "filesystem/iso9660/ByteParser.class.h"
 #include "filesystem/iso9660/DirectoryRecord.class.h"

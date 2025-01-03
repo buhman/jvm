@@ -1,5 +1,5 @@
 CLASS_PATH = \
-	example/GdromTest.class.o \
+	example/GdromClassLoader.class.o \
 	example/GdromDirectoryRecordHandler.class.o \
 	filesystem/iso9660/ByteParser.class.o \
 	filesystem/iso9660/DirectoryRecord.class.o \

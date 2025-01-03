@@ -1,4 +1,4 @@
-(const uint8_t *)&_binary_example_GdromTest_class_start,
+(const uint8_t *)&_binary_example_GdromClassLoader_class_start,
 (const uint8_t *)&_binary_example_GdromDirectoryRecordHandler_class_start,
 (const uint8_t *)&_binary_filesystem_iso9660_ByteParser_class_start,
 (const uint8_t *)&_binary_filesystem_iso9660_DirectoryRecord_class_start,

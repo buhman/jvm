@@ -73,7 +73,7 @@ class GdromDirectoryRecordHandler implements DirectoryRecordHandler {
     }
 }
 
-class GdromTest {
+class GdromClassLoader {
     public static void main() {
         // assume gdrom is already unlocked
 
