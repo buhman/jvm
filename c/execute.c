@@ -1541,11 +1541,18 @@ void op_ldc2_w(struct vm * vm, uint32_t index)
 void op_ldc_w(struct vm * vm, uint32_t index)
 {
   struct constant * constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
-  #ifdef DEBUG
-  assert(constant->tag == CONSTANT_Integer || constant->tag == CONSTANT_Float);
-  #endif
-  int32_t value = constant->integer.bytes;
-  operand_stack_push_u32(vm->current_frame, value);
+  if (constant->tag == CONSTANT_Integer || constant->tag == CONSTANT_Float) {
+    int32_t value = constant->integer.bytes;
+    operand_stack_push_u32(vm->current_frame, value);
+  } else if (constant->tag == CONSTANT_String) {
+    int32_t * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
+                                                       vm->class_hash_table.entry,
+                                                       vm->current_frame->class_entry,
+                                                       constant->string.string_index);
+    operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
+  } else {
+    assert(false);
+  }
 }
 
 void op_ldiv(struct vm * vm)

@@ -107,7 +107,8 @@ jvm.iso: boot.bin main.bin zero.bin
 		sega/dreamcast/gdrom/GdromCommandPacketInterface.class \
 		sega/dreamcast/gdrom/GdromProtocol.class \
 		Main.class \
-		example/DreamcastVideo2.class \
+		example/JavaCube.class \
+		example/JavaCubeDirectoryRecordHandler.class \
 		model/FacePTN.class \
 		model/ModelObject.class \
 		model/UntitledModel.class \
@@ -130,7 +131,9 @@ jvm.iso: boot.bin main.bin zero.bin
 		sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class \
 		sega/dreamcast/holly/TextureMemoryAllocation.class \
 		java/lang/Math.class \
-		java/misc/Resource.class
+		java/misc/Resource.class \
+		images/java_text.data \
+		images/java_cup.data
 
 main.elf: LDSCRIPT = $(LIB)/main.lds
 main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_PATH)

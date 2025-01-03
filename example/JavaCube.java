@@ -22,8 +22,68 @@ import model.FacePTN;
 import model.ModelObject;
 import java.misc.Memory;
 import java.misc.Resource;
+import filesystem.iso9660.VolumeParser;
+import filesystem.iso9660.DirectoryRecordHandler;
+import filesystem.iso9660.DirectoryRecord;
+import sega.dreamcast.gdrom.GdromExtentReader;
+import sega.dreamcast.gdrom.GdromProtocol;
+import sega.dreamcast.gdrom.GdromIF;
+import sega.dreamcast.gdrom.G1IF;
+import sega.dreamcast.gdrom.Gdrom;
+import java.misc.Memory;
 
-public class DreamcastVideo2 {
+class JavaCubeDirectoryRecordHandler implements DirectoryRecordHandler {
+    int[] texture_extents;
+    String[] texture_filenames;
+
+    JavaCubeDirectoryRecordHandler(int[] texture_extents, String[] texture_filenames) {
+        this.texture_extents = texture_extents;
+        this.texture_filenames = texture_filenames;
+    }
+
+    boolean bytesEqual(byte[] a, int a_offset, byte[] b, int length) {
+        for (int i = 0; i < length; i++) {
+            if (a[a_offset + i] != b[i])
+                return false;
+        }
+        return true;
+    }
+
+    public int isTexture(DirectoryRecord dr) {
+        int length = dr.lengthOfFileIdentifier();
+        if (length != 14)
+            return -1;
+
+        byte[] buf = dr.array;
+        int offset = dr.offset + DirectoryRecord.FILE_IDENTIFIER_START;
+
+        if (buf[offset] != (byte)'J')
+            return -1;
+
+        for (int i = 0; i < texture_filenames.length; i++) {
+            byte[] texture_filename = texture_filenames[i].getBytes();
+            if (bytesEqual(buf, offset, texture_filename, length))
+                return i;
+        }
+        return -1;
+    }
+
+    public void handle(DirectoryRecord dr) {
+        int texture_index = isTexture(dr);
+        if (texture_index >= 0) {
+            int extent = dr.locationOfExtent(); // sector number
+            /*
+            System.out.print("texture extent: ");
+            System.out.print(texture_index);
+            System.out.print(": ");
+            System.out.println(extent);
+            */
+            texture_extents[texture_index] = extent;
+        }
+    }
+}
+
+public class JavaCube {
     static final int framebuffer_width = 640;
     static final int framebuffer_height = 480;
 
@@ -43,7 +103,19 @@ public class DreamcastVideo2 {
         11479204, 4042586, 16676239
     };
 
+    public static int[] texture_extents;
+
+    static String[] texture_filenames = {
+        "JAVA_CUP.DAT;1",
+        "JAVA_TEX.DAT;1",
+    };
+
     static {
+        texture_extents = new int[texture_filenames.length];
+        for (int i = 0; i < texture_filenames.length; i++) {
+            texture_extents[i] = -1;
+        }
+
         int parameter_control_word = TAParameter.para_control__para_type__polygon_or_modifier_volume
                                    | TAParameter.para_control__list_type__translucent
                                    | TAParameter.obj_control__col_type__packed_color
@@ -237,29 +309,33 @@ public class DreamcastVideo2 {
     public static void transfer_textures() {
         int texture = TextureMemoryAllocation.texture_regions[1][0] + 512;
 
-        /*
-        // java_cup
-        int[] java_cup = Resource.getResource("images/java_cup");
-        int java_cup_length = (java_cup == null) ? 0 : java_cup.length;
-        //System.out.print("images/java_cup length: ");
-        //System.out.println(java_cup_length);
+        int data_track_fad = GdromProtocol.tocGetDataTrackFad();
 
-        for (int i = 0; i < java_cup_length; i++) {
-            Memory.putU4(MemoryMap.texture_memory64 + texture, java_cup[i]);
-            texture += 4;
+        JavaCubeDirectoryRecordHandler handler
+            = new JavaCubeDirectoryRecordHandler(texture_extents, texture_filenames);
+        GdromExtentReader reader = new GdromExtentReader();
+        VolumeParser parser = new VolumeParser(data_track_fad - 150, reader, handler);
+        parser.parse();
+
+        for (int i = 0; i < texture_extents.length; i++) {
+            int length = 512 * 512 * 2;
+            int sectors = length >> 11; // division by 2048
+
+            System.out.println(texture);
+            if (texture_extents[i] >= 0) {
+                int extent = texture_extents[i];
+                Memory.putU4(G1IF.GDEN, 0);
+                GdromProtocol.cdReadDMA(extent + 150, sectors);
+                GdromIF.startG1DMA(MemoryMap.texture_memory64 + texture, length);
+                while ((Memory.getU4(G1IF.GDST) & 1) != 0);
+                System.out.println("transfer complete");
+                int status = Memory.getU1(Gdrom.status);
+                System.out.print("status: ");
+                System.out.println(status);
+            }
+
+            texture += length;
         }
-
-        // java_text
-        int[] java_text = Resource.getResource("images/java_text");
-        int java_text_length = (java_text == null) ? 0 : java_text.length;
-        //System.out.print("images/java_text length: ");
-        //System.out.println(java_text_length);
-
-        for (int i = 0; i < java_text_length; i++) {
-            Memory.putU4(MemoryMap.texture_memory64 + texture, java_text[i]);
-            texture += 4;
-        }
-        */
     }
 
     public static void transfer_java_powered() {
@@ -340,13 +416,17 @@ public class DreamcastVideo2 {
 
         Core.init();
 
-        boot_splash(ta_alloc, opb_size_total);
+        for (int i = 0; i < 2; i++) {
+            boot_splash(ta_alloc, opb_size_total);
+        }
 
         transfer_textures();
 
         int background_color = 0xff100a00;
         Background.background(TextureMemoryAllocation.background_start[1],
                               background_color);
+
+        Memory.putU4(Holly.VO_BORDER_COL, background_color);
 
         RegionArray.region_array(framebuffer_width / 32,
                                  framebuffer_height / 32,

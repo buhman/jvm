@@ -46,7 +46,7 @@ class color_format:
 
 def convert_colors(f, convert, colors):
     assert len(colors) % 2 == 0, len(colors)
-    f.write(struct.pack("<I", (len(colors) * 2) // 4))
+    #f.write(struct.pack("<I", (len(colors) * 2) // 4))
     for color in colors:
         value = convert(*color)
         f.write(struct.pack("<H", value))

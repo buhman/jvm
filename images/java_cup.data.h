@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern C {
+extern "C" {
 #endif
 
 extern uint32_t _binary_images_java_cup_data_start __asm("_binary_images_java_cup_data_start");

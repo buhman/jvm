@@ -37,8 +37,6 @@ class GdromDirectoryRecordHandler implements DirectoryRecordHandler {
 
         int ix = 0;
         for (int i = length - 5; i < length; i++) {
-            System.out.print(ix);
-            System.out.print(" ");
             if (buf[offset + i] != class_ext[ix]) {
                 return false;
             }

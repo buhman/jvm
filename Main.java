@@ -1,7 +1,7 @@
-import example.DreamcastVideo2;
+import example.JavaCube;
 
 class Main {
     public static void main() {
-        DreamcastVideo2.main();
+        JavaCube.main();
     }
 }
