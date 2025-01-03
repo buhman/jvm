@@ -1,11 +1,11 @@
 package model;
 
-public class UntitledModel {
+public class CubeModel {
     public static Vec3[] position;
     public static Vec3[] normal;
     public static Vec2[] texture;
     public static ModelObject[] objects;
-    private UntitledModel() {
+    private CubeModel() {
     }
     static {
         position = new Vec3[8];

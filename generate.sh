@@ -13,14 +13,14 @@ python regs/bits_gen.py ../dreamcast/regs/core_bits.csv      holly CoreBits    >
 python regs/bits_gen.py ../dreamcast/regs/ta_bits.csv        holly TABits      > sega/dreamcast/holly/TABits.java
 python regs/bits_gen.py ../dreamcast/regs/isp_tsp.csv        holly ISPTSP      > sega/dreamcast/holly/ISPTSP.java
 python regs/bits_gen.py ../dreamcast/regs/ta_parameter.csv   holly TAParameter > sega/dreamcast/holly/TAParameter.java
-python regs/bits_gen.py ..//dreamcast/regs/gdrom_bits.csv    gdrom GdromBits   > sega/dreamcast/gdrom/GdromBits.java
+python regs/bits_gen.py ../dreamcast/regs/gdrom_bits.csv    gdrom GdromBits   > sega/dreamcast/gdrom/GdromBits.java
 
 python regs/bits_gen.py ../dreamcast/regs/systembus_bits.csv systembus SystembusBits > sega/dreamcast/systembus/SystembusBits.java
 
 python regs/ta_parameters.py ../dreamcast/regs/vertex_parameter_format.csv holly TAVertexParameter > sega/dreamcast/holly/TAVertexParameter.java
 python regs/ta_parameters.py ../dreamcast/regs/global_parameter_format.csv holly TAGlobalParameter > sega/dreamcast/holly/TAGlobalParameter.java
 
-PYTHONPATH=./regs/ python ../model_generator/generate_java.py ../untitled.obj UntitledModel > ./model/UntitledModel.java
+PYTHONPATH=./regs/ python ../model_generator/generate_java.py cube.obj CubeModel > ./model/CubeModel.java
 
 python images/color_convert.py images/java_cup.png argb4444 images/java_cup.data
 python images/color_convert.py images/java_text.png argb4444 images/java_text.data

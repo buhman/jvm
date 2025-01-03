@@ -124,7 +124,7 @@ declare -a application_classes=(
     example/JavaCube.class
     model/FacePTN.class
     model/ModelObject.class
-    model/UntitledModel.class
+    model/CubeModel.class
     model/Vec2.class
     model/Vec3.class
     sega/dreamcast/holly/Background.class

@@ -82,7 +82,7 @@ jvm.iso: boot.bin main.bin zero.bin
 		/=$(LIB)/ABSTRACT.TXT \
 		/=$(LIB)/BIBLIOGR.TXT \
 		example/GdromDirectoryRecordHandler.class \
-		example/GdromTest.class \
+		example/GdromClassLoader.class \
 		filesystem/iso9660/ByteParser.class \
 		filesystem/iso9660/DirectoryRecord.class \
 		filesystem/iso9660/ExtentReader.class \
@@ -111,7 +111,7 @@ jvm.iso: boot.bin main.bin zero.bin
 		example/JavaCubeDirectoryRecordHandler.class \
 		model/FacePTN.class \
 		model/ModelObject.class \
-		model/UntitledModel.class \
+		model/CubeModel.class \
 		model/Vec2.class \
 		model/Vec3.class \
 		sega/dreamcast/holly/Background.class \

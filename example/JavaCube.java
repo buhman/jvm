@@ -15,7 +15,7 @@ import sega.dreamcast.holly.TAGlobalParameter;
 import sega.dreamcast.holly.VideoOutput;
 import sega.dreamcast.holly.VideoOutputMode;
 import sega.dreamcast.MemoryMap;
-import model.UntitledModel;
+import model.CubeModel;
 import model.Vec3;
 import model.Vec2;
 import model.FacePTN;
@@ -286,9 +286,9 @@ public class JavaCube {
         Memory.putSQ1(gt0[0], MemoryMap.ta_fifo_polygon_converter);
 
         // triangle parameters
-        ModelObject obj = UntitledModel.objects[0];
+        ModelObject obj = CubeModel.objects[0];
         for (int i = 0; i < obj.faces.length; i ++) {
-            transform_triangle(i, UntitledModel.position, UntitledModel.texture, obj.faces[i]);
+            transform_triangle(i, CubeModel.position, CubeModel.texture, obj.faces[i]);
         }
 
         // end of list
