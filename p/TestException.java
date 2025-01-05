@@ -1,8 +1,16 @@
 package p;
 
 class TestException {
+    static void test2() throws Exception {
+        throw new Exception("asdf exception");
+    }
+
     static void test() throws Exception {
-        throw new Exception("asdf");
+        try {
+            test2();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     public static void main() throws Exception {

@@ -90,6 +90,15 @@ void * attribute_info_parse_info(const uint8_t * buf, struct attribute_info * at
       line_number_table->line_number_table[i].line_number = parse_u2(&buf);
     }
     return line_number_table;
+  } else if (constant_equal(attribute_name, "Exceptions")) {
+    struct Exceptions_attribute * exceptions = malloc_class_arena((sizeof (struct Exceptions_attribute)));
+    exceptions->number_of_exceptions = parse_u2(&buf);
+    uint32_t exceptions_size = (sizeof (u2)) * exceptions->number_of_exceptions;
+    exceptions->exception_index_table = malloc_class_arena(exceptions_size);
+    for (int i = 0; i < exceptions->number_of_exceptions; i++) {
+      exceptions->exception_index_table[i] = parse_u2(&buf);
+    }
+    return exceptions;
   } else {
     return nullptr;
   }

@@ -224,6 +224,28 @@ static void print_line_number_table(const char * indent, struct attribute_info *
   }
 }
 
+static void print_exceptions(const char * indent, struct attribute_info * attribute, struct constant * constant_pool)
+{
+  prints(indent);
+  printf("number_of_exceptions: %d\n", attribute->exceptions->number_of_exceptions);
+  prints(indent);
+  printf("exceptions:\n");
+  for (int i = 0; i < attribute->exceptions->number_of_exceptions; i++) {
+    prints(indent);
+    printf("  exception_index_table[%d]: %d\n", i, attribute->exceptions->exception_index_table[i]);
+    struct constant * class_constant = &constant_pool[attribute->exceptions->exception_index_table[i] - 1];
+    assert(class_constant->tag == CONSTANT_Class);
+    prints(indent);
+    prints("    ");
+    print_constant(class_constant);
+    struct constant * class_name_constant = &constant_pool[class_constant->class.name_index - 1];
+    assert(class_name_constant->tag == CONSTANT_Utf8);
+    prints(indent);
+    prints("      ");
+    print_constant(class_name_constant);
+  }
+}
+
 static void print_attribute(const char * indent, struct attribute_info * attribute, struct constant * constant_pool)
 {
   prints(indent);
@@ -245,6 +267,8 @@ static void print_attribute(const char * indent, struct attribute_info * attribu
     print_nestmembers(indent, attribute, constant_pool);
   } else if (constant_equal(attribute_name, "LineNumberTable")) {
     print_line_number_table(indent, attribute, constant_pool);
+  } else if (constant_equal(attribute_name, "Exceptions")) {
+    print_exceptions(indent, attribute, constant_pool);
   }
 }
 

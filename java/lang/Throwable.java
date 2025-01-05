@@ -20,4 +20,8 @@ public class Throwable {
     public Throwable(Throwable cause) {
         this.cause = cause;
     }
+
+    public String toString() {
+        return message;
+    }
 }

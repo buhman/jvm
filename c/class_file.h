@@ -136,6 +136,7 @@ struct NestHost_attribute;
 struct NestMembers_attribute;
 struct PermittedSubclasses_attribute;
 struct LineNumberTable_attribute;
+struct Exceptions_attribute;
 
 struct attribute_info {
   u2 attribute_name_index;
@@ -150,6 +151,7 @@ struct attribute_info {
     struct NestMembers_attribute * nestmembers;
     //struct PermittedSubclasses_attribute * permittedsubclasses;
     struct LineNumberTable_attribute * line_number_table;
+    struct Exceptions_attribute * exceptions;
   };
 };
 
@@ -203,6 +205,11 @@ struct line_number_table {
 struct LineNumberTable_attribute {
   u2 line_number_table_length;
   struct line_number_table * line_number_table;
+};
+
+struct Exceptions_attribute {
+  u2 number_of_exceptions;
+  u2 * exception_index_table;
 };
 
 enum FIELD_ACC {
