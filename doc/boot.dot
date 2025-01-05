@@ -1,0 +1,64 @@
+digraph jvm_boot {
+
+  newrank=true;
+
+
+  boot_rom [shape=box label="Dreamcast Boot ROM"]
+  first_read [shape=box label="1ST_READ.BIN"]
+  discarded [shape=ellipse label="(discarded/overwritten)"]
+  ip_bin [shape=box label="gdrom_jvm_boot.bin (“ip.bin”)"]
+
+  boot_rom -> first_read -> discarded
+  boot_rom -> ip_bin
+
+  subgraph cluster_jvm_bin {
+    label="                    boot class files (embedded inside jvm.bin)"
+
+    jvm_bin [shape=box label="jvm.bin"]
+
+    boot_class_files [shape=plaintext label=<
+    <table align="center" border="0" cellborder="1" cellpadding="3" cellspacing="3">
+    <tr><td align="left">  example/GdromClassLoader.class</td></tr>
+    <tr><td align="left">  sega/dreamcast/gdrom/GdromExtentReader.class</td></tr>
+    <tr><td align="left">  sega/dreamcast/gdrom/GdromProtocol.class</td></tr>
+    <tr><td align="left">  sega/dreamcast/gdrom/GdromCommandPacketFormat.class </td></tr>
+    <tr><td align="left">  filesystem/iso9660/VolumeParser.class</td></tr>
+    <tr><td align="left">  jvm/internal/Loader.class</td></tr>
+    </table>
+    >]
+  }
+
+  subgraph cluster_application {
+    label="                             application class files (files on the iso9660 filesystem)"
+
+    main [shape=box label="Main.class"]
+
+    class_files [shape=plaintext label=<
+    <table align="left" border="0" cellborder="1" cellpadding="3" cellspacing="3">
+    <tr><td align="left">  example/JavaCube.class</td></tr>
+    <tr><td align="left">  sega/dreamcast/holly/Core.class</td></tr>
+    <tr><td align="left">  sega/dreamcast/holly/VideoOutput.class</td></tr>
+    <tr><td align="left">  sega/dreamcast/holly/RegionArray.class</td></tr>
+    <tr><td align="left">  sega/dreamcast/holly/TAFIFOPolygonConverter.class </td></tr>
+    <tr><td align="left">  sega/dreamcast/holly/TAGlobalParameter.class</td></tr>
+    <tr><td align="left">  sega/dreamcast/holly/TAVertexParameter.class</td></tr>
+    <tr><td align="left">  sega/dreamcast/holly/TextureMemoryAllocation.class  </td></tr>
+    <tr><td align="left">  model/CubeModel.class</td></tr>
+    </table>
+    >]
+  }
+
+  {rank=same; jvm_bin; boot_class_files}
+
+  {rank=same; main; class_files}
+
+  ip_bin -> jvm_bin
+  jvm_bin -> boot_class_files
+
+  GdromClassLoader [shape=box label="GdromClassLoader.class"]
+
+  jvm_bin -> GdromClassLoader -> main
+
+  main -> class_files
+
+}

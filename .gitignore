@@ -24,6 +24,7 @@ classes.txt
 doc/*.pdf
 doc/*.css
 doc/*.html
+doc/entry*.svg
 *.idv
 *.aux
 *.4tc
