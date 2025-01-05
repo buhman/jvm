@@ -69,7 +69,7 @@ static inline void * parse_bytes(const uint8_t ** buf, int length)
   return dest;
 }
 
-static inline bool bytes_equal(int length, const uint8_t * a, const char * b)
+static inline bool bytes_equal_string(int length, const uint8_t * a, const char * b)
 {
   int i;
   for (i = 0; i < length; i++) {
@@ -77,4 +77,22 @@ static inline bool bytes_equal(int length, const uint8_t * a, const char * b)
       return false;
   }
   return b[i] == 0;
+}
+
+static inline bool bytes_equal_bytes(const uint8_t * a, int a_length, const uint8_t * b, int b_length)
+{
+  if (a_length != b_length)
+    return false;
+
+  for (int i = 0; i < a_length; i++) {
+    if ((a[i]) != (b[i]))
+      return false;
+  }
+  return true;
+}
+
+static inline bool constant_equal(struct constant * constant, const char * s)
+{
+  assert(constant->tag == CONSTANT_Utf8);
+  return bytes_equal_string(constant->utf8.length, constant->utf8.bytes, s);
 }

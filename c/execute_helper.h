@@ -1,5 +1,3 @@
-#include "debug_class_file.h"
-
 static inline void class_entry_field_entry_from_constant_index(struct vm * vm,
                                                                int32_t index,
                                                                struct class_entry ** class_entry,

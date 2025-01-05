@@ -6,13 +6,13 @@
 #include "malloc.h"
 #include "class_resolver.h"
 #include "string.h"
-#include "debug_class_file.h"
 #include "memory_allocator.h"
 #include "printf.h"
 #include "field_size.h"
 #include "debug.h"
 #include "fatal.h"
 #include "parse_type.h"
+#include "find_attribute.h"
 
 static int field_info_field_size(struct class_file * class_file, struct field_info * field_info)
 {
@@ -50,7 +50,7 @@ static int32_t count_superclass_instance_fields(int class_hash_table_length,
   struct constant * class_name_constant = &subclass_entry->class_file->constant_pool[class_constant->class.name_index - 1];
   assert(class_name_constant->tag == CONSTANT_Utf8);
   debugf("count_superclass_instance_fields: ");
-  print_utf8_string(class_name_constant);
+  debug_print__constant__utf8_string(class_name_constant);
   debugf(": %d\n", instance_field_count);
 
   return instance_field_count;
@@ -87,7 +87,7 @@ static int add_superclass_instance_fields(int class_hash_table_length,
       struct constant * name_constant = &class_entry->class_file->constant_pool[field_info->name_index - 1];
       assert(name_constant->tag == CONSTANT_Utf8);
       debugf("hash table entry for instance field: ");
-      print_utf8_string(name_constant);
+      debug_print__constant__utf8_string(name_constant);
       debugf(": %d %p\n", instance_index, field_entry);
       hash_table_add(fields_hash_table_length,
                      fields_hash_table,
@@ -106,10 +106,11 @@ static int32_t class_resolver_create_fields_hash_table(int class_hash_table_leng
                                                        struct hash_table_entry * class_hash_table,
                                                        struct class_entry * class_entry)
 {
-  int total_fields_count = class_entry->class_file->fields_count + count_superclass_instance_fields(class_hash_table_length,
-                                                                                                    class_hash_table,
-                                                                                                    class_entry);
-  int fields_hash_table_length = hash_table_next_power_of_two(class_entry->class_file->fields_count * 2);
+  int total_fields_count = class_entry->class_file->fields_count
+                         + count_superclass_instance_fields(class_hash_table_length,
+                                                            class_hash_table,
+                                                            class_entry);
+  int fields_hash_table_length = hash_table_next_power_of_two(total_fields_count * 2);
   uint32_t fields_hash_table_size = (sizeof (struct hash_table_entry)) * fields_hash_table_length;
   struct hash_table_entry * fields_hash_table = malloc_class_arena(fields_hash_table_size);
   hash_table_init(fields_hash_table_length, fields_hash_table);
@@ -127,7 +128,7 @@ static int32_t class_resolver_create_fields_hash_table(int class_hash_table_leng
       struct constant * name_constant = &class_entry->class_file->constant_pool[field_info->name_index - 1];
       assert(name_constant->tag == CONSTANT_Utf8);
       debugf("hash table entry for static field: ");
-      print_utf8_string(name_constant);
+      debug_print__constant__utf8_string(name_constant);
       debugf(": %d %p\n", static_index, field_entry);
 
       hash_table_add(fields_hash_table_length,
@@ -204,7 +205,7 @@ static void class_resolver_allocate_attribute_entry(struct class_entry * class_e
   uint32_t attribute_entry_size = (sizeof (union attribute_entry)) * class_file->constant_pool_count;
   union attribute_entry * attribute_entry = malloc_class_arena(attribute_entry_size);
 
-  for (int i = 0; i < class_file->constant_pool_count; i++) {
+  for (int i = 0; i < class_file->constant_pool_count - 1; i++) {
     attribute_entry[i].class_entry = nullptr;
   }
 
@@ -237,7 +238,7 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buff
     struct constant * class_name_constant = &class_file->constant_pool[class_constant->class.name_index - 1];
     assert(class_name_constant->tag == CONSTANT_Utf8);
     debugf("hash table entry for class: ");
-    print_utf8_string(class_name_constant);
+    debug_print__constant__utf8_string(class_name_constant);
     debugf(" %p\n", &class_entry[i]);
 
     hash_table_add(class_hash_table_length,
@@ -431,9 +432,17 @@ struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(i
       debug_print__method_info__method_name(class_entry, method_info);
       debugc('\n');
 
+      int code_index = find_code_name_index(class_entry->class_file);
+      assert(code_index != 0);
+      struct attribute_info * attribute = find_attribute(code_index,
+                                                         method_info->attributes_count,
+                                                         method_info->attributes);
+      assert(attribute != nullptr);
+
       return (struct method_entry){
         .class_entry = class_entry,
-        .method_info = method_info
+        .method_info = method_info,
+        .code_attribute = attribute->code,
       };
     }
 
@@ -444,7 +453,7 @@ struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(i
     assert(class_constant->tag == CONSTANT_Class);
     struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
     assert(class_name_constant->tag == CONSTANT_Utf8);
-    print_utf8_string(class_name_constant);
+    debug_print__constant__utf8_string(class_name_constant);
     debugf("\n");
 
     // lookup the method from the superclass
@@ -501,6 +510,14 @@ struct method_entry * class_resolver_lookup_method_from_methodref_index(int clas
       struct method_entry * method_entry = malloc_class_arena((sizeof (struct method_entry)));
       method_entry->class_entry = class_entry;
       method_entry->method_info = method_info;
+      int code_index = find_code_name_index(class_entry->class_file);
+      assert(code_index != 0);
+      struct attribute_info * attribute = find_attribute(code_index,
+                                                         method_info->attributes_count,
+                                                         method_info->attributes);
+      assert(attribute != nullptr);
+      method_entry->code_attribute = attribute->code;
+
       origin_class_entry->attribute_entry[methodref_index - 1].method_entry = method_entry;
       return method_entry;
     }
@@ -512,7 +529,7 @@ struct method_entry * class_resolver_lookup_method_from_methodref_index(int clas
     assert(class_constant->tag == CONSTANT_Class);
     struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
     assert(class_name_constant->tag == CONSTANT_Utf8);
-    print_utf8_string(class_name_constant);
+    debug_print__constant__utf8_string(class_name_constant);
     debugf("\n");
 
     // lookup the method from the superclass
@@ -524,6 +541,42 @@ struct method_entry * class_resolver_lookup_method_from_methodref_index(int clas
   }
 
   assert(!"methodref method does not exist");
+}
+
+struct method_entry class_resolver_lookup_method_from_method_name_method_descriptor(struct class_entry * class_entry,
+                                                                                    const uint8_t * method_name,
+                                                                                    int method_name_length,
+                                                                                    const uint8_t * method_descriptor,
+                                                                                    int method_descriptor_length)
+{
+  struct method_info * method_info = class_resolver_lookup_method(class_entry->methods.length,
+                                                                  class_entry->methods.entry,
+                                                                  method_name,
+                                                                  method_name_length,
+                                                                  method_descriptor,
+                                                                  method_descriptor_length);
+
+  if (method_info != nullptr) {
+    int code_index = find_code_name_index(class_entry->class_file);
+    assert(code_index != 0);
+    debugf("code_index: %d\n", code_index);
+    struct attribute_info * attribute = find_attribute(code_index,
+                                                       method_info->attributes_count,
+                                                       method_info->attributes);
+    assert(attribute != nullptr);
+
+    return (struct method_entry){
+      .class_entry = class_entry,
+      .method_info = method_info,
+      .code_attribute = attribute->code,
+    };
+  } else {
+    return (struct method_entry){
+      .class_entry = nullptr,
+      .method_info = nullptr,
+      .code_attribute = nullptr,
+    };
+  }
 }
 
 int32_t * class_resolver_lookup_string(int class_hash_table_length,

@@ -6,8 +6,8 @@
 
 struct frame {
   struct class_entry * class_entry;
-  struct method_info * method;
-  struct Code_attribute * code;
+  struct method_info * method_info;
+  struct Code_attribute * code_attribute;
   uint32_t * local_variable;
   uint32_t * operand_stack;
   uint32_t pc;
@@ -156,8 +156,8 @@ static inline double operand_stack_pop_f64(struct frame * frame)
 }
 
 bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry);
-void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info);
-void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info);
+void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry);
+void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry);
 void vm_method_return(struct vm * vm);
 void vm_execute(struct vm * vm);
 struct vm * vm_start(int class_hash_table_length,

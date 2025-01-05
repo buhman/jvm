@@ -14,3 +14,16 @@ main
 print_class
 __pycache__
 classes.txt
+*.4ct
+*.dvi
+*.lg
+*.log
+*.tmp
+*.toc
+*.xref
+doc/*.pdf
+doc/*.css
+doc/*.html
+*.idv
+*.aux
+*.4tc

@@ -14,6 +14,7 @@ enum initialization_state {
 struct method_entry {
   struct class_entry * class_entry;
   struct method_info * method_info;
+  struct Code_attribute * code_attribute;
 };
 
 union attribute_entry {
@@ -60,12 +61,6 @@ struct class_entry * class_resolver_lookup_class_from_class_index(int class_hash
                                                                   struct hash_table_entry * class_hash_table,
                                                                   struct class_entry * class_entry,
                                                                   int32_t class_index);
-struct method_info * class_resolver_lookup_method(int methods_hash_table_length,
-                                                  struct hash_table_entry * methods_hash_table,
-                                                  const uint8_t * method_name,
-                                                  int method_name_length,
-                                                  const uint8_t * method_descriptor,
-                                                  int method_descriptor_length);
 struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(int class_hash_table_length,
                                                                                struct hash_table_entry * class_hash_table,
                                                                                int32_t interfacemethodref_index,
@@ -75,6 +70,11 @@ struct method_entry * class_resolver_lookup_method_from_methodref_index(int clas
                                                                         struct hash_table_entry * class_hash_table,
                                                                         int32_t methodref_index,
                                                                         struct class_entry * origin_class_entry);
+struct method_entry class_resolver_lookup_method_from_method_name_method_descriptor(struct class_entry * class_entry,
+                                                                                    const uint8_t * method_name,
+                                                                                    int method_name_length,
+                                                                                    const uint8_t * method_descriptor,
+                                                                                    int method_descriptor_length);
 struct field_entry * class_resolver_lookup_field(int fields_hash_table_length,
                                                  struct hash_table_entry * fields_hash_table,
                                                  const uint8_t * field_name,

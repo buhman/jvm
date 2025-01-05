@@ -8,6 +8,7 @@
 #include "file.h"
 #include "malloc.h"
 #include "memory_allocator.h"
+#include "backtrace.h"
 
 static struct hash_table_entry * load_from_filenames(const char * filenames[], int length, int * hash_table_length)
 {
@@ -53,5 +54,8 @@ int main(int argc, const char * argv[])
                             class_hash_table,
                             main_class,
                             main_class_length);
+
+  backtrace_print(vm);
+
   vm_execute(vm);
 }

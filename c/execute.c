@@ -7,6 +7,7 @@
 #include "field_size.h"
 #include "debug.h"
 #include "parse_type.h"
+#include "backtrace.h"
 
 void op_aaload(struct vm * vm)
 {
@@ -125,6 +126,7 @@ void op_astore_3(struct vm * vm)
 
 void op_athrow(struct vm * vm)
 {
+  backtrace_print(vm);
   assert(!"op_athrow");
 }
 
@@ -224,7 +226,7 @@ void op_checkcast(struct vm * vm, uint32_t index)
     assert(class_constant->tag == CONSTANT_Class);
     struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
     assert(class_name_constant->tag == CONSTANT_Utf8);
-    print_utf8_string(class_name_constant);
+    debug_print__constant__utf8_string(class_name_constant);
     debugf("\n");
 
     // superclass lookup
@@ -1193,7 +1195,7 @@ void op_instanceof(struct vm * vm, uint32_t index)
     assert(class_constant->tag == CONSTANT_Class);
     struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
     assert(class_name_constant->tag == CONSTANT_Utf8);
-    print_utf8_string(class_name_constant);
+    debug_print__constant__utf8_string(class_name_constant);
     debugf("\n");
 
     // superclass lookup
@@ -1223,7 +1225,7 @@ void op_invokeinterface(struct vm * vm, uint32_t index, uint32_t count)
                                                                class_entry,
                                                                vm->current_frame->class_entry);
 
-  vm_special_method_call(vm, method_entry.class_entry, method_entry.method_info);
+  vm_special_method_call(vm, method_entry.class_entry, &method_entry);
 }
 
 void op_invokespecial(struct vm * vm, uint32_t index)
@@ -1234,7 +1236,7 @@ void op_invokespecial(struct vm * vm, uint32_t index)
                                                       index,
                                                       vm->current_frame->class_entry);
 
-  vm_special_method_call(vm, method_entry->class_entry, method_entry->method_info);
+  vm_special_method_call(vm, method_entry->class_entry, method_entry);
 }
 
 void op_invokestatic(struct vm * vm, uint32_t index)
@@ -1249,7 +1251,7 @@ void op_invokestatic(struct vm * vm, uint32_t index)
      declared the resolved method is initialized if that class or interface has
      not already been initialized (§5.5). */
 
-  vm_static_method_call(vm, method_entry->class_entry, method_entry->method_info);
+  vm_static_method_call(vm, method_entry->class_entry, method_entry);
 }
 
 #include "debug.h"
@@ -1283,7 +1285,7 @@ void op_invokevirtual(struct vm * vm, uint32_t index)
                                                                class_entry,
                                                                vm->current_frame->class_entry);
 
-  vm_special_method_call(vm, method_entry.class_entry, method_entry.method_info);
+  vm_special_method_call(vm, method_entry.class_entry, &method_entry);
 }
 
 void op_ior(struct vm * vm)

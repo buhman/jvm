@@ -135,6 +135,7 @@ struct BootstrapMethods_attribute;
 struct NestHost_attribute;
 struct NestMembers_attribute;
 struct PermittedSubclasses_attribute;
+struct LineNumberTable_attribute;
 
 struct attribute_info {
   u2 attribute_name_index;
@@ -144,10 +145,11 @@ struct attribute_info {
     struct ConstantValue_attribute * constantvalue;
     struct Code_attribute * code;
     //struct StackMapTable_attribute * stackmaptable;
-    struct BootstrapMethods_attribute * bootstrapmethods;
+    struct BootstrapMethods_attribute * bootstrap_methods;
     struct NestHost_attribute * nesthost;
     struct NestMembers_attribute * nestmembers;
     //struct PermittedSubclasses_attribute * permittedsubclasses;
+    struct LineNumberTable_attribute * line_number_table;
   };
 };
 
@@ -191,6 +193,16 @@ struct NestHost_attribute {
 struct NestMembers_attribute {
   u2 number_of_classes;
   u2 * classes;
+};
+
+struct line_number_table {
+  u2 start_pc;
+  u2 line_number;
+};
+
+struct LineNumberTable_attribute {
+  u2 line_number_table_length;
+  struct line_number_table * line_number_table;
 };
 
 enum FIELD_ACC {

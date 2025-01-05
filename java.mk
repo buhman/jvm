@@ -20,7 +20,9 @@ OBJ = \
 	c/native.o \
 	c/debug.o \
 	c/fatal.o \
-	c/parse_type.o
+	c/parse_type.o \
+	c/backtrace.o \
+	c/find_attribute.o
 
 MAIN_DREAMCAST_OBJ = \
 	c/main_dreamcast.o \

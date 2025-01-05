@@ -12,11 +12,11 @@ void * attribute_info_parse_info(const uint8_t * buf, struct attribute_info * at
   assert(attribute_name->tag == CONSTANT_Utf8);
 #endif
 
-  if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "ConstantValue")) {
+  if (constant_equal(attribute_name, "ConstantValue")) {
     struct ConstantValue_attribute * constantvalue = malloc_class_arena((sizeof (struct ConstantValue_attribute)));
     constantvalue->constantvalue_index = parse_u2(&buf);
     return constantvalue;
-  } else if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "Code")) {
+  } else if (constant_equal(attribute_name, "Code")) {
     // parse Code
     struct Code_attribute * code = malloc_class_arena((sizeof (struct Code_attribute)));
 
@@ -40,34 +40,33 @@ void * attribute_info_parse_info(const uint8_t * buf, struct attribute_info * at
     code->attributes = attribute_info_parse(&buf, code->attributes_count, constant_pool);
 
     return code;
-  } else if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "BootstrapMethods")) {
+  } else if (constant_equal(attribute_name, "BootstrapMethods")) {
     // parse BootstrapMethods
-    struct BootstrapMethods_attribute * bootstrapmethods = malloc_class_arena((sizeof (struct BootstrapMethods_attribute)));
+    struct BootstrapMethods_attribute * bootstrap_methods = malloc_class_arena((sizeof (struct BootstrapMethods_attribute)));
 
-    bootstrapmethods->num_bootstrap_methods = parse_u2(&buf);
+    bootstrap_methods->num_bootstrap_methods = parse_u2(&buf);
 
-    uint32_t bootstrap_methods_size = (sizeof (struct bootstrap_method)) * bootstrapmethods->num_bootstrap_methods;
-    bootstrapmethods->bootstrap_methods = malloc_class_arena(bootstrap_methods_size);
+    uint32_t bootstrap_methods_size = (sizeof (struct bootstrap_method)) * bootstrap_methods->num_bootstrap_methods;
+    bootstrap_methods->bootstrap_methods = malloc_class_arena(bootstrap_methods_size);
 
-    for (int i = 0; i < bootstrapmethods->num_bootstrap_methods; i++) {
-      bootstrapmethods->bootstrap_methods[i].bootstrap_method_ref = parse_u2(&buf);
-      bootstrapmethods->bootstrap_methods[i].num_bootstrap_arguments = parse_u2(&buf);
+    for (int i = 0; i < bootstrap_methods->num_bootstrap_methods; i++) {
+      bootstrap_methods->bootstrap_methods[i].bootstrap_method_ref = parse_u2(&buf);
+      bootstrap_methods->bootstrap_methods[i].num_bootstrap_arguments = parse_u2(&buf);
 
-      uint32_t bootstrap_arguments_size = (sizeof (u2)) * bootstrapmethods->bootstrap_methods[i].num_bootstrap_arguments;
-      bootstrapmethods->bootstrap_methods[i].bootstrap_arguments = malloc_class_arena(bootstrap_arguments_size);
-      for (int j = 0; j < bootstrapmethods->bootstrap_methods[i].num_bootstrap_arguments; j++) {
-        bootstrapmethods->bootstrap_methods[i].bootstrap_arguments[j] = parse_u2(&buf);
+      uint32_t bootstrap_arguments_size = (sizeof (u2)) * bootstrap_methods->bootstrap_methods[i].num_bootstrap_arguments;
+      bootstrap_methods->bootstrap_methods[i].bootstrap_arguments = malloc_class_arena(bootstrap_arguments_size);
+      for (int j = 0; j < bootstrap_methods->bootstrap_methods[i].num_bootstrap_arguments; j++) {
+        bootstrap_methods->bootstrap_methods[i].bootstrap_arguments[j] = parse_u2(&buf);
       }
     }
 
-    return bootstrapmethods;
-  } else if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "BootstrapMethods")) {
-  } else if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "NestHost")) {
+    return bootstrap_methods;
+  } else if (constant_equal(attribute_name, "NestHost")) {
     struct NestHost_attribute * nesthost = malloc_class_arena((sizeof (struct NestHost_attribute)));
     nesthost->host_class_index = parse_u2(&buf);
 
     return nesthost;
-  } else if (bytes_equal(attribute_name->utf8.length, attribute_name->utf8.bytes, "NestMembers")) {
+  } else if (constant_equal(attribute_name, "NestMembers")) {
     struct NestMembers_attribute * nestmembers = malloc_class_arena((sizeof (struct NestMembers_attribute)));
 
     nestmembers->number_of_classes = parse_u2(&buf);
@@ -79,6 +78,18 @@ void * attribute_info_parse_info(const uint8_t * buf, struct attribute_info * at
     }
 
     return nestmembers;
+  } else if (constant_equal(attribute_name, "LineNumberTable")) {
+    struct LineNumberTable_attribute * line_number_table = malloc_class_arena((sizeof (struct LineNumberTable_attribute)));
+    line_number_table->line_number_table_length = parse_u2(&buf);
+
+    uint32_t line_number_table_size = (sizeof (struct line_number_table)) * line_number_table->line_number_table_length;
+    line_number_table->line_number_table = malloc_class_arena(line_number_table_size);
+
+    for (int i = 0; i < line_number_table->line_number_table_length; i++) {
+      line_number_table->line_number_table[i].start_pc = parse_u2(&buf);
+      line_number_table->line_number_table[i].line_number = parse_u2(&buf);
+    }
+    return line_number_table;
   } else {
     return nullptr;
   }

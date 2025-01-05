@@ -2,7 +2,6 @@
 
 #include "assert.h"
 #include "class_file.h"
-#include "debug_class_file.h"
 #include "bytes.h"
 #include "decode.h"
 #include "frame.h"
@@ -11,43 +10,8 @@
 #include "string.h"
 #include "native.h"
 #include "fatal.h"
-
-struct Code_attribute * get_code_attribute(int code_name_index,
-                                           int attributes_count,
-                                           struct attribute_info * attributes)
-{
-  for (int i = 0; i < attributes_count; i++) {
-    if (attributes[i].attribute_name_index == code_name_index)
-      return attributes[i].code;
-  }
-  return nullptr;
-}
-
-int find_code_name_index(struct class_file * class_file)
-{
-  for (int i = 0; i < class_file->constant_pool_count; i++) {
-    struct constant * constant = &class_file->constant_pool[i];
-    if (constant->tag == CONSTANT_Utf8) {
-      if (bytes_equal(constant->utf8.length, constant->utf8.bytes, "Code")) {
-        return i + 1;
-      }
-    }
-  }
-  return 0;
-}
-
-int find_constantvalue_name_index(struct class_file * class_file)
-{
-  for (int i = 0; i < class_file->constant_pool_count; i++) {
-    struct constant * constant = &class_file->constant_pool[i];
-    if (constant->tag == CONSTANT_Utf8) {
-      if (bytes_equal(constant->utf8.length, constant->utf8.bytes, "ConstantValue")) {
-        return i + 1;
-      }
-    }
-  }
-  return 0;
-}
+#include "debug.h"
+#include "find_attribute.h"
 
 int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type)
 {
@@ -56,7 +20,7 @@ int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_typ
   assert(descriptor_constant->utf8.bytes[0] == '(');
 
   debugf("method descriptor: ");
-  print_utf8_string(descriptor_constant);
+  debug_print__constant__utf8_string(descriptor_constant);
   debugf("\n");
 
   int i = 1;
@@ -107,7 +71,7 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
   #ifdef DEBUG
   assert(class_name_constant->tag == CONSTANT_Utf8);
   #endif
-  print_constant(class_name_constant);
+  debug_print__constant__utf8_string(class_name_constant);
   debugf("\n");
 
   if (class_entry->initialization_state == CLASS_INITIALIZED)
@@ -164,27 +128,25 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
   /* Next, if C declares a class or interface initialization method, execute
      that method. */
   const uint8_t * method_name = (const uint8_t *)"<clinit>";
-  int method_name_length = 8;
+  int method_name_length = string_length((const char *)method_name);
   const uint8_t * method_descriptor = (const uint8_t *)"()V";
-  int method_descriptor_length = 3;
+  int method_descriptor_length = string_length((const char *)method_descriptor);
 
-  int methods_hash_table_length = class_entry->methods.length;
-  struct hash_table_entry * methods_hash_table = class_entry->methods.entry;
+  struct method_entry method_entry =
+    class_resolver_lookup_method_from_method_name_method_descriptor(class_entry,
+                                                                    method_name,
+                                                                    method_name_length,
+                                                                    method_descriptor,
+                                                                    method_descriptor_length);
 
-  struct method_info * method_info = class_resolver_lookup_method(methods_hash_table_length,
-                                                                  methods_hash_table,
-                                                                  method_name,
-                                                                  method_name_length,
-                                                                  method_descriptor,
-                                                                  method_descriptor_length);
-  if (method_info != nullptr) {
-    assert((method_info->access_flags & METHOD_ACC_STATIC) != 0);
+  if (method_entry.method_info != nullptr) {
+    assert((method_entry.method_info->access_flags & METHOD_ACC_STATIC) != 0);
     debugf("<clinit>\n");
 
     // tamper with next_pc
     vm->current_frame->next_pc = vm->current_frame->pc;
 
-    vm_static_method_call(vm, class_entry, method_info);
+    vm_static_method_call(vm, class_entry, &method_entry);
 
     vm->current_frame->initialization_frame = 1;
     return false;
@@ -196,9 +158,9 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
   return true;
 }
 
-void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info, int nargs, uint8_t return_type)
+void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry, int nargs, uint8_t return_type)
 {
-  debugf("vm_static_native_method_call: nargs %d\n", nargs);
+  debugf("vm_native_method_call: nargs %d\n", nargs);
 
   uint32_t args[nargs];
   for (int i = 0; i < nargs; i++) {
@@ -210,10 +172,10 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
   debugf("native:\n  ");
   struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->this_class - 1];
   struct constant * class_name_constant = &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
-  print_constant(class_name_constant);
+  debug_print__constant__utf8_string(class_name_constant);
   debugf("  ");
-  struct constant * method_name_constant = &class_entry->class_file->constant_pool[method_info->name_index - 1];
-  print_constant(method_name_constant);
+  struct constant * method_name_constant = &class_entry->class_file->constant_pool[method_entry->method_info->name_index - 1];
+  debug_print__constant__utf8_string(method_name_constant);
 
 
   int java_lang_math_length = 14;
@@ -360,22 +322,15 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
   assert(false);
 }
 
-void vm_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info, int nargs, uint8_t return_type)
+void vm_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry, int nargs, uint8_t return_type)
 {
-  int code_name_index = find_code_name_index(class_entry->class_file);
-  assert(code_name_index > 0);
-
-  struct Code_attribute * code = get_code_attribute(code_name_index,
-                                                    method_info->attributes_count,
-                                                    method_info->attributes);
-  assert(code != nullptr);
+  assert(method_entry->code_attribute != nullptr);
 
   struct frame * old_frame = vm->current_frame;
 
   vm->current_frame = stack_push_frame(&vm->frame_stack, 1);
-  vm->current_frame->code = code;
-  vm->current_frame->local_variable = stack_push_data(&vm->data_stack, code->max_locals);
-  vm->current_frame->operand_stack = stack_push_data(&vm->data_stack, code->max_stack);
+  vm->current_frame->local_variable = stack_push_data(&vm->data_stack, method_entry->code_attribute->max_locals);
+  vm->current_frame->operand_stack = stack_push_data(&vm->data_stack, method_entry->code_attribute->max_stack);
   vm->current_frame->operand_stack_ix = 0;
   vm->current_frame->initialization_frame = 0;
   vm->current_frame->return_type = return_type;
@@ -389,12 +344,13 @@ void vm_method_call(struct vm * vm, struct class_entry * class_entry, struct met
   vm->current_frame->pc = 0;
   vm->current_frame->next_pc = 0;
   vm->current_frame->class_entry = class_entry;
-  vm->current_frame->method = method_info;
+  vm->current_frame->method_info = method_entry->method_info;
+  vm->current_frame->code_attribute = method_entry->code_attribute;
 
   debugf("operand_stack_ix: %d\n", vm->current_frame->operand_stack_ix);
 }
 
-void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info)
+void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry)
 {
   /* If the method is not native, the nargs argument values are popped from the
      operand stack. A new frame is created on the Java Virtual Machine stack for
@@ -407,19 +363,19 @@ void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, st
   */
 
   uint8_t return_type;
-  struct constant * descriptor_constant = &class_entry->class_file->constant_pool[method_info->descriptor_index - 1];
+  struct constant * descriptor_constant = &class_entry->class_file->constant_pool[method_entry->method_info->descriptor_index - 1];
   int nargs = descriptor_nargs(descriptor_constant, &return_type);
   nargs += 1;
   debugf("nargs+1: %d\n", nargs);
 
-  if (method_info->access_flags & METHOD_ACC_NATIVE) {
-    vm_native_method_call(vm, class_entry, method_info, nargs, return_type);
+  if (method_entry->method_info->access_flags & METHOD_ACC_NATIVE) {
+    vm_native_method_call(vm, class_entry, method_entry, nargs, return_type);
   } else {
-    vm_method_call(vm, class_entry, method_info, nargs, return_type);
+    vm_method_call(vm, class_entry, method_entry, nargs, return_type);
   }
 }
 
-void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, struct method_info * method_info)
+void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry)
 {
   /* If the method is not native, the nargs argument values are popped from the
      operand stack. A new frame is created on the Java Virtual Machine stack for
@@ -432,14 +388,14 @@ void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, str
   */
 
   uint8_t return_type;
-  struct constant * descriptor_constant = &class_entry->class_file->constant_pool[method_info->descriptor_index - 1];
+  struct constant * descriptor_constant = &class_entry->class_file->constant_pool[method_entry->method_info->descriptor_index - 1];
   int nargs = descriptor_nargs(descriptor_constant, &return_type);
   debugf("nargs %d\n", nargs);
 
-  if (method_info->access_flags & METHOD_ACC_NATIVE) {
-    vm_native_method_call(vm, class_entry, method_info, nargs, return_type);
+  if (method_entry->method_info->access_flags & METHOD_ACC_NATIVE) {
+    vm_native_method_call(vm, class_entry, method_entry, nargs, return_type);
   } else {
-    vm_method_call(vm, class_entry, method_info, nargs, return_type);
+    vm_method_call(vm, class_entry, method_entry, nargs, return_type);
   }
 }
 
@@ -453,8 +409,8 @@ void vm_method_return(struct vm * vm)
 
   struct frame * old_frame = vm->current_frame;
 
-  stack_pop_data(&vm->data_stack, old_frame->code->max_locals);
-  stack_pop_data(&vm->data_stack, old_frame->code->max_stack);
+  stack_pop_data(&vm->data_stack, old_frame->code_attribute->max_locals);
+  stack_pop_data(&vm->data_stack, old_frame->code_attribute->max_stack);
 
   vm->current_frame = stack_pop_frame(&vm->frame_stack, 1);
   assert(vm->current_frame != old_frame);
@@ -537,22 +493,14 @@ static void print_vm_stack(struct vm * vm)
 void vm_execute(struct vm * vm)
 {
   while (true) {
-    assert(vm->current_frame->pc < vm->current_frame->code->code_length);
+    assert(vm->current_frame->pc < vm->current_frame->code_attribute->code_length);
     print_vm_stack(vm);
-    decode_print_instruction(vm->current_frame->code->code, vm->current_frame->pc);
-    //uint32_t old_pc = vm->current_frame->pc;
-    //struct method_info * old_method = vm->current_frame->method;
-    decode_execute_instruction(vm, vm->current_frame->code->code, vm->current_frame->pc);
-    if (vm->frame_stack.ix == 1) {
+    decode_print_instruction(vm->current_frame->code_attribute->code, vm->current_frame->pc);
+    decode_execute_instruction(vm, vm->current_frame->code_attribute->code, vm->current_frame->pc);
+    if (vm->frame_stack.ix == 0) {
       debugf("terminate\n");
       break;
     }
-    /*
-    if (vm->current_frame->method == old_method && vm->current_frame->pc == old_pc) {
-      // if the instruction did not branch, increment pc
-      vm->current_frame->pc = vm->current_frame->next_pc;
-    }
-    */
     vm->current_frame->pc = vm->current_frame->next_pc;
   }
 }
@@ -567,21 +515,18 @@ struct vm * vm_start(int class_hash_table_length,
                                                                  main_class_name,
                                                                  main_class_name_length);
 
-  const char * method_name = "main";
-  int method_name_length = string_length(method_name);
-  const char * method_descriptor = "()V";
-  int method_descriptor_length = string_length(method_descriptor);
+  const uint8_t * method_name = (const uint8_t *)"main";
+  int method_name_length = string_length((const char *)method_name);
+  const uint8_t * method_descriptor = (const uint8_t *)"()V";
+  int method_descriptor_length = string_length((const char *)method_descriptor);
 
-  int methods_hash_table_length = class_entry->methods.length;
-  struct hash_table_entry * methods_hash_table = class_entry->methods.entry;
-
-  struct method_info * method_info = class_resolver_lookup_method(methods_hash_table_length,
-                                                                  methods_hash_table,
-                                                                  (const uint8_t *)method_name,
-                                                                  method_name_length,
-                                                                  (const uint8_t *)method_descriptor,
-                                                                  method_descriptor_length);
-  assert(method_info != nullptr);
+  struct method_entry method_entry =
+    class_resolver_lookup_method_from_method_name_method_descriptor(class_entry,
+                                                                    method_name,
+                                                                    method_name_length,
+                                                                    method_descriptor,
+                                                                    method_descriptor_length);
+  assert(method_entry.method_info != nullptr);
 
   static struct vm vm;
   vm.class_hash_table.entry = class_hash_table;
@@ -597,16 +542,7 @@ struct vm * vm_start(int class_hash_table_length,
   uint32_t data[vm.data_stack.capacity];
   vm.data_stack.data = data;
 
-  struct frame * entry_frame = stack_push_frame(&vm.frame_stack, 1);
-  struct Code_attribute code;
-  code.max_locals = 0;
-  code.max_stack = 0;
-  entry_frame->code = &code;
-  entry_frame->local_variable = 0;
-  entry_frame->operand_stack = 0;
-  entry_frame->operand_stack_ix = 0;
-
-  vm_static_method_call(&vm, class_entry, method_info);
+  vm_static_method_call(&vm, class_entry, &method_entry);
 
   return &vm;
 }
