@@ -109,6 +109,13 @@ native_java_lang_math_cos_1(uint32_t * args)
   return *((uint32_t *)&value);
 }
 
+uint32_t native_java_lang_math_abs_1(uint32_t * args)
+{
+  float arg = ((float *)args)[0];
+  float value = __builtin_fabsf(arg);
+  return *((uint32_t *)&value);
+}
+
 #if defined(__dreamcast__)
 #include "resources.inc.c"
 #endif

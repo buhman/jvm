@@ -200,6 +200,13 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
         operand_stack_push_u32(vm->current_frame, value);
         return;
       }
+      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"abs", 3)) {
+        assert(nargs == 1);
+        assert(return_type == 'F');
+        uint32_t value = native_java_lang_math_abs_1(args);
+        operand_stack_push_u32(vm->current_frame, value);
+        return;
+      }
     }
   }
 

@@ -17,4 +17,6 @@ public final class Math {
     public static native float sin(float a);
 
     public static native float cos(float a);
+
+    public static native float abs(float a);
 }

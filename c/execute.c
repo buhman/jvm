@@ -7,14 +7,14 @@
 #include "field_size.h"
 #include "debug.h"
 #include "parse_type.h"
+#include "native_types.h"
 
 void op_aaload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  uint32_t * referencearray = (uint32_t *)&arrayref[1];
-  uint32_t value = referencearray[index];
+  struct object_arrayref * arrayref = (struct object_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  uint32_t value = arrayref->u32[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
 
@@ -22,10 +22,9 @@ void op_aastore(struct vm * vm)
 {
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int32_t * referencearray = (int32_t *)&arrayref[1];
-  referencearray[index] = value;
+  struct object_arrayref * arrayref = (struct object_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  arrayref->u32[index] = value;
 }
 
 void op_aconst_null(struct vm * vm)
@@ -66,15 +65,16 @@ void op_aload_3(struct vm * vm)
 void op_anewarray(struct vm * vm, uint32_t index)
 {
   int32_t count = operand_stack_pop_u32(vm->current_frame);
-  int32_t size = 4 * count + 4;
-  int32_t * arrayref = memory_allocate(size);
+  int32_t element_size = (sizeof (void *));
+  int32_t size = element_size * count + (sizeof (struct object_arrayref));
+  struct object_arrayref * arrayref = memory_allocate(size);
   assert(arrayref != nullptr);
-  arrayref[0] = count;
+  arrayref->length = count;
 
   /* All components of the new array are initialized to null, the default value
      for reference types */
   for (int i = 0; i < count; i++) {
-    arrayref[i + 1] = 0;
+    arrayref->a[i] = nullptr;
   }
 
   operand_stack_push_u32(vm->current_frame, (uint32_t)arrayref);
@@ -132,22 +132,19 @@ void op_athrow(struct vm * vm)
 void op_baload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int8_t * bytearray = (int8_t *)&arrayref[1];
-  int8_t value = bytearray[index];
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  int8_t value = arrayref->u8[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_bastore(struct vm * vm)
 {
-  int8_t value = operand_stack_pop_u32(vm->current_frame);
+  uint8_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  debugf("%d %d\n", arrayref[0], index);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int8_t * bytearray = (int8_t *)&arrayref[1];
-  bytearray[index] = value;
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  arrayref->u8[index] = value;
 }
 
 void op_bipush(struct vm * vm, int32_t byte)
@@ -163,10 +160,9 @@ void op_breakpoint(struct vm * vm)
 void op_caload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  uint16_t * chararray = (uint16_t *)&arrayref[1];
-  uint16_t value = chararray[index];
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  uint16_t value = arrayref->u16[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
 
@@ -174,10 +170,9 @@ void op_castore(struct vm * vm)
 {
   uint16_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  uint16_t * chararray = (uint16_t *)&arrayref[1];
-  chararray[index] = value;
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  arrayref->u16[index] = value;
 }
 
 void op_checkcast(struct vm * vm, uint32_t index)
@@ -269,10 +264,9 @@ void op_dadd(struct vm * vm)
 void op_daload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int64_t * longarray = (int64_t *)&arrayref[1];
-  int64_t value = longarray[index];
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  uint64_t value = arrayref->u64[index];
   operand_stack_push_u64(vm->current_frame, value);
 }
 
@@ -280,10 +274,9 @@ void op_dastore(struct vm * vm)
 {
   int64_t value = operand_stack_pop_u64(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int64_t * longarray = (int64_t *)&arrayref[1];
-  longarray[index] = value;
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  arrayref->u64[index] = value;
 }
 
 void op_dcmpg(struct vm * vm)
@@ -553,21 +546,19 @@ void op_fadd(struct vm * vm)
 void op_faload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int32_t * intarray = (int32_t *)&arrayref[1];
-  int32_t value = intarray[index];
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  uint32_t value = arrayref->u32[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_fastore(struct vm * vm)
 {
-  int32_t value = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int32_t * intarray = (int32_t *)&arrayref[1];
-  intarray[index] = value;
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  arrayref->u32[index] = value;
 }
 
 void op_fcmpg(struct vm * vm)
@@ -881,10 +872,9 @@ void op_iadd(struct vm * vm)
 void op_iaload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int32_t * intarray = (int32_t *)&arrayref[1];
-  int32_t value = intarray[index];
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  int32_t value = arrayref->u32[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
 
@@ -898,12 +888,11 @@ void op_iand(struct vm * vm)
 
 void op_iastore(struct vm * vm)
 {
-  int32_t value = operand_stack_pop_u32(vm->current_frame);
+  uint32_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int32_t * intarray = (int32_t *)&arrayref[1];
-  intarray[index] = value;
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  arrayref->u32[index] = value;
 }
 
 void op_iconst_0(struct vm * vm)
@@ -1460,10 +1449,9 @@ void op_ladd(struct vm * vm)
 void op_laload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int64_t * longarray = (int64_t *)&arrayref[1];
-  int64_t value = longarray[index];
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  int64_t value = arrayref->u64[index];
   operand_stack_push_u64(vm->current_frame, value);
 }
 
@@ -1477,12 +1465,11 @@ void op_land(struct vm * vm)
 
 void op_lastore(struct vm * vm)
 {
-  int64_t value = operand_stack_pop_u64(vm->current_frame);
+  uint64_t value = operand_stack_pop_u64(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int64_t * longarray = (int64_t *)&arrayref[1];
-  longarray[index] = value;
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  arrayref->u64[index] = value;
 }
 
 void op_lcmp(struct vm * vm)
@@ -1824,55 +1811,25 @@ void op_new(struct vm * vm, uint32_t index)
   operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
 }
 
-enum ARRAY_TYPE {
-  T_BOOLEAN = 4, // 1 byte
-  T_CHAR = 5, // 2 bytes
-  T_FLOAT = 6, // 4 bytes
-  T_DOUBLE = 7, // 8 bytes
-  T_BYTE = 8, // 1 byte
-  T_SHORT = 9, // 2 bytes
-  T_INT = 10, // 4 bytes
-  T_LONG = 11, // 8 bytes
-};
 
 void op_newarray(struct vm * vm, uint32_t atype)
 {
-  int32_t element_size = 0;
-  switch (atype) {
-  case T_BOOLEAN: [[fallthrough]]; // 1 byte
-  case T_BYTE:                     // 1 byte
-    element_size = 1;
-    break;
-  case T_CHAR:    [[fallthrough]]; // 2 bytes
-  case T_SHORT:                    // 2 bytes
-    element_size = 2;
-    break;
-  case T_FLOAT:   [[fallthrough]]; // 4 bytes
-  case T_INT:                      // 4 bytes
-    element_size = 4;
-    break;
-  case T_DOUBLE:  [[fallthrough]]; // 8 bytes
-  case T_LONG:                     // 8 bytes
-    element_size = 8;
-    break;
-  default:
-    assert(false);
-    break;
-  }
   int32_t count = operand_stack_pop_u32(vm->current_frame);
-  int32_t size = element_size * count + 4;
-  int32_t * arrayref = memory_allocate(size);
+  int32_t element_size = array_element_size(atype);
+  int32_t size = element_size * count + (sizeof (struct primitive_arrayref));
+  struct primitive_arrayref * arrayref = memory_allocate(size);
   assert(arrayref != nullptr);
-  arrayref[0] = count;
+  arrayref->length = count;
 
   /* Each of the elements of the new array is initialized to the default initial
      value (§2.3, §2.4) for the element type of the array type. */
   /* round up u32_count, possibly initializing past the end of the array. This
      is acceptable because memory_allocate always allocates a multiple of 4
      greater than or equal to `size`. */
-  int32_t u32_count = (size - 4 + 3) / 4;
+  int32_t array_element_size = count * element_size; // bytes
+  int32_t u32_count = (array_element_size + 3) / 4;  // u32 units
   for (int i = 0; i < u32_count; i++) {
-    arrayref[i + 1] = 0;
+    arrayref->u32[i] = 0;
   }
 
   operand_stack_push_u32(vm->current_frame, (uint32_t)arrayref);
@@ -2014,10 +1971,9 @@ void op_return(struct vm * vm)
 void op_saload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int16_t * shortarray = (int16_t *)&arrayref[1];
-  int16_t value = shortarray[index];
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  int16_t value = arrayref->u16[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
 
@@ -2025,10 +1981,9 @@ void op_sastore(struct vm * vm)
 {
   uint16_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  assert(arrayref[0] > 0 && index < arrayref[0]);
-  int16_t * shortarray = (int16_t *)&arrayref[1];
-  shortarray[index] = value;
+  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  arrayref->u16[index] = value;
 }
 
 void op_sipush(struct vm * vm, int32_t byte)
