@@ -7,6 +7,18 @@ typedef uint32_t u4;
 typedef uint16_t u2;
 typedef uint8_t u1;
 
+enum REF {
+  REF_getField         = 1, //  getfield C.f:T
+  REF_getStatic        = 2, //  getstatic C.f:T
+  REF_putField         = 3, //  putfield C.f:T
+  REF_putStatic        = 4, //  putstatic C.f:T
+  REF_invokeVirtual    = 5, //  invokevirtual C.m:(A*)T
+  REF_invokeStatic     = 6, //  invokestatic C.m:(A*)T
+  REF_invokeSpecial    = 7, //  invokespecial C.m:(A*)T
+  REF_newInvokeSpecial = 8, //  new C; dup; invokespecial C.<init>:(A*)V
+  REF_invokeInterface  = 9, //  invokeinterface C.m:(A*)T
+};
+
 enum CONSTANT {
   CONSTANT_Class              = 7,  // §4.4.1
   CONSTANT_Fieldref           = 9,  // §4.4.2

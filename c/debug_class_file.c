@@ -94,6 +94,117 @@ static void print_constant(struct constant * constant)
   }
 }
 
+void print_methodref(const char * indent, struct constant * constant, struct constant * constant_pool)
+{
+  assert(constant->tag == CONSTANT_Methodref || constant->tag == CONSTANT_InterfaceMethodref || constant->tag == CONSTANT_Fieldref);
+
+  struct constant * class_constant = &constant_pool[constant->methodref.class_index - 1];
+  assert(class_constant->tag == CONSTANT_Class);
+  struct constant * class_name_constant = &constant_pool[class_constant->class.name_index - 1];
+  assert(class_name_constant->tag == CONSTANT_Utf8);
+  struct constant * name_and_type_constant = &constant_pool[constant->methodref.name_and_type_index - 1];
+  assert(name_and_type_constant->tag == CONSTANT_NameAndType);
+  struct constant * method_name_constant = &constant_pool[name_and_type_constant->nameandtype.name_index - 1];
+  assert(method_name_constant->tag == CONSTANT_Utf8);
+  struct constant * method_descriptor_constant = &constant_pool[name_and_type_constant->nameandtype.descriptor_index - 1];
+  assert(method_descriptor_constant->tag == CONSTANT_Utf8);
+  prints(indent);
+  print_constant(class_constant);
+  prints(indent);
+  prints("  ");
+  print_constant(class_name_constant);
+
+  prints(indent);
+  print_constant(name_and_type_constant);
+  prints(indent);
+  prints("  ");
+  print_constant(method_name_constant);
+  prints(indent);
+  prints("  ");
+  print_constant(method_descriptor_constant);
+}
+
+static void print_methodhandle_constant(const char * indent, struct constant * methodhandle_constant, struct constant * constant_pool)
+{
+  prints(indent);
+  assert(methodhandle_constant->tag == CONSTANT_MethodHandle);
+  print_constant(methodhandle_constant);
+
+  prints(indent);
+  prints("  reference_kind:  ");
+  switch (methodhandle_constant->methodhandle.reference_kind) {
+  case REF_getField:         prints("REF_getField\n"); break;
+  case REF_getStatic:        prints("REF_getStatic\n"); break;
+  case REF_putField:         prints("REF_putField\n"); break;
+  case REF_putStatic:        prints("REF_putStatic\n"); break;
+  case REF_invokeVirtual:    prints("REF_invokeVirtual\n"); break;
+  case REF_invokeStatic:     prints("REF_invokeStatic\n"); break;
+  case REF_invokeSpecial:    prints("REF_invokeSpecial\n"); break;
+  case REF_newInvokeSpecial: prints("REF_newInvokeSpecial\n"); break;
+  case REF_invokeInterface:  prints("REF_invokeInterface\n"); break;
+  default:
+    assert(false);
+    break;
+  }
+
+  struct constant * constant = &constant_pool[methodhandle_constant->methodhandle.reference_index - 1];
+  prints(indent);
+  prints("  reference_index: ");
+  print_constant(constant);
+
+  char indent2[string_length(indent) + 4 + 1];
+  indent2[(sizeof (indent2)) - 1] = 0;
+  for (int i = 0; i < (sizeof (indent2)) - 1; i++) indent2[i] = ' ';
+
+  switch (methodhandle_constant->methodhandle.reference_kind) {
+  case REF_getField: [[fallthrough]];
+  case REF_getStatic: [[fallthrough]];
+  case REF_putField: [[fallthrough]];
+  case REF_putStatic:
+    // If the value of the reference_kind item is 1 (REF_getField), 2
+    // (REF_getStatic), 3 (REF_putField), or 4 (REF_putStatic), then the
+    // constant_pool entry at that index must be a CONSTANT_Fieldref_info
+    // structure (§4.4.2) representing a field for which a method handle is to be
+    // created.
+    assert(constant->tag == CONSTANT_Fieldref);
+    print_methodref(indent2, constant, constant_pool);
+    break;
+  case REF_invokeVirtual: [[fallthrough]];
+  case REF_newInvokeSpecial:
+    // If the value of the reference_kind item is 5 (REF_invokeVirtual) or 8
+    // (REF_newInvokeSpecial), then the constant_pool entry at that index must be
+    // a CONSTANT_Methodref_info structure (§4.4.2) representing a class's method
+    // or constructor (§2.9.1) for which a method handle is to be created.
+    assert(constant->tag == CONSTANT_Methodref);
+    print_methodref(indent2, constant, constant_pool);
+    break;
+  case REF_invokeStatic: [[fallthrough]];
+  case REF_invokeSpecial:
+    // If the value of the reference_kind item is 6 (REF_invokeStatic) or 7
+    // (REF_invokeSpecial), [...] the constant_pool entry at that index must be
+    // either a CONSTANT_Methodref_info structure or a
+    // CONSTANT_InterfaceMethodref_info structure (§4.4.2) representing a class's
+    // or interface's method for which a method handle is to be created.
+    assert(constant->tag == CONSTANT_Methodref || constant->tag == CONSTANT_InterfaceMethodref);
+    print_methodref(indent2, constant, constant_pool);
+    break;
+  case REF_invokeInterface:
+    // If the value of the reference_kind item is 9 (REF_invokeInterface), then
+    // the constant_pool entry at that index must be a
+    // CONSTANT_InterfaceMethodref_info structure representing an interface's
+    // method for which a method handle is to be created.
+    assert(constant->tag == CONSTANT_InterfaceMethodref);
+    print_methodref(indent2, constant, constant_pool);
+    break;
+  default:
+    assert(false);
+    break;
+  }
+
+  //reference_kind=6
+  //reference_index=36
+}
+
 static void print_bootstrap_methods(const char * indent, struct attribute_info * attribute, struct constant * constant_pool)
 {
   prints(indent);
@@ -101,17 +212,24 @@ static void print_bootstrap_methods(const char * indent, struct attribute_info *
   prints(indent);
   printf("bootstrap methods:\n");
   for (int i = 0; i < attribute->bootstrap_methods->num_bootstrap_methods; i++) {
+    struct bootstrap_method * bootstrap_method = &attribute->bootstrap_methods->bootstrap_methods[i];
     prints(indent);
     printf("  bootstrap_method %d:\n", i);
     prints(indent);
-    printf("    bootstrap_method_ref: %d\n", attribute->bootstrap_methods->bootstrap_methods[i].bootstrap_method_ref);
-    prints(indent);
-    printf("    num_bootstrap_arguments: %d\n", attribute->bootstrap_methods->bootstrap_methods[i].num_bootstrap_arguments);
-    prints(indent);
-    printf("    bootstrap_arguments:\n");
-    for (int j = 0; j < attribute->bootstrap_methods->bootstrap_methods[i].num_bootstrap_arguments; j++) {
-      prints(indent);
-      printf("      bootstrap_argument %d: %d\n", j, attribute->bootstrap_methods->bootstrap_methods[i].bootstrap_arguments[j]);
+    printf("    bootstrap_method_ref: %d\n", bootstrap_method->bootstrap_method_ref);
+    struct constant * methodhandle_constant = &constant_pool[bootstrap_method->bootstrap_method_ref - 1];
+    assert(methodhandle_constant->tag == CONSTANT_MethodHandle);
+    char indent2[string_length(indent) + 6 + 1];
+    indent2[(sizeof (indent2)) - 1] = 0;
+    for (int i = 0; i < (sizeof (indent2)) - 1; i++) indent2[i] = ' ';
+    print_methodhandle_constant(indent2, methodhandle_constant, constant_pool);
+    prints(indent2);
+    printf("num_bootstrap_arguments: %d\n", bootstrap_method->num_bootstrap_arguments);
+    prints(indent2);
+    printf("bootstrap_arguments:\n");
+    for (int j = 0; j < bootstrap_method->num_bootstrap_arguments; j++) {
+      prints(indent2);
+      printf("  bootstrap_argument %d: %d\n", j, bootstrap_method->bootstrap_arguments[j]);
     }
   }
 }
@@ -201,8 +319,9 @@ static void print_code(const char * indent, struct attribute_info * attribute, s
   printf("attributes:\n");
   for (int i = 0; i < attribute->code->attributes_count; i++) {
     char indent2[string_length(indent) + 2 + 1];
-    string_copy(indent2, indent);
-    string_copy(indent2 + string_length(indent), "    ");
+    indent2[(sizeof (indent2)) - 1] = 0;
+    for (int i = 0; i < (sizeof (indent2)) - 1; i++)
+      indent2[i] = ' ';
     prints(indent);
     printf("  attribute %d:\n", i);
     print_attribute(indent2, &attribute->code->attributes[i], constant_pool);
