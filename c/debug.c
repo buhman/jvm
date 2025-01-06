@@ -39,6 +39,13 @@ void debug_print__method_info__method_name(struct class_file * class_file, struc
   debug_print__constant__method_name(method_name_constant, method_descriptor_constant);
 }
 
+void print__string(const uint8_t * bytes, int length)
+{
+  for (int i = 0; i < length; i++) {
+    printc(bytes[i]);
+  }
+}
+
 void print__constant__utf8_string(struct constant * constant)
 {
   assert(constant->tag == CONSTANT_Utf8);

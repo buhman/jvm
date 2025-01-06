@@ -464,6 +464,8 @@ struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(i
     assert(class_entry != nullptr);
   }
 
+  print__class_file__class_name(objectref_class_entry->class_file);
+  printc('\n');
   assert(!"interfacemethodref method does not exist");
 }
 

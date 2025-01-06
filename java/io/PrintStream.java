@@ -48,6 +48,10 @@ public class PrintStream
         write(String.valueOf(obj));
     }
 
+    public void print(String s) {
+        write(String.valueOf(s));
+    }
+
     public void println() {
         write(newline);
     }
@@ -89,6 +93,11 @@ public class PrintStream
 
     public void println(Object obj) {
         write(String.valueOf(obj));
+        write(newline);
+    }
+
+    public void println(String s) {
+        write(String.valueOf(s));
         write(newline);
     }
 }

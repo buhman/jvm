@@ -497,7 +497,14 @@ void vm_exception(struct vm * vm, int32_t * objectref)
   while (vm->frame_stack.ix > 0) {
     for (int i = 0; i < vm->current_frame->code_attribute->exception_table_length; i++) {
       struct exception_table_entry * entry = &vm->current_frame->code_attribute->exception_table[i];
-      if (vm->current_frame->pc >= entry->start_pc && vm->current_frame->pc < entry->end_pc) {
+      bool caught =
+        vm->current_frame->pc >= entry->start_pc &&
+        vm->current_frame->pc < entry->end_pc &&
+        exception_class_entry == class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
+                                                                              vm->class_hash_table.entry,
+                                                                              vm->current_frame->class_entry,
+                                                                              entry->catch_type);
+      if (caught) {
         operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
         vm->current_frame->next_pc = entry->handler_pc;
 
@@ -515,10 +522,27 @@ void vm_exception(struct vm * vm, int32_t * objectref)
     vm->current_frame = stack_pop_frame(&vm->frame_stack, 1);
   }
 
+  prints("exception: ");
+  print__class_file__class_name(exception_class_entry->class_file);
+  printc('\n');
+  {
+    int32_t * string_objectref = (int32_t *)objectref[2];
+    if (string_objectref != nullptr) {
+      prints("  message: ");
+      struct class_entry * string_class_entry = (struct class_entry *)string_objectref[0];
+      prints("(class: ");
+      print__class_file__class_name(string_class_entry->class_file);
+      printc(')');
+      prints("\n    ");
+      int32_t * arrayref = (int32_t *)string_objectref[1];
+      int32_t length = arrayref[0];
+      uint8_t * bytes = (uint8_t *)&arrayref[1];
+      print__string(bytes, length);
+      printc('\n');
+    }
+  }
   assert(objectref[1] != 0);
   backtrace_print((struct backtrace *)objectref[1]);
-
-  assert(!"exception");
 }
 
 static void print_vm_stack(struct vm * vm)
