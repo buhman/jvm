@@ -12,6 +12,7 @@
 #include "fatal.h"
 #include "debug.h"
 #include "find_attribute.h"
+#include "backtrace.h"
 
 int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type)
 {
@@ -173,9 +174,10 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
   struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->this_class - 1];
   struct constant * class_name_constant = &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
   debug_print__constant__utf8_string(class_name_constant);
-  debugf("  ");
+  debugs("  ");
   struct constant * method_name_constant = &class_entry->class_file->constant_pool[method_entry->method_info->name_index - 1];
   debug_print__constant__utf8_string(method_name_constant);
+  debugc('\n');
 
 
   int java_lang_math_length = 14;
@@ -470,7 +472,44 @@ void vm_method_return(struct vm * vm)
     break;
   }
   assert(old_frame->operand_stack_ix == 0);
-  debugf("vm_method_return\n");
+  if (vm->frame_stack.ix > 0) {
+    debugs("vm_method_return\n");
+    debugs("current_frame:\n  class:  ");
+    debug_print__class_entry__class_name(vm->current_frame->class_entry);
+    debugs("\n  method: ");
+    debug_print__method_info__method_name(vm->current_frame->class_entry, vm->current_frame->method_info);
+    debugf("\n  pc:      %d", vm->current_frame->pc);
+    debugf("\n  next_pc: %d\n", vm->current_frame->next_pc);
+  }
+}
+
+void vm_exception(struct vm * vm, int32_t * objectref)
+{
+  // If objectref is null, athrow throws a NullPointerException instead of objectref.
+  assert(objectref != nullptr);
+
+  while (vm->frame_stack.ix > 0) {
+    for (int i = 0; i < vm->current_frame->code_attribute->exception_table_length; i++) {
+      struct exception_table_entry * entry = &vm->current_frame->code_attribute->exception_table[i];
+      if (vm->current_frame->pc >= entry->start_pc && vm->current_frame->pc < entry->end_pc) {
+        operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
+        vm->current_frame->next_pc = entry->handler_pc;
+
+        debugs("vm_exception (handled)\n");
+        debugs("current_frame:\n  class:  ");
+        debug_print__class_entry__class_name(vm->current_frame->class_entry);
+        debugs("\n  method: ");
+        debug_print__method_info__method_name(vm->current_frame->class_entry, vm->current_frame->method_info);
+        debugf("\n  pc:      %d", vm->current_frame->pc);
+        debugf("\n  next_pc: %d\n", vm->current_frame->next_pc);
+
+        return;
+      }
+    }
+    vm->current_frame = stack_pop_frame(&vm->frame_stack, 1);
+  }
+  backtrace_print(vm);
+  assert(!"exception");
 }
 
 static void print_vm_stack(struct vm * vm)

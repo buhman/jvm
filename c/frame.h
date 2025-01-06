@@ -165,3 +165,4 @@ struct vm * vm_start(int class_hash_table_length,
                      const uint8_t * main_class_name,
                      int main_class_name_length);
 int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type);
+void vm_exception(struct vm * vm, int32_t * objectref);

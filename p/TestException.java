@@ -10,6 +10,7 @@ class TestException {
             test2();
         } catch (Exception e) {
             System.out.println(e);
+            throw e;
         }
     }
 

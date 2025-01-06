@@ -7,7 +7,6 @@
 #include "field_size.h"
 #include "debug.h"
 #include "parse_type.h"
-#include "backtrace.h"
 
 void op_aaload(struct vm * vm)
 {
@@ -126,8 +125,8 @@ void op_astore_3(struct vm * vm)
 
 void op_athrow(struct vm * vm)
 {
-  backtrace_print(vm);
-  assert(!"op_athrow");
+  int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  vm_exception(vm, objectref);
 }
 
 void op_baload(struct vm * vm)

@@ -515,8 +515,13 @@ struct method_entry * class_resolver_lookup_method_from_methodref_index(int clas
       struct attribute_info * attribute = find_attribute(code_index,
                                                          method_info->attributes_count,
                                                          method_info->attributes);
-      assert(attribute != nullptr);
-      method_entry->code_attribute = attribute->code;
+      if ((method_info->access_flags & METHOD_ACC_NATIVE) != 0) {
+        assert(attribute == nullptr);
+        method_entry->code_attribute = nullptr;
+      } else {
+        assert(attribute != nullptr);
+        method_entry->code_attribute = attribute->code;
+      }
 
       origin_class_entry->attribute_entry[methodref_index - 1].method_entry = method_entry;
       return method_entry;
