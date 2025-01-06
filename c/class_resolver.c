@@ -427,9 +427,9 @@ struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(i
     if (method_info != nullptr) {
       debugf("method resolved:\n");
       debugf("  class: ");
-      debug_print__class_entry__class_name(class_entry);
+      debug_print__class_file__class_name(class_entry->class_file);
       debugf("\n  method: ");
-      debug_print__method_info__method_name(class_entry, method_info);
+      debug_print__method_info__method_name(class_entry->class_file, method_info);
       debugc('\n');
 
       int code_index = find_code_name_index(class_entry->class_file);
@@ -502,9 +502,9 @@ struct method_entry * class_resolver_lookup_method_from_methodref_index(int clas
       // cache the result
       debugf("method resolved:\n");
       debugf("  class: ");
-      debug_print__class_entry__class_name(class_entry);
+      debug_print__class_file__class_name(class_entry->class_file);
       debugf("\n  method: ");
-      debug_print__method_info__method_name(class_entry, method_info);
+      debug_print__method_info__method_name(class_entry->class_file, method_info);
       debugc('\n');
 
       struct method_entry * method_entry = malloc_class_arena((sizeof (struct method_entry)));

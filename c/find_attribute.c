@@ -47,9 +47,9 @@ struct attribute_info * find_attribute(int name_index,
                                        int attributes_count,
                                        struct attribute_info * attributes)
 {
-  debugf("find_attribute: name_index=%d attributes_count=%d\n", name_index, attributes_count);
+  //debugf("find_attribute: name_index=%d attributes_count=%d\n", name_index, attributes_count);
   for (int i = 0; i < attributes_count; i++) {
-    debugf("find_attribute: attribute[%d]: %d\n", i, attributes[i].attribute_name_index);
+    //debugf("find_attribute: attribute[%d]: %d\n", i, attributes[i].attribute_name_index);
     if (attributes[i].attribute_name_index == name_index)
       return &attributes[i];
   }

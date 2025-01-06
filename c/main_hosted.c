@@ -55,7 +55,5 @@ int main(int argc, const char * argv[])
                             main_class,
                             main_class_length);
 
-  backtrace_print(vm);
-
   vm_execute(vm);
 }

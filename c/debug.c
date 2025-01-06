@@ -17,11 +17,11 @@ void debug_print__constant__utf8_string(struct constant * constant)
   }
 }
 
-void debug_print__class_entry__class_name(struct class_entry * class_entry)
+void debug_print__class_file__class_name(struct class_file * class_file)
 {
-  struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->this_class - 1];
+  struct constant * class_constant = &class_file->constant_pool[class_file->this_class - 1];
   assert(class_constant->tag == CONSTANT_Class);
-  struct constant * class_name_constant = &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  struct constant * class_name_constant = &class_file->constant_pool[class_constant->class.name_index - 1];
   debug_print__constant__utf8_string(class_name_constant);
 }
 
@@ -32,10 +32,10 @@ void debug_print__constant__method_name(struct constant * name_constant, struct 
   debug_print__constant__utf8_string(descriptor_constant);
 }
 
-void debug_print__method_info__method_name(struct class_entry * class_entry, struct method_info * method_info)
+void debug_print__method_info__method_name(struct class_file * class_file, struct method_info * method_info)
 {
-  struct constant * method_name_constant = &class_entry->class_file->constant_pool[method_info->name_index - 1];
-  struct constant * method_descriptor_constant = &class_entry->class_file->constant_pool[method_info->descriptor_index - 1];
+  struct constant * method_name_constant = &class_file->constant_pool[method_info->name_index - 1];
+  struct constant * method_descriptor_constant = &class_file->constant_pool[method_info->descriptor_index - 1];
   debug_print__constant__method_name(method_name_constant, method_descriptor_constant);
 }
 
@@ -47,11 +47,11 @@ void print__constant__utf8_string(struct constant * constant)
   }
 }
 
-void print__class_entry__class_name(struct class_entry * class_entry)
+void print__class_file__class_name(struct class_file * class_file)
 {
-  struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->this_class - 1];
+  struct constant * class_constant = &class_file->constant_pool[class_file->this_class - 1];
   assert(class_constant->tag == CONSTANT_Class);
-  struct constant * class_name_constant = &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  struct constant * class_name_constant = &class_file->constant_pool[class_constant->class.name_index - 1];
   print__constant__utf8_string(class_name_constant);
 }
 
@@ -62,9 +62,9 @@ void print__constant__method_name(struct constant * name_constant, struct consta
   print__constant__utf8_string(descriptor_constant);
 }
 
-void print__method_info__method_name(struct class_entry * class_entry, struct method_info * method_info)
+void print__method_info__method_name(struct class_file * class_file, struct method_info * method_info)
 {
-  struct constant * method_name_constant = &class_entry->class_file->constant_pool[method_info->name_index - 1];
-  struct constant * method_descriptor_constant = &class_entry->class_file->constant_pool[method_info->descriptor_index - 1];
+  struct constant * method_name_constant = &class_file->constant_pool[method_info->name_index - 1];
+  struct constant * method_descriptor_constant = &class_file->constant_pool[method_info->descriptor_index - 1];
   print__constant__method_name(method_name_constant, method_descriptor_constant);
 }

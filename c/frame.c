@@ -475,9 +475,9 @@ void vm_method_return(struct vm * vm)
   if (vm->frame_stack.ix > 0) {
     debugs("vm_method_return\n");
     debugs("current_frame:\n  class:  ");
-    debug_print__class_entry__class_name(vm->current_frame->class_entry);
+    debug_print__class_file__class_name(vm->current_frame->class_entry->class_file);
     debugs("\n  method: ");
-    debug_print__method_info__method_name(vm->current_frame->class_entry, vm->current_frame->method_info);
+    debug_print__method_info__method_name(vm->current_frame->class_entry->class_file, vm->current_frame->method_info);
     debugf("\n  pc:      %d", vm->current_frame->pc);
     debugf("\n  next_pc: %d\n", vm->current_frame->next_pc);
   }
@@ -488,6 +488,12 @@ void vm_exception(struct vm * vm, int32_t * objectref)
   // If objectref is null, athrow throws a NullPointerException instead of objectref.
   assert(objectref != nullptr);
 
+  struct class_entry * exception_class_entry = (struct class_entry *)objectref[0];
+  if (objectref[1] == 0) {
+    struct backtrace * backtrace = backtrace_allocate(vm);
+    objectref[1] = (int32_t)backtrace;
+  }
+
   while (vm->frame_stack.ix > 0) {
     for (int i = 0; i < vm->current_frame->code_attribute->exception_table_length; i++) {
       struct exception_table_entry * entry = &vm->current_frame->code_attribute->exception_table[i];
@@ -497,9 +503,9 @@ void vm_exception(struct vm * vm, int32_t * objectref)
 
         debugs("vm_exception (handled)\n");
         debugs("current_frame:\n  class:  ");
-        debug_print__class_entry__class_name(vm->current_frame->class_entry);
+        debug_print__class_file__class_name(vm->current_frame->class_entry->class_file);
         debugs("\n  method: ");
-        debug_print__method_info__method_name(vm->current_frame->class_entry, vm->current_frame->method_info);
+        debug_print__method_info__method_name(vm->current_frame->class_entry->class_file, vm->current_frame->method_info);
         debugf("\n  pc:      %d", vm->current_frame->pc);
         debugf("\n  next_pc: %d\n", vm->current_frame->next_pc);
 
@@ -508,7 +514,10 @@ void vm_exception(struct vm * vm, int32_t * objectref)
     }
     vm->current_frame = stack_pop_frame(&vm->frame_stack, 1);
   }
-  backtrace_print(vm);
+
+  assert(objectref[1] != 0);
+  backtrace_print((struct backtrace *)objectref[1]);
+
   assert(!"exception");
 }
 

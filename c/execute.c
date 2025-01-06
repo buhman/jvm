@@ -209,8 +209,8 @@ void op_checkcast(struct vm * vm, uint32_t index)
   }
 
   struct class_entry * class_entry = (struct class_entry *)objectref[0];
-  debug_print__class_entry__class_name(index_class_entry);
-  debug_print__class_entry__class_name(class_entry);
+  debug_print__class_file__class_name(index_class_entry->class_file);
+  debug_print__class_file__class_name(class_entry->class_file);
 
   while (true) {
     assert(class_entry != nullptr);

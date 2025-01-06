@@ -1,7 +1,7 @@
 package java.lang;
 
 public class Throwable {
-
+    private Object backtrace;
     private String message;
     private Throwable cause = this;
 

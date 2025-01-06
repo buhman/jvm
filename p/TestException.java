@@ -6,12 +6,12 @@ class TestException {
     }
 
     static void test() throws Exception {
-        try {
+        //        try {
             test2();
-        } catch (Exception e) {
-            System.out.println(e);
-            throw e;
-        }
+            //} catch (Exception e) {
+            //System.out.println(e);
+            //throw e;
+            //}
     }
 
     public static void main() throws Exception {
