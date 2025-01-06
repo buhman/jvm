@@ -1813,13 +1813,12 @@ void op_new(struct vm * vm, uint32_t index)
      reference to the instance, is pushed onto the operand stack. */
 
   int fields_count = class_entry->instance_fields_count;
-  int32_t * objectref = memory_allocate(fields_count * 2 * 4 + 4);
+  int32_t * objectref = memory_allocate(fields_count * 4 + 4);
   assert(objectref != nullptr);
   objectref[0] = (int32_t)class_entry;
   int32_t * objectfields = &objectref[1];
   for (int i = 0; i < fields_count; i++) {
-    objectfields[i * 2] = 0;
-    objectfields[i * 2 + 1] = 0;
+    objectfields[i] = 0;
   }
 
   operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
