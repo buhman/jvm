@@ -665,37 +665,3 @@ bool class_resolver_instanceof(int class_hash_table_length,
                                                                class_entry->class_file->super_class);
   }
 }
-
-struct hash_table_entry * class_resolver_init_string_hash_table(int length)
-{
-  assert((length & (length - 1)) == 0); // length must be a power of two
-  int hash_table_length = length;
-  uint32_t hash_table_size = (sizeof (struct hash_table_entry)) * hash_table_length;
-  struct hash_table_entry * hash_table = malloc_class_arena(hash_table_size);
-  hash_table_init(hash_table_length, hash_table);
-
-  return hash_table;
-}
-
-void * class_resolver_memoize_string_type(int string_hash_table_length,
-                                          struct hash_table_entry * string_hash_table,
-                                          const uint8_t * type,
-                                          int length)
-{
-  struct hash_table_entry * e = hash_table_find(string_hash_table_length,
-                                                string_hash_table,
-                                                type,
-                                                length);
-  if (e != nullptr) {
-    assert(e->value == (void *)0x12345678);
-    return e;
-  } else {
-    struct hash_table_entry * e = hash_table_add(string_hash_table_length,
-                                                 string_hash_table,
-                                                 type,
-                                                 length,
-                                                 (void *)0x12345678);
-    assert(e != nullptr);
-    return e;
-  }
-}

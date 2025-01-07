@@ -1663,21 +1663,7 @@ static struct arrayref * _multiarray(struct vm * vm, int32_t * dims, int num_dim
   struct arrayref * arrayref = memory_allocate(size);
   assert(arrayref != nullptr);
   arrayref->length = count;
-  { // generate/recall unique pointer for type string
-    uint8_t * array_type = type - 1;
-    assert(*array_type == '[');
-    int type_length = type_end - array_type;
-    assert(type_length > 0);
-    void * type = class_resolver_memoize_string_type(vm->string_hash_table.length,
-                                                     vm->string_hash_table.entry,
-                                                     array_type,
-                                                     type_length);
-    debugf("memoized string type: %d %p: ", count, type);
-    print_string((const char *)array_type, type_length);
-    debugc('\n');
-    assert(type != nullptr);
-    arrayref->class_entry = type;
-  }
+  arrayref->class_entry = nullptr;
 
   int32_t array_element_size = count * element_size; // bytes
   int32_t u32_count = (array_element_size + 3) / 4;  // u32 units

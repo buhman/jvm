@@ -612,9 +612,6 @@ struct vm * vm_start(int class_hash_table_length,
   vm.class_hash_table.length = class_hash_table_length;
   vm.class_hash_table.entry = class_hash_table;
 
-  vm.string_hash_table.length = 128;
-  vm.string_hash_table.entry = class_resolver_init_string_hash_table(vm.string_hash_table.length);
-
   vm.frame_stack.ix = 0;
   vm.frame_stack.capacity = 1024;
   struct frame frames[vm.frame_stack.capacity];

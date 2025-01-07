@@ -11,7 +11,7 @@ class TestMultiArray {
         return a instanceof Object[][];
     }
 
-    public static void main(String[] args) {
+    public static void main() {
         System.out.print("testInstanceof: ");
         System.out.println(testInstanceof());
         System.out.print("testInstanceof2: ");

@@ -95,10 +95,3 @@ bool class_resolver_instanceof(int class_hash_table_length,
                                struct class_entry * origin_class_entry,
                                const int class_index,
                                struct objectref * objectref);
-
-struct hash_table_entry * class_resolver_init_string_hash_table(int length);
-
-void * class_resolver_memoize_string_type(int string_hash_table_length,
-                                          struct hash_table_entry * string_hash_table,
-                                          const uint8_t * type,
-                                          int length);

@@ -35,10 +35,6 @@ struct vm {
     int length;
     struct hash_table_entry * entry;
   } class_hash_table;
-  struct {
-    int length;
-    struct hash_table_entry * entry;
-  } string_hash_table;
 };
 static inline struct frame * stack_push_frame(struct stack * stack, int num_frames)
 {
