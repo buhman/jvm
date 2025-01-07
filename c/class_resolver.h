@@ -4,6 +4,7 @@
 
 #include "class_file.h"
 #include "hash_table.h"
+#include "native_types.h"
 
 enum initialization_state {
   CLASS_UNINITIALIZED,
@@ -21,7 +22,7 @@ union attribute_entry {
   struct class_entry * class_entry;
   struct method_entry * method_entry;
   struct field_entry * field_entry;
-  int32_t * string_objectref;
+  struct objectref * string_objectref;
 };
 
 struct field_entry {
@@ -84,7 +85,20 @@ struct field_entry * class_resolver_lookup_field_from_fieldref_index(int fields_
                                                                      struct class_entry * class_entry,
                                                                      int fieldref_index);
 
-int32_t * class_resolver_lookup_string(int class_hash_table_length,
-                                       struct hash_table_entry * class_hash_table,
-                                       struct class_entry * class_entry,
-                                       const int string_index);
+struct objectref * class_resolver_lookup_string(int class_hash_table_length,
+                                                struct hash_table_entry * class_hash_table,
+                                                struct class_entry * class_entry,
+                                                const int string_index);
+
+bool class_resolver_instanceof(int class_hash_table_length,
+                               struct hash_table_entry * class_hash_table,
+                               struct class_entry * origin_class_entry,
+                               const int class_index,
+                               struct objectref * objectref);
+
+struct hash_table_entry * class_resolver_init_string_hash_table(int length);
+
+void * class_resolver_memoize_string_type(int string_hash_table_length,
+                                          struct hash_table_entry * string_hash_table,
+                                          const uint8_t * type,
+                                          int length);

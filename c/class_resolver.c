@@ -309,7 +309,6 @@ struct class_entry * class_resolver_lookup_class_from_class_index(int class_hash
   struct parse_type_ret parse_type_ret = parse_type(class_name_constant->utf8.bytes,
                                                     class_name_constant->utf8.length);
 
-
   struct class_entry * _class_entry = class_resolver_lookup_class(class_hash_table_length,
                                                                   class_hash_table,
                                                                   parse_type_ret.bytes,
@@ -586,10 +585,10 @@ struct method_entry class_resolver_lookup_method_from_method_name_method_descrip
   }
 }
 
-int32_t * class_resolver_lookup_string(int class_hash_table_length,
-                                       struct hash_table_entry * class_hash_table,
-                                       struct class_entry * class_entry,
-                                       const int string_index)
+struct objectref * class_resolver_lookup_string(int class_hash_table_length,
+                                                struct hash_table_entry * class_hash_table,
+                                                struct class_entry * class_entry,
+                                                const int string_index)
 {
   debugf("class_resolver_lookup_string: %d\n", string_index);
   if (class_entry->attribute_entry[string_index - 1].string_objectref != nullptr) {
@@ -605,22 +604,98 @@ int32_t * class_resolver_lookup_string(int class_hash_table_length,
                                                                         (const uint8_t *)"java/lang/String",
                                                                         16);
 
-  int32_t size = utf8_constant->utf8.length + 4;
-  int32_t * arrayref = memory_allocate(size);
+  int32_t size = utf8_constant->utf8.length + (sizeof (struct arrayref));
+  struct arrayref * arrayref = memory_allocate(size);
   assert(arrayref != nullptr);
-  arrayref[0] = utf8_constant->utf8.length;
-  uint8_t * bytearray = (uint8_t *)&arrayref[1];
-  for (int i = 0; i < utf8_constant->utf8.length; i++)
-    bytearray[i] = utf8_constant->utf8.bytes[i];
+  arrayref->class_entry = nullptr; // byte[]
+  arrayref->length = utf8_constant->utf8.length;
+  for (int i = 0; i < utf8_constant->utf8.length; i++) {
+    arrayref->u8[i] = utf8_constant->utf8.bytes[i];
+  }
 
   assert(string_class_entry != nullptr);
-  int32_t * objectref = memory_allocate(4 + 4);
+  struct objectref * objectref = memory_allocate((sizeof (struct objectref)) + (sizeof (void *)));
   assert(objectref != nullptr);
-  objectref[0] = (int32_t)string_class_entry;
-  objectref[1] = (int32_t)arrayref;
+  objectref->class_entry = string_class_entry;
+  objectref->aref[0] = arrayref;
 
   // cache the result
   class_entry->attribute_entry[string_index - 1].string_objectref = objectref;
 
   return objectref;
+}
+
+bool class_resolver_instanceof(int class_hash_table_length,
+                               struct hash_table_entry * class_hash_table,
+                               struct class_entry * origin_class_entry,
+                               const int class_index,
+                               struct objectref * objectref)
+{
+  struct class_entry * index_class_entry =
+    class_resolver_lookup_class_from_class_index(class_hash_table_length,
+                                                 class_hash_table,
+                                                 origin_class_entry,
+                                                 class_index);
+  assert(index_class_entry != nullptr);
+
+  assert(objectref != nullptr);
+  struct class_entry * class_entry = objectref->class_entry;
+  while (true) {
+    debugf("class_entry: %p\n", class_entry);
+
+    assert(class_entry != nullptr);
+    if (class_entry == index_class_entry) {
+      return true;
+    }
+    if (class_entry->class_file->super_class == 0) {
+      return false;
+    }
+
+    struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->super_class - 1];
+    assert(class_constant->tag == CONSTANT_Class);
+    struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+    assert(class_name_constant->tag == CONSTANT_Utf8);
+    debug_print__constant__utf8_string(class_name_constant);
+    debugf("\n");
+
+    // superclass lookup
+    class_entry = class_resolver_lookup_class_from_class_index(class_hash_table_length,
+                                                               class_hash_table,
+                                                               class_entry,
+                                                               class_entry->class_file->super_class);
+  }
+}
+
+struct hash_table_entry * class_resolver_init_string_hash_table(int length)
+{
+  assert((length & (length - 1)) == 0); // length must be a power of two
+  int hash_table_length = length;
+  uint32_t hash_table_size = (sizeof (struct hash_table_entry)) * hash_table_length;
+  struct hash_table_entry * hash_table = malloc_class_arena(hash_table_size);
+  hash_table_init(hash_table_length, hash_table);
+
+  return hash_table;
+}
+
+void * class_resolver_memoize_string_type(int string_hash_table_length,
+                                          struct hash_table_entry * string_hash_table,
+                                          const uint8_t * type,
+                                          int length)
+{
+  struct hash_table_entry * e = hash_table_find(string_hash_table_length,
+                                                string_hash_table,
+                                                type,
+                                                length);
+  if (e != nullptr) {
+    assert(e->value == (void *)0x12345678);
+    return e;
+  } else {
+    struct hash_table_entry * e = hash_table_add(string_hash_table_length,
+                                                 string_hash_table,
+                                                 type,
+                                                 length,
+                                                 (void *)0x12345678);
+    assert(e != nullptr);
+    return e;
+  }
 }

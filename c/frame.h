@@ -3,6 +3,7 @@
 #include "assert.h"
 #include "class_file.h"
 #include "class_resolver.h"
+#include "native_types.h"
 
 struct frame {
   struct class_entry * class_entry;
@@ -34,6 +35,10 @@ struct vm {
     int length;
     struct hash_table_entry * entry;
   } class_hash_table;
+  struct {
+    int length;
+    struct hash_table_entry * entry;
+  } string_hash_table;
 };
 static inline struct frame * stack_push_frame(struct stack * stack, int num_frames)
 {
@@ -94,6 +99,28 @@ static inline void operand_stack_dup_u32(struct frame * frame)
   uint32_t value = frame->operand_stack[frame->operand_stack_ix - 1];
   frame->operand_stack[frame->operand_stack_ix] = value;
   frame->operand_stack_ix++;
+}
+
+static inline void operand_stack_push_ref(struct frame * frame, void * value)
+{
+  frame->operand_stack[frame->operand_stack_ix] = (uint32_t)value;
+  frame->operand_stack_ix++;
+}
+
+static inline void * operand_stack_pop_ref(struct frame * frame)
+{
+  frame->operand_stack_ix--;
+  assert(frame->operand_stack_ix >= 0);
+  uint32_t value = frame->operand_stack[frame->operand_stack_ix];
+  frame->operand_stack[frame->operand_stack_ix] = -1;
+  return (void *)value;
+}
+
+static inline void * operand_stack_peek_ref(struct frame * frame, int index)
+{
+  assert((frame->operand_stack_ix - index) >= 0);
+  uint32_t value = frame->operand_stack[frame->operand_stack_ix - index];
+  return (void *)value;
 }
 
 static inline void operand_stack_push_f32(struct frame * frame, float f)
@@ -165,4 +192,4 @@ struct vm * vm_start(int class_hash_table_length,
                      const uint8_t * main_class_name,
                      int main_class_name_length);
 int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type);
-void vm_exception(struct vm * vm, int32_t * objectref);
+void vm_exception(struct vm * vm, struct objectref * objectref);

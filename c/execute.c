@@ -6,13 +6,13 @@
 #include "printf.h"
 #include "field_size.h"
 #include "debug.h"
-#include "parse_type.h"
 #include "native_types.h"
+#include "parse_type.h"
 
 void op_aaload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct object_arrayref * arrayref = (struct object_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   uint32_t value = arrayref->u32[index];
   operand_stack_push_u32(vm->current_frame, value);
@@ -22,7 +22,7 @@ void op_aastore(struct vm * vm)
 {
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct object_arrayref * arrayref = (struct object_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   arrayref->u32[index] = value;
 }
@@ -64,20 +64,27 @@ void op_aload_3(struct vm * vm)
 
 void op_anewarray(struct vm * vm, uint32_t index)
 {
+  struct class_entry * class_entry =
+    class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
+                                                 vm->class_hash_table.entry,
+                                                 vm->current_frame->class_entry,
+                                                 index);
+
   int32_t count = operand_stack_pop_u32(vm->current_frame);
   int32_t element_size = (sizeof (void *));
-  int32_t size = element_size * count + (sizeof (struct object_arrayref));
-  struct object_arrayref * arrayref = memory_allocate(size);
+  int32_t size = element_size * count + (sizeof (struct arrayref));
+  struct arrayref * arrayref = memory_allocate(size);
   assert(arrayref != nullptr);
   arrayref->length = count;
+  arrayref->class_entry = class_entry;
 
   /* All components of the new array are initialized to null, the default value
      for reference types */
   for (int i = 0; i < count; i++) {
-    arrayref->a[i] = nullptr;
+    arrayref->oref[i] = nullptr;
   }
 
-  operand_stack_push_u32(vm->current_frame, (uint32_t)arrayref);
+  operand_stack_push_ref(vm->current_frame, arrayref);
 }
 
 void op_areturn(struct vm * vm)
@@ -88,8 +95,8 @@ void op_areturn(struct vm * vm)
 
 void op_arraylength(struct vm * vm)
 {
-  int32_t * arrayref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
-  int32_t length = arrayref[0];
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
+  int32_t length = arrayref->length;
   operand_stack_push_u32(vm->current_frame, length);
 }
 
@@ -125,14 +132,14 @@ void op_astore_3(struct vm * vm)
 
 void op_athrow(struct vm * vm)
 {
-  int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
   vm_exception(vm, objectref);
 }
 
 void op_baload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   int8_t value = arrayref->u8[index];
   operand_stack_push_u32(vm->current_frame, value);
@@ -142,7 +149,7 @@ void op_bastore(struct vm * vm)
 {
   uint8_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   arrayref->u8[index] = value;
 }
@@ -160,7 +167,7 @@ void op_breakpoint(struct vm * vm)
 void op_caload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   uint16_t value = arrayref->u16[index];
   operand_stack_push_u32(vm->current_frame, value);
@@ -170,66 +177,25 @@ void op_castore(struct vm * vm)
 {
   uint16_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   arrayref->u16[index] = value;
 }
 
 void op_checkcast(struct vm * vm, uint32_t index)
 {
-  int32_t * objectref = (int32_t *)operand_stack_peek_u32(vm->current_frame, 1);
-  if (objectref == nullptr) {
-    return;
-  }
-
-  struct class_entry * index_class_entry =
-    class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
-                                                 vm->class_hash_table.entry,
-                                                 vm->current_frame->class_entry,
-                                                 index);
-
-  struct constant * class_constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
-  assert(class_constant->tag == CONSTANT_Class);
-  struct constant * class_name_constant = &vm->current_frame->class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
-  assert(class_name_constant->tag == CONSTANT_Utf8);
-
-  int depth = parse_type_array_depth(class_name_constant->utf8.bytes, class_name_constant->utf8.length);
-  while (depth-- > 0) {
-    if (objectref == nullptr || objectref[0] == 0)
-      assert(!"checkcast on null or zero-length array not implemented");
-    objectref = (int32_t *)objectref[1];
-  }
-  if (objectref == nullptr) {
-    assert(!"checkcast on array with null elements not implemented");
-  }
-
-  struct class_entry * class_entry = (struct class_entry *)objectref[0];
-  debug_print__class_file__class_name(index_class_entry->class_file);
-  debug_print__class_file__class_name(class_entry->class_file);
-
-  while (true) {
-    assert(class_entry != nullptr);
-    if (class_entry == index_class_entry) {
-      return;
+  struct objectref * objectref = operand_stack_peek_ref(vm->current_frame, 1);
+  if (objectref != nullptr) {
+    bool isinstance =
+      class_resolver_instanceof(vm->class_hash_table.length,
+                                vm->class_hash_table.entry,
+                                vm->current_frame->class_entry,
+                                index,
+                                objectref);
+    if (!isinstance) {
+      assert(!"ClassCastException");
     }
-    if (class_entry->class_file->super_class == 0) {
-      break;
-    }
-
-    struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->super_class - 1];
-    assert(class_constant->tag == CONSTANT_Class);
-    struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
-    assert(class_name_constant->tag == CONSTANT_Utf8);
-    debug_print__constant__utf8_string(class_name_constant);
-    debugf("\n");
-
-    // superclass lookup
-    class_entry = class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
-                                                               vm->class_hash_table.entry,
-                                                               class_entry,
-                                                               class_entry->class_file->super_class);
   }
-  assert(!"ClassCastException");
 }
 
 void op_d2f(struct vm * vm)
@@ -264,7 +230,7 @@ void op_dadd(struct vm * vm)
 void op_daload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   uint64_t value = arrayref->u64[index];
   operand_stack_push_u64(vm->current_frame, value);
@@ -274,7 +240,7 @@ void op_dastore(struct vm * vm)
 {
   int64_t value = operand_stack_pop_u64(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   arrayref->u64[index] = value;
 }
@@ -546,7 +512,7 @@ void op_fadd(struct vm * vm)
 void op_faload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   uint32_t value = arrayref->u32[index];
   operand_stack_push_u32(vm->current_frame, value);
@@ -556,7 +522,7 @@ void op_fastore(struct vm * vm)
 {
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   arrayref->u32[index] = value;
 }
@@ -732,9 +698,8 @@ void op_getfield(struct vm * vm, uint32_t index)
 
   debugf("getfield instance_index %d\n", field_entry->instance_index);
 
-  int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
   assert(objectref != nullptr);
-  int32_t * objectfields = &objectref[1];
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
   case 'B': [[fallthrough]];
@@ -746,17 +711,17 @@ void op_getfield(struct vm * vm, uint32_t index)
   case 'Z': [[fallthrough]];
   case '[':
     {
-      uint32_t value = objectfields[field_entry->instance_index];
-      operand_stack_push_u32(vm->current_frame, value);
+      void * value = objectref->oref[field_entry->instance_index];
+      operand_stack_push_ref(vm->current_frame, value);
     }
     break;
   case 'D': [[fallthrough]];
   case 'J':
     {
-      uint32_t low = objectfields[field_entry->instance_index];
-      uint32_t high = objectfields[field_entry->instance_index + 1];
-      operand_stack_push_u32(vm->current_frame, low);
-      operand_stack_push_u32(vm->current_frame, high);
+      void * low = objectref->oref[field_entry->instance_index];
+      void * high = objectref->oref[field_entry->instance_index + 1];
+      operand_stack_push_ref(vm->current_frame, low);
+      operand_stack_push_ref(vm->current_frame, high);
     }
     break;
   default:
@@ -872,7 +837,7 @@ void op_iadd(struct vm * vm)
 void op_iaload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   int32_t value = arrayref->u32[index];
   operand_stack_push_u32(vm->current_frame, value);
@@ -890,7 +855,7 @@ void op_iastore(struct vm * vm)
 {
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   arrayref->u32[index] = value;
 }
@@ -1060,7 +1025,7 @@ void op_ifne(struct vm * vm, int32_t branch)
 
 void op_ifnonnull(struct vm * vm, int32_t branch)
 {
-  void * value = (void *)operand_stack_pop_u32(vm->current_frame);
+  void * value = operand_stack_pop_ref(vm->current_frame);
   if (value != nullptr) {
     vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
@@ -1068,7 +1033,7 @@ void op_ifnonnull(struct vm * vm, int32_t branch)
 
 void op_ifnull(struct vm * vm, int32_t branch)
 {
-  void * value = (void *)operand_stack_pop_u32(vm->current_frame);
+  void * value = operand_stack_pop_ref(vm->current_frame);
   if (value == nullptr) {
     vm->current_frame->next_pc = vm->current_frame->pc + branch;
   }
@@ -1138,61 +1103,18 @@ void op_ineg(struct vm * vm)
 
 void op_instanceof(struct vm * vm, uint32_t index)
 {
-  struct class_entry * index_class_entry =
-    class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
-                                                 vm->class_hash_table.entry,
-                                                 vm->current_frame->class_entry,
-                                                 index);
-  assert(index_class_entry != nullptr);
-
-  int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+  struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
   if (objectref == nullptr) {
-    operand_stack_push_u32(vm->current_frame, (uint32_t)false);
-    return;
+    operand_stack_push_u32(vm->current_frame, false);
+  } else {
+    bool isinstance =
+      class_resolver_instanceof(vm->class_hash_table.length,
+                                vm->class_hash_table.entry,
+                                vm->current_frame->class_entry,
+                                index,
+                                objectref);
+    operand_stack_push_u32(vm->current_frame, isinstance);
   }
-
-  struct constant * class_constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
-  assert(class_constant->tag == CONSTANT_Class);
-  struct constant * class_name_constant = &vm->current_frame->class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
-  assert(class_name_constant->tag == CONSTANT_Utf8);
-
-  int depth = parse_type_array_depth(class_name_constant->utf8.bytes, class_name_constant->utf8.length);
-  printf("depth: %d\n", depth);
-  while (depth-- > 0) {
-    if (objectref == nullptr || objectref[0] == 0)
-      assert(!"instanceof on null or zero-length array not implemented");
-    objectref = (int32_t *)objectref[1];
-  }
-  if (objectref == nullptr) {
-    assert(!"instanceof on array with null elements not implemented");
-  }
-
-  bool value = false;
-  struct class_entry * class_entry = (struct class_entry *)objectref[0];
-  while (true) {
-    assert(class_entry != nullptr);
-    if (class_entry == index_class_entry) {
-      value = true;
-      break;
-    }
-    if (class_entry->class_file->super_class == 0) {
-      break;
-    }
-
-    struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->super_class - 1];
-    assert(class_constant->tag == CONSTANT_Class);
-    struct constant * class_name_constant =  &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
-    assert(class_name_constant->tag == CONSTANT_Utf8);
-    debug_print__constant__utf8_string(class_name_constant);
-    debugf("\n");
-
-    // superclass lookup
-    class_entry = class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
-                                                               vm->class_hash_table.entry,
-                                                               class_entry,
-                                                               class_entry->class_file->super_class);
-  }
-  operand_stack_push_u32(vm->current_frame, (uint32_t)value);
 }
 
 void op_invokedynamic(struct vm * vm, uint32_t index)
@@ -1202,9 +1124,9 @@ void op_invokedynamic(struct vm * vm, uint32_t index)
 
 void op_invokeinterface(struct vm * vm, uint32_t index, uint32_t count)
 {
-  int32_t * objectref = (int32_t *)operand_stack_peek_u32(vm->current_frame, count);
+  struct objectref * objectref = operand_stack_peek_ref(vm->current_frame, count);
   assert(objectref != nullptr);
-  struct class_entry * class_entry = (struct class_entry *)objectref[0];
+  struct class_entry * class_entry = objectref->class_entry;
 
   struct method_entry method_entry =
     class_resolver_lookup_method_from_interfacemethodref_index(vm->class_hash_table.length,
@@ -1242,8 +1164,6 @@ void op_invokestatic(struct vm * vm, uint32_t index)
   vm_static_method_call(vm, method_entry->class_entry, method_entry);
 }
 
-#include "debug.h"
-
 void op_invokevirtual(struct vm * vm, uint32_t index)
 {
   struct class_entry * origin_class_entry = vm->current_frame->class_entry;
@@ -1261,9 +1181,9 @@ void op_invokevirtual(struct vm * vm, uint32_t index)
   int nargs = descriptor_nargs(method_descriptor_constant, &return_type);
   (void)return_type;
 
-  int32_t * objectref = (int32_t *)operand_stack_peek_u32(vm->current_frame, nargs + 1);
+  struct objectref * objectref = operand_stack_peek_ref(vm->current_frame, nargs + 1);
   assert(objectref != nullptr);
-  struct class_entry * class_entry = (struct class_entry *)objectref[0];
+  struct class_entry * class_entry = objectref->class_entry;
   debugf("class_entry: %p\n", class_entry);
 
   struct method_entry method_entry =
@@ -1449,7 +1369,7 @@ void op_ladd(struct vm * vm)
 void op_laload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   int64_t value = arrayref->u64[index];
   operand_stack_push_u64(vm->current_frame, value);
@@ -1467,7 +1387,7 @@ void op_lastore(struct vm * vm)
 {
   uint64_t value = operand_stack_pop_u64(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   arrayref->u64[index] = value;
 }
@@ -1506,11 +1426,11 @@ void op_ldc(struct vm * vm, uint32_t index)
     int32_t value = constant->integer.bytes;
     operand_stack_push_u32(vm->current_frame, value);
   } else if (constant->tag == CONSTANT_String) {
-    int32_t * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
-                                                       vm->class_hash_table.entry,
-                                                       vm->current_frame->class_entry,
-                                                       constant->string.string_index);
-    operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
+    struct objectref * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
+                                                                vm->class_hash_table.entry,
+                                                                vm->current_frame->class_entry,
+                                                                constant->string.string_index);
+    operand_stack_push_ref(vm->current_frame, objectref);
   } else {
     assert(false);
   }
@@ -1533,11 +1453,11 @@ void op_ldc_w(struct vm * vm, uint32_t index)
     int32_t value = constant->integer.bytes;
     operand_stack_push_u32(vm->current_frame, value);
   } else if (constant->tag == CONSTANT_String) {
-    int32_t * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
-                                                       vm->class_hash_table.entry,
-                                                       vm->current_frame->class_entry,
-                                                       constant->string.string_index);
-    operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
+    struct objectref * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
+                                                                vm->class_hash_table.entry,
+                                                                vm->current_frame->class_entry,
+                                                                constant->string.string_index);
+    operand_stack_push_ref(vm->current_frame, objectref);
   } else {
     assert(false);
   }
@@ -1735,22 +1655,40 @@ void op_monitorexit(struct vm * vm)
   assert(!"op_monitorexit");
 }
 
-static int32_t * _multiarray(int32_t * dims, int num_dimensions, int level, uint8_t * type)
+static struct arrayref * _multiarray(struct vm * vm, int32_t * dims, int num_dimensions, int level, uint8_t * type, uint8_t * type_end)
 {
   int32_t count = dims[level];
   int32_t element_size = field_size_array(*type);
-  int32_t size = element_size * count + 4;
-  int32_t * arrayref = memory_allocate(size);
+  int32_t size = element_size * count + (sizeof (struct arrayref));
+  struct arrayref * arrayref = memory_allocate(size);
   assert(arrayref != nullptr);
-  arrayref[0] = count;
+  arrayref->length = count;
+  { // generate/recall unique pointer for type string
+    uint8_t * array_type = type - 1;
+    assert(*array_type == '[');
+    int type_length = type_end - array_type;
+    assert(type_length > 0);
+    void * type = class_resolver_memoize_string_type(vm->string_hash_table.length,
+                                                     vm->string_hash_table.entry,
+                                                     array_type,
+                                                     type_length);
+    debugf("memoized string type: %d %p: ", count, type);
+    print_string((const char *)array_type, type_length);
+    debugc('\n');
+    assert(type != nullptr);
+    arrayref->class_entry = type;
+  }
 
-  int32_t u32_count = (size - 4 + 3) / 4;
+  int32_t array_element_size = count * element_size; // bytes
+  int32_t u32_count = (array_element_size + 3) / 4;  // u32 units
+  debugf("u32_count: %d\n", u32_count);
   for (int i = 0; i < u32_count; i++) {
     if (level == num_dimensions - 1) {
-      arrayref[i + 1] = 0;
+      assert(*type != '[');
+      arrayref->u32[1] = 0;
     } else {
       assert(*type == '[');
-      arrayref[1 + i] = (int32_t)_multiarray(dims, num_dimensions, level + 1, type + 1);
+      arrayref->aref[i] = _multiarray(vm, dims, num_dimensions, level + 1, type + 1, type_end);
     }
   }
   return arrayref;
@@ -1763,9 +1701,14 @@ void op_multianewarray(struct vm * vm, uint32_t index, uint32_t dimensions)
   struct constant * type_constant = &vm->current_frame->class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
   assert(type_constant->tag == CONSTANT_Utf8);
 
+  debugs("type_constant: ");
+  debug_print__constant__utf8_string(type_constant);
+  debugc('\n');
+
   // The run-time constant pool entry at the index must be a symbolic reference
   // to a class, array, or interface type
   uint8_t * type = type_constant->utf8.bytes;
+  uint8_t * type_end = type + type_constant->utf8.length;
   assert(*type == '[');
 
   assert(dimensions > 0);
@@ -1773,8 +1716,8 @@ void op_multianewarray(struct vm * vm, uint32_t index, uint32_t dimensions)
   for (int i = 0; i < dimensions; i++) {
     dims[dimensions - i - 1] = operand_stack_pop_u32(vm->current_frame);
   }
-  int32_t * arrayref = _multiarray(dims, dimensions, 0, type + 1);
-  operand_stack_push_u32(vm->current_frame, (uint32_t)arrayref);
+  struct arrayref * arrayref = _multiarray(vm, dims, dimensions, 0, type + 1, type_end);
+  operand_stack_push_ref(vm->current_frame, arrayref);
 }
 
 void op_new(struct vm * vm, uint32_t index)
@@ -1800,15 +1743,14 @@ void op_new(struct vm * vm, uint32_t index)
      reference to the instance, is pushed onto the operand stack. */
 
   int fields_count = class_entry->instance_fields_count;
-  int32_t * objectref = memory_allocate(fields_count * 4 + 4);
+  struct objectref * objectref = memory_allocate(fields_count * 4 + 4);
   assert(objectref != nullptr);
-  objectref[0] = (int32_t)class_entry;
-  int32_t * objectfields = &objectref[1];
+  objectref->class_entry = class_entry;
   for (int i = 0; i < fields_count; i++) {
-    objectfields[i] = 0;
+    objectref->oref[i] = nullptr;
   }
 
-  operand_stack_push_u32(vm->current_frame, (uint32_t)objectref);
+  operand_stack_push_ref(vm->current_frame, objectref);
 }
 
 
@@ -1816,10 +1758,11 @@ void op_newarray(struct vm * vm, uint32_t atype)
 {
   int32_t count = operand_stack_pop_u32(vm->current_frame);
   int32_t element_size = array_element_size(atype);
-  int32_t size = element_size * count + (sizeof (struct primitive_arrayref));
-  struct primitive_arrayref * arrayref = memory_allocate(size);
+  int32_t size = element_size * count + (sizeof (struct arrayref));
+  struct arrayref * arrayref = memory_allocate(size);
   assert(arrayref != nullptr);
   arrayref->length = count;
+  arrayref->class_entry = nullptr;
 
   /* Each of the elements of the new array is initialized to the default initial
      value (§2.3, §2.4) for the element type of the array type. */
@@ -1832,7 +1775,7 @@ void op_newarray(struct vm * vm, uint32_t atype)
     arrayref->u32[i] = 0;
   }
 
-  operand_stack_push_u32(vm->current_frame, (uint32_t)arrayref);
+  operand_stack_push_ref(vm->current_frame, arrayref);
 }
 
 void op_nop(struct vm * vm)
@@ -1882,10 +1825,9 @@ void op_putfield(struct vm * vm, uint32_t index)
   case '[':
     {
       uint32_t value = operand_stack_pop_u32(vm->current_frame);
-      int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+      struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
       assert(objectref != nullptr);
-      int32_t * objectfields = &objectref[1];
-      objectfields[field_entry->instance_index] = value;
+      objectref->u32[field_entry->instance_index] = value;
     }
     break;
   case 'D': [[fallthrough]];
@@ -1893,11 +1835,10 @@ void op_putfield(struct vm * vm, uint32_t index)
     {
       uint32_t high = operand_stack_pop_u32(vm->current_frame);
       uint32_t low = operand_stack_pop_u32(vm->current_frame);
-      int32_t * objectref = (int32_t *)operand_stack_pop_u32(vm->current_frame);
+      struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
       assert(objectref != nullptr);
-      int32_t * objectfields = &objectref[1];
-      objectfields[field_entry->instance_index + 1] = high;
-      objectfields[field_entry->instance_index] = low;
+      objectref->u32[field_entry->instance_index + 1] = high;
+      objectref->u32[field_entry->instance_index] = low;
     }
     break;
   default:
@@ -1971,7 +1912,7 @@ void op_return(struct vm * vm)
 void op_saload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   int16_t value = arrayref->u16[index];
   operand_stack_push_u32(vm->current_frame, value);
@@ -1981,7 +1922,7 @@ void op_sastore(struct vm * vm)
 {
   uint16_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
-  struct primitive_arrayref * arrayref = (struct primitive_arrayref *)operand_stack_pop_u32(vm->current_frame);
+  struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
   assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
   arrayref->u16[index] = value;
 }

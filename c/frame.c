@@ -13,6 +13,7 @@
 #include "debug.h"
 #include "find_attribute.h"
 #include "backtrace.h"
+#include "native_types.h"
 
 int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type)
 {
@@ -490,15 +491,15 @@ void vm_method_return(struct vm * vm)
   }
 }
 
-void vm_exception(struct vm * vm, int32_t * objectref)
+void vm_exception(struct vm * vm, struct objectref * objectref)
 {
   // If objectref is null, athrow throws a NullPointerException instead of objectref.
   assert(objectref != nullptr);
 
-  struct class_entry * exception_class_entry = (struct class_entry *)objectref[0];
-  if (objectref[1] == 0) {
-    struct backtrace * backtrace = backtrace_allocate(vm);
-    objectref[1] = (int32_t)backtrace;
+  struct class_entry * exception_class_entry = objectref->class_entry;
+  if (objectref->oref[0] == nullptr) {
+    // FIXME: make backtrace a real objectref
+    objectref->oref[0] = (struct objectref *)backtrace_allocate(vm);
   }
 
   while (vm->frame_stack.ix > 0) {
@@ -533,23 +534,21 @@ void vm_exception(struct vm * vm, int32_t * objectref)
   print__class_file__class_name(exception_class_entry->class_file);
   printc('\n');
   {
-    int32_t * string_objectref = (int32_t *)objectref[2];
+    struct objectref * string_objectref = objectref->oref[1]; // message
     if (string_objectref != nullptr) {
       prints("  message: ");
-      struct class_entry * string_class_entry = (struct class_entry *)string_objectref[0];
+      struct class_entry * string_class_entry = string_objectref->class_entry;
       prints("(class: ");
       print__class_file__class_name(string_class_entry->class_file);
       printc(')');
       prints("\n    ");
-      int32_t * arrayref = (int32_t *)string_objectref[1];
-      int32_t length = arrayref[0];
-      uint8_t * bytes = (uint8_t *)&arrayref[1];
-      print__string(bytes, length);
+      struct arrayref * arrayref = string_objectref->aref[0];
+      print__string(arrayref->u8, arrayref->length);
       printc('\n');
     }
   }
-  assert(objectref[1] != 0);
-  backtrace_print((struct backtrace *)objectref[1]);
+  assert(objectref->oref[0] != 0);
+  backtrace_print((struct backtrace *)objectref->oref[0]);
 }
 
 static void print_vm_stack(struct vm * vm)
@@ -574,7 +573,9 @@ void vm_execute(struct vm * vm)
   while (true) {
     assert(vm->current_frame->pc < vm->current_frame->code_attribute->code_length);
     print_vm_stack(vm);
+#ifdef DEBUG_PRINT
     decode_print_instruction(vm->current_frame->code_attribute->code, vm->current_frame->pc);
+#endif
     decode_execute_instruction(vm, vm->current_frame->code_attribute->code, vm->current_frame->pc);
     if (vm->frame_stack.ix == 0) {
       debugf("terminate\n");
@@ -608,8 +609,11 @@ struct vm * vm_start(int class_hash_table_length,
   assert(method_entry.method_info != nullptr);
 
   static struct vm vm;
-  vm.class_hash_table.entry = class_hash_table;
   vm.class_hash_table.length = class_hash_table_length;
+  vm.class_hash_table.entry = class_hash_table;
+
+  vm.string_hash_table.length = 128;
+  vm.string_hash_table.entry = class_resolver_init_string_hash_table(vm.string_hash_table.length);
 
   vm.frame_stack.ix = 0;
   vm.frame_stack.capacity = 1024;

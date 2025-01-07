@@ -1,4 +1,4 @@
-package p;
+package test;
 
 class TestPrimitiveArray {
     static boolean testBool() {
@@ -24,12 +24,13 @@ class TestPrimitiveArray {
     }
 
     static boolean testChar() {
-        char[] a = {'a', 'b', 'c', 'd'};
+        char[] a = {'a', 'b', 'c', 'd', 200};
         return
             a[0] == 'a' &&
             a[1] == 'b' &&
             a[2] == 'c' &&
-            a[3] == 'd';
+            a[3] == 'd' &&
+            a[4] > 0;
     }
 
     static boolean testShort() {

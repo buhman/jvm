@@ -1,19 +1,32 @@
+#pragma once
+
 #include <stdint.h>
+#include <assert.h>
 
 #include "class_resolver.h"
 
+struct object_arrayref;
+
 struct objectref {
+  int32_t _res;
   struct class_entry * class_entry;
   union {
-    void * field[0];
+    struct objectref * oref[0];
+    struct arrayref * aref[0];
+    uint32_t u32[0];
   };
 };
 
-static_assert((sizeof (struct objectref)) == 4);
+static_assert((sizeof (struct objectref)) == 8);
 
-struct primitive_arrayref {
-  int32_t length;
+struct arrayref {
+  int32_t length; // length position must match primitive_arrayref
+  struct class_entry * class_entry;
   union {
+    // object array:
+    struct objectref * oref[0];
+    struct arrayref * aref[0];
+    // primitive array:
     uint8_t u8[0];
     uint16_t u16[0];
     uint32_t u32[0];
@@ -21,18 +34,7 @@ struct primitive_arrayref {
   };
 };
 
-static_assert((sizeof (struct primitive_arrayref)) == 4);
-
-struct object_arrayref {
-  struct class_entry * class_entry;
-  int32_t length;
-  union {
-    struct objectref * a[0];
-    uint32_t u32[0];
-  };
-};
-
-static_assert((sizeof (struct object_arrayref)) == 8);
+static_assert((sizeof (struct arrayref)) == 8);
 
 enum ARRAY_TYPE {
   T_BOOLEAN = 4, // 1 byte

@@ -1,5 +1,6 @@
 #include "assert.h"
 #include "parse_type.h"
+#include "printf.h"
 
 struct parse_type_ret parse_type(uint8_t * bytes, uint32_t length)
 {
