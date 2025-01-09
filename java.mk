@@ -2,7 +2,8 @@
 #	javac $<
 
 %.class: %.java
-	javac -Xlint:-options --source 8 --target 8 --boot-class-path . $<
+	cd ./classes ; \
+	javac -Xlint:-options --source 8 --target 8 --boot-class-path . $(<:classes/%=%)
 
 OBJ = \
 	c/decode.o \
@@ -22,7 +23,8 @@ OBJ = \
 	c/fatal.o \
 	c/parse_type.o \
 	c/backtrace.o \
-	c/find_attribute.o
+	c/find_attribute.o \
+	c/gc.o
 
 MAIN_DREAMCAST_OBJ = \
 	c/main_dreamcast.o \

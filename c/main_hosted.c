@@ -9,6 +9,7 @@
 #include "malloc.h"
 #include "memory_allocator.h"
 #include "backtrace.h"
+#include "gc.h"
 
 static struct hash_table_entry * load_from_filenames(const char * filenames[], int length, int * hash_table_length)
 {
@@ -56,4 +57,7 @@ int main(int argc, const char * argv[])
                             main_class_length);
 
   vm_execute(vm);
+
+  gc_mark(vm);
+  gc_sweep();
 }

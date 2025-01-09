@@ -37,6 +37,7 @@ struct class_entry {
   struct class_file * class_file;
   enum initialization_state initialization_state;
   union attribute_entry * attribute_entry;
+  int32_t static_fields_count;
   int32_t * static_fields;
   int32_t instance_fields_count;
 

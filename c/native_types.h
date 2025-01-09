@@ -4,11 +4,24 @@
 #include <assert.h>
 
 #include "class_resolver.h"
+#include "memory_allocator.h"
 
-struct object_arrayref;
+enum tag_type {
+  TAG_TYPE_OBJECT = -30741,
+  TAG_TYPE_REF_ARRAY = 23240,
+  TAG_TYPE_PRIM_ARRAY = -5251,
+};
+
+struct tag {
+  int8_t mark;
+  int8_t _res;
+  int16_t type;
+};
+
+static_assert((sizeof (struct tag)) == 4);
 
 struct objectref {
-  int32_t _res;
+  struct tag tag;
   struct class_entry * class_entry;
   union {
     struct objectref * oref[0];
@@ -20,8 +33,9 @@ struct objectref {
 static_assert((sizeof (struct objectref)) == 8);
 
 struct arrayref {
-  int32_t length; // length position must match primitive_arrayref
+  struct tag tag;
   struct class_entry * class_entry;
+  int32_t length;
   union {
     // object array:
     struct objectref * oref[0];
@@ -34,7 +48,7 @@ struct arrayref {
   };
 };
 
-static_assert((sizeof (struct arrayref)) == 8);
+static_assert((sizeof (struct arrayref)) == 12);
 
 enum ARRAY_TYPE {
   T_BOOLEAN = 4, // 1 byte
@@ -70,4 +84,37 @@ static inline int array_element_size(int atype)
     assert(!"invalid atype");
     break;
   }
+}
+
+static inline struct arrayref * prim_array_allocate(int element_size, int count)
+{
+  int32_t size = count * element_size + (sizeof (struct arrayref));
+  struct arrayref * arrayref = memory_allocate(size);
+  if (arrayref != nullptr) {
+    arrayref->tag.type = TAG_TYPE_PRIM_ARRAY;
+    arrayref->tag.mark = 0;
+  }
+  return arrayref;
+}
+
+static inline struct arrayref * ref_array_allocate(int count)
+{
+  int32_t size = count * (sizeof (void *)) + (sizeof (struct arrayref));
+  struct arrayref * arrayref = memory_allocate(size);
+  if (arrayref != nullptr) {
+    arrayref->tag.type = TAG_TYPE_REF_ARRAY;
+    arrayref->tag.mark = 0;
+  }
+  return arrayref;
+}
+
+static inline struct objectref * obj_allocate(int num_fields)
+{
+  int32_t size = num_fields * (sizeof (void *)) + (sizeof (struct objectref));
+  struct objectref * objectref = memory_allocate(size);
+  if (objectref != nullptr) {
+    objectref->tag.type = TAG_TYPE_OBJECT;
+    objectref->tag.mark = 0;
+  }
+  return objectref;
 }

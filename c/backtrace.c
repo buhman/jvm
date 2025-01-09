@@ -6,7 +6,16 @@
 
 struct backtrace * backtrace_allocate(struct vm * vm)
 {
-  struct backtrace * backtrace = memory_allocate((sizeof (struct backtrace)));
+  struct class_entry * object_class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
+                                                                        vm->class_hash_table.entry,
+                                                                        (const uint8_t *)"java/lang/Object",
+                                                                        16);
+  debugf("object class entry: %p\n", object_class_entry);
+
+  int num_fields = (sizeof (struct backtrace)) / (sizeof (void *));
+  struct objectref * objectref = obj_allocate(num_fields);
+  objectref->class_entry = object_class_entry;
+  struct backtrace * backtrace = (struct backtrace *)&objectref->aref[0];
   backtrace->num_entries = vm->frame_stack.ix;
   int backtrace_entries_size = (sizeof (struct backtrace_entry)) * backtrace->num_entries;
   backtrace->entry = memory_allocate(backtrace_entries_size);

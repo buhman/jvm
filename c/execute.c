@@ -71,9 +71,7 @@ void op_anewarray(struct vm * vm, uint32_t index)
                                                  index);
 
   int32_t count = operand_stack_pop_u32(vm->current_frame);
-  int32_t element_size = (sizeof (void *));
-  int32_t size = element_size * count + (sizeof (struct arrayref));
-  struct arrayref * arrayref = memory_allocate(size);
+  struct arrayref * arrayref = ref_array_allocate(count);
   assert(arrayref != nullptr);
   arrayref->length = count;
   arrayref->class_entry = class_entry;
@@ -1429,7 +1427,7 @@ void op_ldc(struct vm * vm, uint32_t index)
     struct objectref * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
                                                                 vm->class_hash_table.entry,
                                                                 vm->current_frame->class_entry,
-                                                                constant->string.string_index);
+                                                                index);
     operand_stack_push_ref(vm->current_frame, objectref);
   } else {
     assert(false);
@@ -1456,7 +1454,7 @@ void op_ldc_w(struct vm * vm, uint32_t index)
     struct objectref * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
                                                                 vm->class_hash_table.entry,
                                                                 vm->current_frame->class_entry,
-                                                                constant->string.string_index);
+                                                                index);
     operand_stack_push_ref(vm->current_frame, objectref);
   } else {
     assert(false);
@@ -1658,9 +1656,15 @@ void op_monitorexit(struct vm * vm)
 static struct arrayref * _multiarray(struct vm * vm, int32_t * dims, int num_dimensions, int level, uint8_t * type, uint8_t * type_end)
 {
   int32_t count = dims[level];
-  int32_t element_size = field_size_array(*type);
-  int32_t size = element_size * count + (sizeof (struct arrayref));
-  struct arrayref * arrayref = memory_allocate(size);
+  struct arrayref * arrayref;
+  int32_t element_size;
+  if (*type == 'L' || *type == '[') {
+    element_size = (sizeof (void *));
+    arrayref = ref_array_allocate(count);
+  } else {
+    element_size = field_size_array(*type);
+    arrayref = prim_array_allocate(element_size, count);
+  }
   assert(arrayref != nullptr);
   arrayref->length = count;
   arrayref->class_entry = nullptr;
@@ -1729,7 +1733,7 @@ void op_new(struct vm * vm, uint32_t index)
      reference to the instance, is pushed onto the operand stack. */
 
   int fields_count = class_entry->instance_fields_count;
-  struct objectref * objectref = memory_allocate(fields_count * 4 + 4);
+  struct objectref * objectref = obj_allocate(fields_count);
   assert(objectref != nullptr);
   objectref->class_entry = class_entry;
   for (int i = 0; i < fields_count; i++) {
@@ -1744,8 +1748,7 @@ void op_newarray(struct vm * vm, uint32_t atype)
 {
   int32_t count = operand_stack_pop_u32(vm->current_frame);
   int32_t element_size = array_element_size(atype);
-  int32_t size = element_size * count + (sizeof (struct arrayref));
-  struct arrayref * arrayref = memory_allocate(size);
+  struct arrayref * arrayref = prim_array_allocate(element_size, count);
   assert(arrayref != nullptr);
   arrayref->length = count;
   arrayref->class_entry = nullptr;

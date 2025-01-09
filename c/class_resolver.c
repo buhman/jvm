@@ -151,6 +151,7 @@ static int32_t class_resolver_create_fields_hash_table(int class_hash_table_leng
   class_entry->fields.length = fields_hash_table_length;
   class_entry->fields.entry = fields_hash_table;
   class_entry->instance_fields_count = instance_index;
+  class_entry->static_fields_count = static_index;
 
   return static_index;
 }
@@ -232,6 +233,7 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buff
 
     class_entry[i].class_file = class_file;
     class_entry[i].initialization_state = CLASS_UNINITIALIZED;
+
 
     struct constant * class_constant = &class_file->constant_pool[class_file->this_class - 1];
     assert(class_constant->tag == CONSTANT_Class);
@@ -596,16 +598,20 @@ struct objectref * class_resolver_lookup_string(int class_hash_table_length,
     return class_entry->attribute_entry[string_index - 1].string_objectref;
   }
 
-  struct constant * utf8_constant = &class_entry->class_file->constant_pool[string_index - 1];
+  struct constant * string_constant = &class_entry->class_file->constant_pool[string_index - 1];
+  assert(string_constant->tag == CONSTANT_String);
+
+  struct constant * utf8_constant = &class_entry->class_file->constant_pool[string_constant->string.string_index - 1];
   assert(utf8_constant->tag == CONSTANT_Utf8);
 
   struct class_entry * string_class_entry = class_resolver_lookup_class(class_hash_table_length,
                                                                         class_hash_table,
                                                                         (const uint8_t *)"java/lang/String",
                                                                         16);
+  debugf("string class entry: %p\n", string_class_entry);
 
-  int32_t size = utf8_constant->utf8.length + (sizeof (struct arrayref));
-  struct arrayref * arrayref = memory_allocate(size);
+  int32_t count = utf8_constant->utf8.length;
+  struct arrayref * arrayref = prim_array_allocate(1, count);
   assert(arrayref != nullptr);
   arrayref->class_entry = nullptr; // byte[]
   arrayref->length = utf8_constant->utf8.length;
@@ -614,9 +620,13 @@ struct objectref * class_resolver_lookup_string(int class_hash_table_length,
   }
 
   assert(string_class_entry != nullptr);
-  struct objectref * objectref = memory_allocate((sizeof (struct objectref)) + (sizeof (void *)));
+  int fields_count = string_class_entry->instance_fields_count;
+  struct objectref * objectref = obj_allocate(fields_count);
   assert(objectref != nullptr);
   objectref->class_entry = string_class_entry;
+  for (int i = 0; i < fields_count; i++) {
+    objectref->oref[i] = nullptr;
+  }
   objectref->aref[0] = arrayref;
 
   // cache the result

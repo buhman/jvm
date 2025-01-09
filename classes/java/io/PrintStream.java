@@ -8,7 +8,7 @@ public class PrintStream
     public PrintStream() {
     }
 
-    private final byte[] newline = {'\n'};
+    private static final byte[] newline = {'\n'};
 
     public static native void write(byte[] buf);
 

@@ -2,10 +2,11 @@
 
 #include "assert.h"
 #include "printf.h"
+#include "memory_allocator.h"
 
 #define block_power (5UL)
 #define block_size (1UL << block_power)
-static uint8_t memory[0x100];
+static uint8_t memory[0x200];
 //static uint8_t memory[0x100000];
 #define free_list_length ((sizeof (memory)) / block_size)
 static uint8_t free_list[free_list_length];
@@ -34,7 +35,7 @@ static inline uint32_t find_contiguous_blocks(uint32_t blocks, int * zero_crossi
 
   for (uint32_t i = 0; i < blocks; i++) {
     if (free_list[free_ix + i] != 0)
-      return i + 1;
+      return i;
   }
   return blocks;
 }
@@ -44,6 +45,7 @@ void * memory_allocate(uint32_t size)
   assert(size != 0);
 
   uint32_t blocks = ((size + (block_size - 1)) & ~(block_size - 1)) >> block_power;
+  assert(blocks > 0);
   int zero_crossings = 0;
 
   while (true) {
@@ -52,9 +54,13 @@ void * memory_allocate(uint32_t size)
       return nullptr; // memory allocation failed
     if (ix_offset == blocks)
       break;
-    free_ix = (free_ix + ix_offset) & (free_list_length - 1);
+    uint32_t next_free_ix = (free_ix + ix_offset + 1) & (free_list_length - 1);
+    if (next_free_ix < free_ix)
+      zero_crossings += 1;
+    free_ix = next_free_ix;
   }
 
+  assert(free_list[free_ix] == 0);
   free_list[free_ix] = START | ALLOCATED;
   for (int i = 1; i < blocks; i++) {
     free_list[free_ix + i] = ALLOCATED;
@@ -63,15 +69,21 @@ void * memory_allocate(uint32_t size)
 
   void * mem = &memory[free_ix << block_power];
   free_ix = (free_ix + blocks) & (free_list_length - 1);
+
+  printf("memory allocate: %p\n", mem);
+
   return mem;
 }
 
 void memory_free(void * p)
 {
+  printf("memory free: %p\n", p);
+
   uint8_t * buf = (uint8_t *)p;
   assert(buf >= memory);
   uint32_t address_index = buf - memory;
   assert(address_index < (sizeof (memory)));
+  assert((address_index & (~(block_size - 1))) == address_index);
   uint32_t free_list_index = address_index >> block_power;
   assert((free_list[free_list_index] & START) != 0);
 
@@ -96,8 +108,18 @@ bool memory_is_allocated(void * p)
   return (free_list[free_list_index] & START) != 0;
 }
 
-#if 1
-void print_free_list()
+void memory_iterate_allocated(memory_iterate_func_t func)
+{
+  for (int i = 0; i < free_list_length; i++) {
+    if ((free_list[i] & START) != 0) {
+      void * address = &memory[i << block_power];
+      func(address);
+    }
+  }
+}
+
+#if 0
+static void print_free_list()
 {
   for (int i = 0; i < free_list_length; i++) {
     printf("%d ", free_list[i]);
