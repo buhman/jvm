@@ -15,6 +15,7 @@
 #include "find_attribute.h"
 #include "frame.h"
 #include "native_types_allocate.h"
+#include "vm_instance.h"
 
 static int field_info_field_size(struct class_file * class_file, struct field_info * field_info)
 {
@@ -219,7 +220,7 @@ struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buff
                                                            int length,
                                                            int * hash_table_length)
 {
-  int class_hash_table_length = hash_table_next_power_of_two(hash_table_next_power_of_two(length * 2));
+  int class_hash_table_length = hash_table_next_power_of_two(length * 2);
   uint32_t class_hash_table_size = (sizeof (struct hash_table_entry)) * class_hash_table_length;
   struct hash_table_entry * class_hash_table = malloc_class_arena(class_hash_table_size);
   hash_table_init(class_hash_table_length, class_hash_table);
@@ -605,12 +606,6 @@ struct objectref * class_resolver_lookup_string(struct vm * vm,
   struct constant * utf8_constant = &class_entry->class_file->constant_pool[string_constant->string.string_index - 1];
   assert(utf8_constant->tag == CONSTANT_Utf8);
 
-  struct class_entry * string_class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
-                                                                        vm->class_hash_table.entry,
-                                                                        (const uint8_t *)"java/lang/String",
-                                                                        16);
-  debugf("string class entry: %p\n", string_class_entry);
-
   int32_t count = utf8_constant->utf8.length;
   struct arrayref * arrayref = prim_array_allocate(vm, 1, count);
   assert(arrayref != nullptr);
@@ -620,14 +615,9 @@ struct objectref * class_resolver_lookup_string(struct vm * vm,
     arrayref->u8[i] = utf8_constant->utf8.bytes[i];
   }
 
-  assert(string_class_entry != nullptr);
-  int fields_count = string_class_entry->instance_fields_count;
-  struct objectref * objectref = obj_allocate(vm, fields_count);
+  struct objectref * objectref = vm_instance_create(vm, "java/lang/String");
   assert(objectref != nullptr);
-  objectref->class_entry = string_class_entry;
-  for (int i = 0; i < fields_count; i++) {
-    objectref->oref[i] = nullptr;
-  }
+  assert(objectref->class_entry->instance_fields_count >= 1);
   objectref->aref[0] = arrayref;
 
   // cache the result

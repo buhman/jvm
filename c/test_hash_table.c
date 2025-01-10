@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stddef.h>
-#include <assert.h>
 
 #include "hash_table.h"
+#include "assert.h"
 
 static const char * names[] = {
   "java/beans/Introspector.java",

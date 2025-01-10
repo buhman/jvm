@@ -186,26 +186,105 @@ struct hash_table_entry * hash_table_find2(int hash_table_length,
   return nullptr;
 }
 
-/*
-void hash_table_add_int(int hash_table_length,
-                        struct hash_table_entry * entry,
-                        int key,
-                        void * value)
+struct hash_table_entry * hash_table_add3(int hash_table_length,
+                                          struct hash_table_entry * entry,
+                                          const uint8_t * key1,
+                                          int key1_length,
+                                          const uint8_t * key2,
+                                          int key2_length,
+                                          const uint8_t * key3,
+                                          int key3_length,
+                                          void * value)
 {
-  hash_table_add(hash_table_length,
-                 entry,
-                 (const uint8_t *)&key,
-                 4,
-                 value);
+  assert(hash_table_length != 0);
+  assert((hash_table_length & (hash_table_length - 1)) == 0);
+  uint32_t hash = fnv_offset_basis;
+  hash = fnv_1(hash, key1, key1_length);
+  hash = fnv_1(hash, key2, key2_length);
+  hash = fnv_1(hash, key3, key3_length);
+  hash &= (hash_table_length - 1);
+
+  printf("hash: %d %u %p\n", hash_table_length, hash, value);
+
+  struct hash_table_entry * e = &entry[hash];
+
+  while (e->next != nullptr) {
+    e = e->next;
+  }
+
+  if (e->key != nullptr) {
+    // allocate e from overflow
+    e->next = malloc_class_arena((sizeof (struct hash_table_entry)));
+    e->next->key = nullptr;
+    e->next->next = nullptr;
+    e = e->next;
+  }
+
+  uint8_t * key_copy = malloc_class_arena(key1_length + key2_length + key3_length);
+  for (int i = 0; i < key1_length; i++) key_copy[i] = key1[i];
+  for (int i = 0; i < key2_length; i++) key_copy[key1_length + i] = key2[i];
+  for (int i = 0; i < key3_length; i++) key_copy[key1_length + key2_length + i] = key3[i];
+  e->key = key_copy;
+  e->key_length = key1_length + key2_length + key3_length;
+  e->value = value;
+
+  return e;
 }
 
-struct hash_table_entry * hash_table_find_int(int hash_table_length,
-                                              struct hash_table_entry * entry,
-                                              int key)
+static inline bool key_equal3(const uint8_t * a1, int a1_length,
+                              const uint8_t * a2, int a2_length,
+                              const uint8_t * a3, int a3_length,
+                              const uint8_t * b)
 {
-  return hash_table_find(hash_table_length,
-                         entry,
-                         (const uint8_t *)&key,
-                         4);
+  for (int i = 0; i < a1_length; i++) {
+    if (a1[i] != b[i])
+      return false;
+  }
+  for (int i = 0; i < a2_length; i++) {
+    if (a2[i] != b[a1_length + i])
+      return false;
+  }
+  for (int i = 0; i < a3_length; i++) {
+    if (a3[i] != b[a1_length + a2_length + i])
+      return false;
+  }
+  return true;
 }
-*/
+
+struct hash_table_entry * hash_table_find3(int hash_table_length,
+                                           struct hash_table_entry * entry,
+                                           const uint8_t * key1,
+                                           int key1_length,
+                                           const uint8_t * key2,
+                                           int key2_length,
+                                           const uint8_t * key3,
+                                           int key3_length)
+{
+  if (hash_table_length == 0)
+    return nullptr;
+
+  assert((hash_table_length & (hash_table_length - 1)) == 0);
+  uint32_t hash = fnv_offset_basis;
+  hash = fnv_1(hash, key1, key1_length);
+  hash = fnv_1(hash, key2, key2_length);
+  hash = fnv_1(hash, key3, key3_length);
+  hash &= (hash_table_length - 1);
+
+  printf("hash: %d %u\n", hash_table_length, hash);
+
+  struct hash_table_entry * e = &entry[hash];
+
+  while (e != nullptr && e->key != nullptr) {
+    bool equal =
+      e->key_length == (key1_length + key2_length + key3_length) &&
+      key_equal3(key1, key1_length,
+                 key2, key2_length,
+                 key3, key3_length,
+                 e->key);
+    if (equal) {
+      return e;
+    }
+    e = e->next;
+  }
+  return nullptr;
+}

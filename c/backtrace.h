@@ -1,5 +1,6 @@
 #pragma once
 
+#include "native_types.h"
 #include "frame.h"
 
 struct backtrace_entry {

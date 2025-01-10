@@ -7,8 +7,9 @@ LIB ?= $(MAKEFILE_PATH)/dreamcast
 CFLAGS += -D__dreamcast__
 CFLAGS += -DDEBUG
 #CFLAGS += -DDEBUG_PRINT
-CFLAGS += -I$(MAKEFILE_PATH)
-CFLAGS += -I$(MAKEFILE_PATH)/dreamcast/
+CFLAGS += -I$(MAKEFILE_PATH)/c
+CFLAGS += -I$(MAKEFILE_PATH)/dreamcast
+CFLAGS += -I$(MAKEFILE_PATH)/
 CFLAGS += -Wno-error=strict-aliasing -fno-strict-aliasing
 CARCH = -m4-single -ml
 

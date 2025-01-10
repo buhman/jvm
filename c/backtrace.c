@@ -4,22 +4,16 @@
 #include "find_attribute.h"
 #include "memory_allocator.h"
 #include "native_types_allocate.h"
+#include "vm_instance.h"
 
 struct objectref * backtrace_allocate(struct vm * vm)
 {
-  struct class_entry * class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
-                                                                 vm->class_hash_table.entry,
-                                                                 (const uint8_t *)"java/lang/Backtrace",
-                                                                 19);
-  debugf("backtrace class entry: %p\n", class_entry);
-
-  assert(class_entry->instance_fields_count >= 1);
-  struct objectref * objectref = obj_allocate(vm, class_entry->instance_fields_count);
-  objectref->class_entry = class_entry;
+  struct objectref * objectref = vm_instance_create(vm, "java/lang/Backtrace");
+  assert(objectref != nullptr);
+  assert(objectref->class_entry->instance_fields_count >= 1);
 
   int num_entries = vm->frame_stack.ix;
   struct arrayref * arrayref = prim_array_allocate(vm, (sizeof (struct backtrace_entry)), num_entries);
-  arrayref->length = num_entries;
   arrayref->class_entry = nullptr;
 
   struct backtrace_entry * backtrace_entry = (struct backtrace_entry *)&arrayref->u32[0];

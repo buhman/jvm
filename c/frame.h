@@ -35,7 +35,12 @@ struct vm {
     int length;
     struct hash_table_entry * entry;
   } class_hash_table;
+  struct {
+    int length;
+    struct hash_table_entry * entry;
+  } native_hash_table;
 };
+
 static inline struct frame * stack_push_frame(struct stack * stack, int num_frames)
 {
   struct frame * frame = &stack->frame[stack->ix];
@@ -185,6 +190,8 @@ void vm_method_return(struct vm * vm);
 void vm_execute(struct vm * vm);
 struct vm * vm_start(int class_hash_table_length,
                      struct hash_table_entry * class_hash_table,
+                     int native_hash_table_length,
+                     struct hash_table_entry * native_hash_table,
                      const uint8_t * main_class_name,
                      int main_class_name_length);
 int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type);

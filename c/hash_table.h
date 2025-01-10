@@ -40,6 +40,25 @@ struct hash_table_entry * hash_table_find2(int hash_table_length,
                                            const uint8_t * key2,
                                            int key2_length);
 
+struct hash_table_entry * hash_table_add3(int hash_table_length,
+                                          struct hash_table_entry * entry,
+                                          const uint8_t * key1,
+                                          int key1_length,
+                                          const uint8_t * key2,
+                                          int key2_length,
+                                          const uint8_t * key3,
+                                          int key3_length,
+                                          void * value);
+
+struct hash_table_entry * hash_table_find3(int hash_table_length,
+                                           struct hash_table_entry * entry,
+                                           const uint8_t * key1,
+                                           int key1_length,
+                                           const uint8_t * key2,
+                                           int key2_length,
+                                           const uint8_t * key3,
+                                           int key3_length);
+
 static inline bool hash_table_key_equal(const uint8_t * a, const uint8_t * b, int length)
 {
   for (int i = 0; i < length; i++) {

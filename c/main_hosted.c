@@ -1,15 +1,14 @@
 #include <stdlib.h>
-#include <string.h>
 
 #include "printf.h"
-#include "frame.h"
 #include "class_resolver.h"
 #include "string.h"
 #include "file.h"
 #include "malloc.h"
+#include "native.h"
 #include "memory_allocator.h"
-#include "backtrace.h"
-#include "gc.h"
+
+void * memset(void * s, int c, size_t n);
 
 static struct hash_table_entry * load_from_filenames(const char * filenames[], int length, int * hash_table_length)
 {
@@ -49,15 +48,17 @@ int main(int argc, const char * argv[])
   int class_hash_table_length;
   struct hash_table_entry * class_hash_table = load_from_filenames(class_filenames, num_class_filenames, &class_hash_table_length);
 
+  int native_hash_table_length;
+  struct hash_table_entry * native_hash_table = native_init_hash_table(&native_hash_table_length);
+
   debugf("vm_start\n");
 
   struct vm * vm = vm_start(class_hash_table_length,
                             class_hash_table,
+                            native_hash_table_length,
+                            native_hash_table,
                             main_class,
                             main_class_length);
 
   vm_execute(vm);
-
-  gc_mark(vm);
-  gc_sweep();
 }

@@ -74,7 +74,6 @@ void op_anewarray(struct vm * vm, uint32_t index)
   int32_t count = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = ref_array_allocate(vm, count);
   assert(arrayref != nullptr);
-  arrayref->length = count;
   arrayref->class_entry = class_entry;
 
   /* All components of the new array are initialized to null, the default value
@@ -1171,8 +1170,6 @@ void op_invokevirtual(struct vm * vm, uint32_t index)
   assert(interfacemethodref_constant->tag == CONSTANT_Methodref);
   struct constant * nameandtype_constant = &origin_class_entry->class_file->constant_pool[interfacemethodref_constant->interfacemethodref.name_and_type_index - 1];
   assert(nameandtype_constant->tag == CONSTANT_NameAndType);
-  struct constant * method_name_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.name_index - 1];
-  assert(method_name_constant->tag == CONSTANT_Utf8);
   struct constant * method_descriptor_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
   assert(method_descriptor_constant->tag == CONSTANT_Utf8);
 
@@ -1665,7 +1662,6 @@ static struct arrayref * _multiarray(struct vm * vm, int32_t * dims, int num_dim
     arrayref = prim_array_allocate(vm, element_size, count);
   }
   assert(arrayref != nullptr);
-  arrayref->length = count;
   arrayref->class_entry = nullptr;
 
   int32_t array_element_size = count * element_size; // bytes
@@ -1749,7 +1745,6 @@ void op_newarray(struct vm * vm, uint32_t atype)
   int32_t element_size = array_element_size(atype);
   struct arrayref * arrayref = prim_array_allocate(vm, element_size, count);
   assert(arrayref != nullptr);
-  arrayref->length = count;
   arrayref->class_entry = nullptr;
 
   /* Each of the elements of the new array is initialized to the default initial

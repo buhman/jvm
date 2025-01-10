@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdint.h>
-#include <assert.h>
 
+#include "assert.h"
 #include "class_resolver.h"
 #include "memory_allocator.h"
 

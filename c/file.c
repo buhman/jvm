@@ -1,13 +1,15 @@
-#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "file.h"
+#include "assert.h"
+#include "printf.h"
 
 uint8_t * file_read(const char * path, size_t * file_size)
 {
   int ret;
+  debugf("file_read: ", path);
   FILE * f = fopen(path, "rb");
   assert(f != nullptr);
   ret = fseek(f, 0L, SEEK_END);

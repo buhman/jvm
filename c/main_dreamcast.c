@@ -2,14 +2,12 @@
 
 #include "string.h"
 #include "class_resolver.h"
-#include "frame.h"
-#include "printf.h"
+#include "native.h"
 #include "malloc.h"
-#include "memory_allocator.h"
-
-#include "sh7091_scif.h"
 
 #include "classpath.h"
+
+#include "sh7091_scif.h"
 
 void main()
 {
@@ -36,9 +34,15 @@ void main()
                                                                                 class_file_buffers_length,
                                                                                 &class_hash_table_length);
 
+  int native_hash_table_length;
+  struct hash_table_entry * native_hash_table = native_init_hash_table(&native_hash_table_length);
+
   struct vm * vm = vm_start(class_hash_table_length,
                             class_hash_table,
+                            native_hash_table_length,
+                            native_hash_table,
                             main_class,
                             main_class_length);
+
   vm_execute(vm);
 }

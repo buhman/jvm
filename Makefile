@@ -3,11 +3,14 @@
 
 include java.mk
 
+MAKEFILE_PATH := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 CC ?= gcc
 ARCH = -m32
 CFLAGS += -Wall -Werror -Wfatal-errors -Wno-error=unused-variable -fstack-protector -std=c2x -g
+CFLAGS += -I$(MAKEFILE_PATH)/
+CFLAGS += -I$(MAKEFILE_PATH)/c
 CFLAGS += -DDEBUG
-#CFLAGS += -DDEBUG_PRINT
+CFLAGS += -DDEBUG_PRINT
 LDFLAGS = -lm
 OPT ?= -O0
 DEPFLAGS = -MMD -MP
@@ -22,7 +25,11 @@ main: $(OBJ) $(MAIN_HOSTED_OBJ)
 	$(CC) $(ARCH) $(LDFLAGS) $^ -o $@
 
 clean:
-	rm -f main print_class c/*.o c/*.d *.elf *.bin
+	rm -f main print_class *.elf *.bin
+	find -P \
+		-regextype posix-egrep \
+		-regex '.*\.(o|d|gch)$$' \
+		-exec rm {} \;
 
 .SUFFIXES:
 .INTERMEDIATE:

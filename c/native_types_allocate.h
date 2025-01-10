@@ -21,6 +21,7 @@ static inline struct arrayref * prim_array_allocate(struct vm * vm, int element_
   if (arrayref != nullptr) {
     arrayref->tag.type = TAG_TYPE_PRIM_ARRAY;
     arrayref->tag.mark = 0;
+    arrayref->length = count;
   }
   return arrayref;
 }
@@ -32,6 +33,7 @@ static inline struct arrayref * ref_array_allocate(struct vm * vm, int count)
   if (arrayref != nullptr) {
     arrayref->tag.type = TAG_TYPE_REF_ARRAY;
     arrayref->tag.mark = 0;
+    arrayref->length = count;
   }
   return arrayref;
 }

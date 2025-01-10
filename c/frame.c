@@ -171,165 +171,35 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
     args[nargs - i - 1] = value;
   }
 
-  debugf("native:\n  ");
+  debugf("native:  ");
   struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->this_class - 1];
+  assert(class_constant->tag == CONSTANT_Class);
   struct constant * class_name_constant = &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  assert(class_name_constant->tag == CONSTANT_Utf8);
   debug_print__constant__utf8_string(class_name_constant);
   debugs("  ");
   struct constant * method_name_constant = &class_entry->class_file->constant_pool[method_entry->method_info->name_index - 1];
+  assert(method_name_constant->tag == CONSTANT_Utf8);
   debug_print__constant__utf8_string(method_name_constant);
+  debugs("  ");
+  struct constant * method_descriptor_constant = &class_entry->class_file->constant_pool[method_entry->method_info->descriptor_index - 1];
+  assert(method_descriptor_constant->tag == CONSTANT_Utf8);
+  debug_print__constant__utf8_string(method_descriptor_constant);
   debugc('\n');
 
+  int old_stack_ix = vm->current_frame->operand_stack_ix;
 
-  int java_lang_math_length = 14;
-  bool java_lang_math =
-    class_name_constant->utf8.length == java_lang_math_length &&
-    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/lang/Math", class_name_constant->utf8.length);
-  if (java_lang_math) {
-    if (method_name_constant->utf8.length == 3) {
-      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"sin", 3)) {
-        assert(nargs == 1);
-        assert(return_type == 'F');
-        uint32_t value = native_java_lang_math_sin_1(args);
-        operand_stack_push_u32(vm->current_frame, value);
-        return;
-      }
-      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"cos", 3)) {
-        assert(nargs == 1);
-        assert(return_type == 'F');
-        uint32_t value = native_java_lang_math_cos_1(args);
-        operand_stack_push_u32(vm->current_frame, value);
-        return;
-      }
-      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"abs", 3)) {
-        assert(nargs == 1);
-        assert(return_type == 'F');
-        uint32_t value = native_java_lang_math_abs_1(args);
-        operand_stack_push_u32(vm->current_frame, value);
-        return;
-      }
-    }
+  native_method_call(vm,
+                     class_name_constant,
+                     method_name_constant,
+                     method_descriptor_constant,
+                     args);
+
+  if (return_type != 'V') {
+    assert(old_stack_ix == vm->current_frame->operand_stack_ix - 1);
+  } else {
+    assert(old_stack_ix == vm->current_frame->operand_stack_ix);
   }
-
-  int java_misc_memory_length = 16;
-  bool java_misc_memory =
-    class_name_constant->utf8.length == java_misc_memory_length &&
-    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/misc/Memory", class_name_constant->utf8.length);
-  if (java_misc_memory) {
-    if (method_name_constant->utf8.length == 5) {
-      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"putU", 4)) {
-        assert(nargs == 2);
-        assert(return_type == 'V');
-        switch (method_name_constant->utf8.bytes[4]) {
-        case '4': native_java_misc_memory_putU4_2(args); break;
-        case '2': native_java_misc_memory_putU2_2(args); break;
-        case '1': native_java_misc_memory_putU1_2(args); break;
-        default: assert(false);
-        }
-        return;
-      }
-      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"getU", 4)) {
-        assert(nargs == 1);
-        assert(return_type == 'I');
-        uint32_t value;
-        switch (method_name_constant->utf8.bytes[4]) {
-        case '4': value = native_java_misc_memory_getU4_1(args); break;
-        case '2': value = native_java_misc_memory_getU2_1(args); break;
-        case '1': value = native_java_misc_memory_getU1_1(args); break;
-        default: assert(false);
-        }
-        operand_stack_push_u32(vm->current_frame, value);
-        return;
-      }
-    }
-    if (method_name_constant->utf8.length == 6) {
-      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"putSQ", 5)) {
-        assert(nargs == 2);
-        assert(return_type == 'V');
-        switch (method_name_constant->utf8.bytes[5]) {
-          //case '2': value = native_java_misc_memory_putSQ2_2(args); break;
-        case '1': native_java_misc_memory_putSQ1_2(args); break;
-        default: assert(false);
-        }
-        return;
-      }
-    }
-    if (method_name_constant->utf8.length == 11) {
-      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"isBigEndian", 11)) {
-        assert(nargs == 0);
-        assert(return_type == 'Z');
-        uint32_t value = native_java_misc_memory_isbigendian();
-        operand_stack_push_u32(vm->current_frame, value);
-        return;
-      }
-    }
-  }
-
-  int java_misc_resource_length = 18;
-  bool java_misc_resource =
-    class_name_constant->utf8.length == java_misc_resource_length &&
-    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/misc/Resource", class_name_constant->utf8.length);
-  if (java_misc_resource) {
-    int getresource_length = 11;
-    bool getresource =
-      method_name_constant->utf8.length == getresource_length &&
-      hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"getResource", method_name_constant->utf8.length);
-    if (getresource) {
-      assert(nargs == 1);
-      assert(return_type == '[');
-      uint32_t value = java_misc_resource_getresource_1(args);
-      operand_stack_push_u32(vm->current_frame, value);
-      return;
-    }
-  }
-
-  int java_io_printstream_length = 19;
-  bool java_io_printstream =
-    class_name_constant->utf8.length == java_io_printstream_length &&
-    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"java/io/PrintStream", class_name_constant->utf8.length);
-  if (java_io_printstream) {
-    int write_length = 5;
-    bool write =
-      method_name_constant->utf8.length == write_length &&
-      hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"write", method_name_constant->utf8.length);
-    if (write) {
-      if (nargs == 1) {
-        assert(return_type == 'V');
-        native_java_io_printstream_write_1(args);
-        return;
-      } else if (nargs == 2) {
-        assert(return_type == 'V');
-        native_java_io_printstream_write_2(args);
-        return;
-      }
-    }
-  }
-
-  int jvm_internal_loader_length = 19;
-  bool jvm_internal_loader =
-    class_name_constant->utf8.length == jvm_internal_loader_length &&
-    hash_table_key_equal(class_name_constant->utf8.bytes, (const uint8_t *)"jvm/internal/Loader", class_name_constant->utf8.length);
-  if (jvm_internal_loader) {
-    if (method_name_constant->utf8.length == 4) {
-      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"load", 4)) {
-        assert(nargs == 2);
-        assert(return_type == 'V');
-        native_jvm_internal_loader_load(args);
-        return;
-      }
-    }
-    if (method_name_constant->utf8.length == 9) {
-      if (hash_table_key_equal(method_name_constant->utf8.bytes, (const uint8_t *)"getBuffer", 9)) {
-        assert(nargs == 0);
-        assert(return_type == 'I');
-        uint32_t value = native_jvm_internal_loader_getbuffer();
-        operand_stack_push_u32(vm->current_frame, value);
-        return;
-      }
-    }
-  }
-
-  assert(false);
 }
 
 void vm_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry, int nargs, uint8_t return_type)
@@ -587,6 +457,8 @@ void vm_execute(struct vm * vm)
 
 struct vm * vm_start(int class_hash_table_length,
                      struct hash_table_entry * class_hash_table,
+                     int native_hash_table_length,
+                     struct hash_table_entry * native_hash_table,
                      const uint8_t * main_class_name,
                      int main_class_name_length)
 {
@@ -611,6 +483,8 @@ struct vm * vm_start(int class_hash_table_length,
   static struct vm vm;
   vm.class_hash_table.length = class_hash_table_length;
   vm.class_hash_table.entry = class_hash_table;
+  vm.native_hash_table.length = native_hash_table_length;
+  vm.native_hash_table.entry = native_hash_table;
 
   vm.frame_stack.ix = 0;
   vm.frame_stack.capacity = 1024;

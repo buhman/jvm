@@ -12,7 +12,4 @@ public class Memory {
     public static native void putSQ1(Object object, int address);
 
     public static native boolean isBigEndian();
-
-    // .length of the returned byte array must not be accessed
-    public static native byte[] wrapAddress(int address);
 }
