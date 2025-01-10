@@ -8,11 +8,6 @@ struct backtrace_entry {
   int pc;
 };
 
-struct backtrace {
-  int num_entries;
-  struct backtrace_entry * entry;
-};
+struct objectref * backtrace_allocate(struct vm * vm);
 
-struct backtrace * backtrace_allocate(struct vm * vm);
-
-void backtrace_print(struct backtrace * backtrace);
+void backtrace_print(struct objectref * objectref);

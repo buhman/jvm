@@ -85,36 +85,3 @@ static inline int array_element_size(int atype)
     break;
   }
 }
-
-static inline struct arrayref * prim_array_allocate(int element_size, int count)
-{
-  int32_t size = count * element_size + (sizeof (struct arrayref));
-  struct arrayref * arrayref = memory_allocate(size);
-  if (arrayref != nullptr) {
-    arrayref->tag.type = TAG_TYPE_PRIM_ARRAY;
-    arrayref->tag.mark = 0;
-  }
-  return arrayref;
-}
-
-static inline struct arrayref * ref_array_allocate(int count)
-{
-  int32_t size = count * (sizeof (void *)) + (sizeof (struct arrayref));
-  struct arrayref * arrayref = memory_allocate(size);
-  if (arrayref != nullptr) {
-    arrayref->tag.type = TAG_TYPE_REF_ARRAY;
-    arrayref->tag.mark = 0;
-  }
-  return arrayref;
-}
-
-static inline struct objectref * obj_allocate(int num_fields)
-{
-  int32_t size = num_fields * (sizeof (void *)) + (sizeof (struct objectref));
-  struct objectref * objectref = memory_allocate(size);
-  if (objectref != nullptr) {
-    objectref->tag.type = TAG_TYPE_OBJECT;
-    objectref->tag.mark = 0;
-  }
-  return objectref;
-}

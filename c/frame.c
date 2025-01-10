@@ -548,7 +548,7 @@ void vm_exception(struct vm * vm, struct objectref * objectref)
     }
   }
   assert(objectref->oref[0] != 0);
-  backtrace_print((struct backtrace *)objectref->oref[0]);
+  backtrace_print(objectref->oref[0]);
 }
 
 static void print_vm_stack(struct vm * vm)

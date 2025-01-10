@@ -13,6 +13,8 @@
 #include "fatal.h"
 #include "parse_type.h"
 #include "find_attribute.h"
+#include "frame.h"
+#include "native_types_allocate.h"
 
 static int field_info_field_size(struct class_file * class_file, struct field_info * field_info)
 {
@@ -587,8 +589,7 @@ struct method_entry class_resolver_lookup_method_from_method_name_method_descrip
   }
 }
 
-struct objectref * class_resolver_lookup_string(int class_hash_table_length,
-                                                struct hash_table_entry * class_hash_table,
+struct objectref * class_resolver_lookup_string(struct vm * vm,
                                                 struct class_entry * class_entry,
                                                 const int string_index)
 {
@@ -604,14 +605,14 @@ struct objectref * class_resolver_lookup_string(int class_hash_table_length,
   struct constant * utf8_constant = &class_entry->class_file->constant_pool[string_constant->string.string_index - 1];
   assert(utf8_constant->tag == CONSTANT_Utf8);
 
-  struct class_entry * string_class_entry = class_resolver_lookup_class(class_hash_table_length,
-                                                                        class_hash_table,
+  struct class_entry * string_class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
+                                                                        vm->class_hash_table.entry,
                                                                         (const uint8_t *)"java/lang/String",
                                                                         16);
   debugf("string class entry: %p\n", string_class_entry);
 
   int32_t count = utf8_constant->utf8.length;
-  struct arrayref * arrayref = prim_array_allocate(1, count);
+  struct arrayref * arrayref = prim_array_allocate(vm, 1, count);
   assert(arrayref != nullptr);
   arrayref->class_entry = nullptr; // byte[]
   arrayref->length = utf8_constant->utf8.length;
@@ -621,7 +622,7 @@ struct objectref * class_resolver_lookup_string(int class_hash_table_length,
 
   assert(string_class_entry != nullptr);
   int fields_count = string_class_entry->instance_fields_count;
-  struct objectref * objectref = obj_allocate(fields_count);
+  struct objectref * objectref = obj_allocate(vm, fields_count);
   assert(objectref != nullptr);
   objectref->class_entry = string_class_entry;
   for (int i = 0; i < fields_count; i++) {

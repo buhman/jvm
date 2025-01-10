@@ -86,11 +86,6 @@ struct field_entry * class_resolver_lookup_field_from_fieldref_index(int fields_
                                                                      struct class_entry * class_entry,
                                                                      int fieldref_index);
 
-struct objectref * class_resolver_lookup_string(int class_hash_table_length,
-                                                struct hash_table_entry * class_hash_table,
-                                                struct class_entry * class_entry,
-                                                const int string_index);
-
 bool class_resolver_instanceof(int class_hash_table_length,
                                struct hash_table_entry * class_hash_table,
                                struct class_entry * origin_class_entry,

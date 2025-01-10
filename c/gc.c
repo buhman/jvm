@@ -145,7 +145,7 @@ void gc_mark(struct vm * vm)
 static void sweep_address(void * address)
 {
   struct tag * tag = (struct tag *)address;
-  printf("%p mark: %d\n", address, tag->mark);
+  //printf("%p mark: %d\n", address, tag->mark);
   int mark = tag->mark;
   tag->mark = 0;
   if (mark == 0) {
@@ -156,4 +156,13 @@ static void sweep_address(void * address)
 void gc_sweep()
 {
   memory_iterate_allocated(sweep_address);
+}
+
+void memory_print_free_list();
+
+void gc_run(struct vm * vm)
+{
+  gc_mark(vm);
+  gc_sweep();
+  //memory_print_free_list();
 }

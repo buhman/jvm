@@ -6,17 +6,37 @@
 
 #define block_power (5UL)
 #define block_size (1UL << block_power)
-static uint8_t memory[0x200];
+static uint8_t memory[0x400];
 //static uint8_t memory[0x100000];
-#define free_list_length ((sizeof (memory)) / block_size)
-static uint8_t free_list[free_list_length];
+static uint8_t free_list[((sizeof (memory)) / block_size)];
+const int free_list_length = (sizeof (free_list));
 static uint32_t free_ix;
+
+static_assert(((sizeof (free_list)) & (~((sizeof (free_list)) - 1))) == (sizeof (free_list)));
 
 enum allocation_state {
   ALLOCATED = 0b0001,
   START     = 0b0010,
   END       = 0b0100,
 };
+
+void memory_print_free_list()
+{
+  for (int i = 0; i < free_list_length; i++) {
+    printf("%d ", free_list[i]);
+  }
+  printf("\n");
+  for (int i = 0; i < free_list_length; i++) {
+    char c = (free_ix == i) ? '^' : ' ';
+    printf("%c ", c);
+  }
+  printf("\n");
+  for (int i = 0; i < free_list_length; i++) {
+    char c = memory_is_allocated((void *)((i << block_power) + memory)) ? 'X' : ' ';
+    printf("%c ", c);
+  }
+  printf("\n");
+}
 
 void memory_reset_free_list()
 {
@@ -70,14 +90,16 @@ void * memory_allocate(uint32_t size)
   void * mem = &memory[free_ix << block_power];
   free_ix = (free_ix + blocks) & (free_list_length - 1);
 
-  printf("memory allocate: %p\n", mem);
+  debugf("memory allocate: %p\n", mem);
+  //memory_print_free_list();
 
   return mem;
 }
 
 void memory_free(void * p)
 {
-  printf("memory free: %p\n", p);
+  debugf("memory free: %p\n", p);
+  //memory_print_free_list();
 
   uint8_t * buf = (uint8_t *)p;
   assert(buf >= memory);
@@ -119,25 +141,6 @@ void memory_iterate_allocated(memory_iterate_func_t func)
 }
 
 #if 0
-static void print_free_list()
-{
-  for (int i = 0; i < free_list_length; i++) {
-    printf("%d ", free_list[i]);
-  }
-  printf("\n");
-  for (int i = 0; i < free_list_length; i++) {
-    char c = (free_ix == i) ? '^' : ' ';
-    printf("%c ", c);
-  }
-  printf("\n");
-  for (int i = 0; i < free_list_length; i++) {
-    char c = memory_is_allocated((void *)((i << block_power) + memory)) ? 'X' : ' ';
-    printf("%c ", c);
-  }
-  printf("\n");
-
-}
-
 int main()
 {
   memory_reset_free_list();
@@ -151,33 +154,33 @@ int main()
   printf("p3 %p\n", p3);
   void * p4 = memory_allocate(90);
   printf("p4 %p\n", p4);
-  print_free_list();
+  memory_print_free_list();
 
   memory_free(p2);
   memory_free(p1);
   void * p5 = memory_allocate(256);
   printf("p5 %p\n", p5);
 
-  print_free_list();
+  memory_print_free_list();
 
   void * p6 = memory_allocate(128);
   printf("p6 %p\n", p6);
 
   memory_free(p4);
 
-  print_free_list();
+  memory_print_free_list();
 
   void * p7 = memory_allocate(128);
   printf("p7 %p\n", p7);
 
-  print_free_list();
+  memory_print_free_list();
 
   void * p8 = memory_allocate(128);
   printf("p8 %p\n", p8);
-  print_free_list();
+  memory_print_free_list();
 
   void * p9 = memory_allocate(128);
   printf("p9 %p\n", p9);
-  print_free_list();
+  memory_print_free_list();
 }
 #endif

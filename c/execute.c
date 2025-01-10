@@ -2,12 +2,13 @@
 #include "memory_allocator.h"
 #include "bswap.h"
 #include "class_resolver.h"
-#include "execute_helper.h"
 #include "printf.h"
 #include "field_size.h"
 #include "debug.h"
 #include "native_types.h"
+#include "native_types_allocate.h"
 #include "parse_type.h"
+#include "execute_helper.h"
 
 void op_aaload(struct vm * vm)
 {
@@ -71,7 +72,7 @@ void op_anewarray(struct vm * vm, uint32_t index)
                                                  index);
 
   int32_t count = operand_stack_pop_u32(vm->current_frame);
-  struct arrayref * arrayref = ref_array_allocate(count);
+  struct arrayref * arrayref = ref_array_allocate(vm, count);
   assert(arrayref != nullptr);
   arrayref->length = count;
   arrayref->class_entry = class_entry;
@@ -1424,8 +1425,7 @@ void op_ldc(struct vm * vm, uint32_t index)
     int32_t value = constant->integer.bytes;
     operand_stack_push_u32(vm->current_frame, value);
   } else if (constant->tag == CONSTANT_String) {
-    struct objectref * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
-                                                                vm->class_hash_table.entry,
+    struct objectref * objectref = class_resolver_lookup_string(vm,
                                                                 vm->current_frame->class_entry,
                                                                 index);
     operand_stack_push_ref(vm->current_frame, objectref);
@@ -1451,8 +1451,7 @@ void op_ldc_w(struct vm * vm, uint32_t index)
     int32_t value = constant->integer.bytes;
     operand_stack_push_u32(vm->current_frame, value);
   } else if (constant->tag == CONSTANT_String) {
-    struct objectref * objectref = class_resolver_lookup_string(vm->class_hash_table.length,
-                                                                vm->class_hash_table.entry,
+    struct objectref * objectref = class_resolver_lookup_string(vm,
                                                                 vm->current_frame->class_entry,
                                                                 index);
     operand_stack_push_ref(vm->current_frame, objectref);
@@ -1660,10 +1659,10 @@ static struct arrayref * _multiarray(struct vm * vm, int32_t * dims, int num_dim
   int32_t element_size;
   if (*type == 'L' || *type == '[') {
     element_size = (sizeof (void *));
-    arrayref = ref_array_allocate(count);
+    arrayref = ref_array_allocate(vm, count);
   } else {
     element_size = field_size_array(*type);
-    arrayref = prim_array_allocate(element_size, count);
+    arrayref = prim_array_allocate(vm, element_size, count);
   }
   assert(arrayref != nullptr);
   arrayref->length = count;
@@ -1733,7 +1732,7 @@ void op_new(struct vm * vm, uint32_t index)
      reference to the instance, is pushed onto the operand stack. */
 
   int fields_count = class_entry->instance_fields_count;
-  struct objectref * objectref = obj_allocate(fields_count);
+  struct objectref * objectref = obj_allocate(vm, fields_count);
   assert(objectref != nullptr);
   objectref->class_entry = class_entry;
   for (int i = 0; i < fields_count; i++) {
@@ -1748,7 +1747,7 @@ void op_newarray(struct vm * vm, uint32_t atype)
 {
   int32_t count = operand_stack_pop_u32(vm->current_frame);
   int32_t element_size = array_element_size(atype);
-  struct arrayref * arrayref = prim_array_allocate(element_size, count);
+  struct arrayref * arrayref = prim_array_allocate(vm, element_size, count);
   assert(arrayref != nullptr);
   arrayref->length = count;
   arrayref->class_entry = nullptr;
