@@ -734,19 +734,18 @@ void op_fsub(struct vm * vm)
 
 void op_getfield(struct vm * vm, uint32_t index)
 {
-  struct class_entry * class_entry;
-  struct field_entry * field_entry;
-  struct constant * field_descriptor_constant;
-  class_entry_field_entry_from_constant_index(vm, index,
-                                              &class_entry,
-                                              &field_entry,
-                                              &field_descriptor_constant);
-
-  debugf("getfield instance_index %d\n", field_entry->instance_index);
-
   struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
   if (objectref == nullptr)
     return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+
+  struct constant * field_descriptor_constant;
+  struct field_entry * field_entry = field_entry_from_constant_index(vm->class_hash_table.length,
+                                                                     vm->class_hash_table.entry,
+                                                                     vm->current_frame->class_entry,
+                                                                     index,
+                                                                     &field_descriptor_constant);
+
+  debugf("getfield instance_index %d\n", field_entry->instance_index);
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
   case 'B': [[fallthrough]];
@@ -778,17 +777,18 @@ void op_getfield(struct vm * vm, uint32_t index)
 
 void op_getstatic(struct vm * vm, uint32_t index)
 {
-  struct class_entry * class_entry;
-  struct field_entry * field_entry;
   struct constant * field_descriptor_constant;
-  class_entry_field_entry_from_constant_index(vm, index,
-                                              &class_entry,
-                                              &field_entry,
-                                              &field_descriptor_constant);
+  struct field_entry * field_entry = field_entry_from_constant_index(vm->class_hash_table.length,
+                                                                     vm->class_hash_table.entry,
+                                                                     vm->current_frame->class_entry,
+                                                                     index,
+                                                                     &field_descriptor_constant);
 
   /*  On successful resolution of the field, the class or interface that
       declared the resolved field is initialized if that class or interface has
       not already been initialized (§5.5). */
+
+  struct class_entry * class_entry = field_entry->class_entry;
 
   if (!vm_initialize_class(vm, class_entry))
     return;
@@ -1184,14 +1184,13 @@ void op_invokeinterface(struct vm * vm, uint32_t index, uint32_t count)
   struct objectref * objectref = operand_stack_peek_ref(vm->current_frame, count);
   if (objectref == nullptr)
     return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
-  struct class_entry * class_entry = objectref->class_entry;
 
   struct method_entry method_entry =
-    class_resolver_lookup_method_from_interfacemethodref_index(vm->class_hash_table.length,
-                                                               vm->class_hash_table.entry,
-                                                               index,
-                                                               class_entry,
-                                                               vm->current_frame->class_entry);
+    class_resolver_lookup_method_from_objectref_class(vm->class_hash_table.length,
+                                                      vm->class_hash_table.entry,
+                                                      index,
+                                                      objectref->class_entry,
+                                                      vm->current_frame->class_entry);
 
   vm_special_method_call(vm, method_entry.class_entry, &method_entry);
 }
@@ -1200,9 +1199,9 @@ void op_invokespecial(struct vm * vm, uint32_t index)
 {
   struct class_entry * origin_class_entry = vm->current_frame->class_entry;
 
-  struct constant * interfacemethodref_constant = &origin_class_entry->class_file->constant_pool[index - 1];
-  assert(interfacemethodref_constant->tag == CONSTANT_Methodref);
-  struct constant * nameandtype_constant = &origin_class_entry->class_file->constant_pool[interfacemethodref_constant->interfacemethodref.name_and_type_index - 1];
+  struct constant * methodref_constant = &origin_class_entry->class_file->constant_pool[index - 1];
+  assert(methodref_constant->tag == CONSTANT_Methodref);
+  struct constant * nameandtype_constant = &origin_class_entry->class_file->constant_pool[methodref_constant->methodref.name_and_type_index - 1];
   assert(nameandtype_constant->tag == CONSTANT_NameAndType);
   struct constant * method_descriptor_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
   assert(method_descriptor_constant->tag == CONSTANT_Utf8);
@@ -1216,10 +1215,10 @@ void op_invokespecial(struct vm * vm, uint32_t index)
     return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
 
   struct method_entry * method_entry =
-    class_resolver_lookup_method_from_methodref_index(vm->class_hash_table.length,
-                                                      vm->class_hash_table.entry,
-                                                      index,
-                                                      vm->current_frame->class_entry);
+    class_resolver_lookup_method_from_origin_class(vm->class_hash_table.length,
+                                                   vm->class_hash_table.entry,
+                                                   index,
+                                                   vm->current_frame->class_entry);
 
   vm_special_method_call(vm, method_entry->class_entry, method_entry);
 }
@@ -1227,10 +1226,10 @@ void op_invokespecial(struct vm * vm, uint32_t index)
 void op_invokestatic(struct vm * vm, uint32_t index)
 {
   struct method_entry * method_entry =
-    class_resolver_lookup_method_from_methodref_index(vm->class_hash_table.length,
-                                                      vm->class_hash_table.entry,
-                                                      index,
-                                                      vm->current_frame->class_entry);
+    class_resolver_lookup_method_from_origin_class(vm->class_hash_table.length,
+                                                   vm->class_hash_table.entry,
+                                                   index,
+                                                   vm->current_frame->class_entry);
 
   /* On successful resolution of the method, the class or interface that
      declared the resolved method is initialized if that class or interface has
@@ -1257,14 +1256,13 @@ void op_invokevirtual(struct vm * vm, uint32_t index)
   struct objectref * objectref = operand_stack_peek_ref(vm->current_frame, nargs + 1);
   if (objectref == nullptr)
     return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
-  struct class_entry * class_entry = objectref->class_entry;
 
   struct method_entry method_entry =
-    class_resolver_lookup_method_from_interfacemethodref_index(vm->class_hash_table.length,
-                                                               vm->class_hash_table.entry,
-                                                               index,
-                                                               class_entry,
-                                                               vm->current_frame->class_entry);
+    class_resolver_lookup_method_from_objectref_class(vm->class_hash_table.length,
+                                                      vm->class_hash_table.entry,
+                                                      index,
+                                                      objectref->class_entry,
+                                                      vm->current_frame->class_entry);
 
   vm_special_method_call(vm, method_entry.class_entry, &method_entry);
 }
@@ -1893,14 +1891,12 @@ void op_pop2(struct vm * vm)
 
 void op_putfield(struct vm * vm, uint32_t index)
 {
-  struct class_entry * class_entry;
-  struct field_entry * field_entry;
   struct constant * field_descriptor_constant;
-  class_entry_field_entry_from_constant_index(vm,
-                                              index,
-                                              &class_entry,
-                                              &field_entry,
-                                              &field_descriptor_constant);
+  struct field_entry * field_entry = field_entry_from_constant_index(vm->class_hash_table.length,
+                                                                     vm->class_hash_table.entry,
+                                                                     vm->current_frame->class_entry,
+                                                                     index,
+                                                                     &field_descriptor_constant);
 
   /* The type of a value stored by a putfield instruction must be compatible
      with the descriptor of the referenced field (§4.3.2). If the field descriptor
@@ -1948,13 +1944,12 @@ void op_putfield(struct vm * vm, uint32_t index)
 
 void op_putstatic(struct vm * vm, uint32_t index)
 {
-  struct class_entry * class_entry;
-  struct field_entry * field_entry;
   struct constant * field_descriptor_constant;
-  class_entry_field_entry_from_constant_index(vm, index,
-                                              &class_entry,
-                                              &field_entry,
-                                              &field_descriptor_constant);
+  struct field_entry * field_entry = field_entry_from_constant_index(vm->class_hash_table.length,
+                                                                     vm->class_hash_table.entry,
+                                                                     vm->current_frame->class_entry,
+                                                                     index,
+                                                                     &field_descriptor_constant);
 
   /* The type of a value stored by a putstatic instruction must be compatible
      with the descriptor of the referenced field (§4.3.2). If the field
@@ -1967,6 +1962,8 @@ void op_putstatic(struct vm * vm, uint32_t index)
   /* On successful resolution of the field, the class or interface that declared
      the resolved field is initialized if that class or interface has not
      already been initialized (§5.5). */
+
+  struct class_entry * class_entry = field_entry->class_entry;
 
   if (!vm_initialize_class(vm, class_entry))
     return;

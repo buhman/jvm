@@ -110,14 +110,11 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
           struct constant * name_constant = &class_file->constant_pool[field_info->name_index - 1];
           assert(name_constant->tag == CONSTANT_Utf8);
 
-          int fields_hash_table_length = class_entry->fields.length;
-          struct hash_table_entry * fields_hash_table = class_entry->fields.entry;
-
-          struct field_entry * field_entry = class_resolver_lookup_field(fields_hash_table_length,
-                                                                         fields_hash_table,
+          struct field_entry * field_entry = class_resolver_lookup_field(class_entry->fields.length,
+                                                                         class_entry->fields.entry,
                                                                          name_constant->utf8.bytes,
                                                                          name_constant->utf8.length);
-          assert(field_info != nullptr);
+          assert(field_entry != nullptr);
           class_entry->static_fields[field_entry->static_index] = constantvalue->integer.bytes;
           debugf("  constantvalue: %d\n", constantvalue->integer.bytes);
           break;

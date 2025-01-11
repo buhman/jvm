@@ -26,6 +26,7 @@ union attribute_entry {
 };
 
 struct field_entry {
+  struct class_entry * class_entry;
   struct field_info * field_info;
   union {
     int32_t instance_index;
@@ -63,15 +64,17 @@ struct class_entry * class_resolver_lookup_class_from_class_index(int class_hash
                                                                   struct hash_table_entry * class_hash_table,
                                                                   struct class_entry * class_entry,
                                                                   int32_t class_index);
-struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(int class_hash_table_length,
-                                                                               struct hash_table_entry * class_hash_table,
-                                                                               int32_t interfacemethodref_index,
-                                                                               struct class_entry * objectref_class_entry,
-                                                                               struct class_entry * origin_class_entry);
-struct method_entry * class_resolver_lookup_method_from_methodref_index(int class_hash_table_length,
-                                                                        struct hash_table_entry * class_hash_table,
-                                                                        int32_t methodref_index,
-                                                                        struct class_entry * origin_class_entry);
+
+struct method_entry class_resolver_lookup_method_from_objectref_class(int class_hash_table_length,
+                                                                      struct hash_table_entry * class_hash_table,
+                                                                      int32_t methodref_index,
+                                                                      struct class_entry * objectref_class_entry,
+                                                                      struct class_entry * origin_class_entry);
+struct method_entry * class_resolver_lookup_method_from_origin_class(int class_hash_table_length,
+                                                                     struct hash_table_entry * class_hash_table,
+                                                                     int32_t methodref_index,
+                                                                     struct class_entry * origin_class_entry);
+
 struct method_entry class_resolver_lookup_method_from_method_name_method_descriptor(struct class_entry * class_entry,
                                                                                     const uint8_t * method_name,
                                                                                     int method_name_length,

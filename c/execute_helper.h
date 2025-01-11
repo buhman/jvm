@@ -3,39 +3,24 @@ struct objectref * class_resolver_lookup_string(struct vm * vm,
                                                 struct class_entry * class_entry,
                                                 const int string_index);
 
-static inline void class_entry_field_entry_from_constant_index(struct vm * vm,
-                                                               int32_t index,
-                                                               struct class_entry ** class_entry,
-                                                               struct field_entry ** field_entry,
-                                                               struct constant ** field_descriptor_constant)
+static inline struct field_entry * field_entry_from_constant_index(int class_hash_table_length,
+                                                                   struct hash_table_entry * class_hash_table,
+                                                                   struct class_entry * origin_class_entry,
+                                                                   int32_t index,
+                                                                   struct constant ** field_descriptor_constant)
 {
-  struct constant * fieldref_constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
-  #ifdef DEBUG
+  struct field_entry * field_entry = class_resolver_lookup_field_from_fieldref_index(class_hash_table_length,
+                                                                                     class_hash_table,
+                                                                                     origin_class_entry,
+                                                                                     index);
+  assert(field_entry != nullptr);
+
+  struct constant * fieldref_constant = &origin_class_entry->class_file->constant_pool[index - 1];
   assert(fieldref_constant->tag == CONSTANT_Fieldref);
-  #endif
-
-  *class_entry = class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
-                                                              vm->class_hash_table.entry,
-                                                              vm->current_frame->class_entry,
-                                                              fieldref_constant->fieldref.class_index);
-
-  assert(*class_entry != nullptr);
-
-  int fields_hash_table_length = (*class_entry)->fields.length;
-  struct hash_table_entry * fields_hash_table = (*class_entry)->fields.entry;
-
-  *field_entry = class_resolver_lookup_field_from_fieldref_index(fields_hash_table_length,
-                                                                 fields_hash_table,
-                                                                 vm->current_frame->class_entry,
-                                                                 index);
-  assert(*field_entry != nullptr);
-
-  struct constant * nameandtype_constant = &vm->current_frame->class_entry->class_file->constant_pool[fieldref_constant->fieldref.name_and_type_index - 1];
-  #ifdef DEBUG
+  struct constant * nameandtype_constant = &origin_class_entry->class_file->constant_pool[fieldref_constant->fieldref.name_and_type_index - 1];
   assert(nameandtype_constant->tag == CONSTANT_NameAndType);
-  #endif
-  *field_descriptor_constant = &vm->current_frame->class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
-  #ifdef DEBUG
+  *field_descriptor_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
   assert((*field_descriptor_constant)->tag == CONSTANT_Utf8);
-  #endif
+
+  return field_entry;
 }
