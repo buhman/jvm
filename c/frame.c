@@ -392,7 +392,6 @@ void vm_exception(struct vm * vm, struct objectref * objectref)
         debugs("\n  method: ");
         debug_print__method_info__method_name(vm->current_frame->class_entry->class_file, vm->current_frame->method_info);
         debugf("\n  pc:      %d", vm->current_frame->pc);
-        debugf("\n  next_pc: %d\n", vm->current_frame->next_pc);
 
         return;
       }

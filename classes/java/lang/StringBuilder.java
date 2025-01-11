@@ -5,7 +5,7 @@ public class StringBuilder {
     int count;
 
     public StringBuilder() {
-        strings = new String[0];
+        strings = new String[5];
     }
 
     public StringBuilder(int capacity) {
@@ -14,7 +14,9 @@ public class StringBuilder {
 
     private void ensureCapacityInternal(int minimumCapacity) {
         if (strings.length < minimumCapacity) {
-            String[] new_strings = new String[minimumCapacity + 3];
+            // round up to nearest allocation unit
+            int new_capacity = ((minimumCapacity + 3 + 7) & (~7)) - 3;
+            String[] new_strings = new String[new_capacity];
             for (int i = 0; i < count; i++) {
                 new_strings[i] = strings[i];
             }

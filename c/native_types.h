@@ -40,6 +40,7 @@ struct arrayref {
     // object array:
     struct objectref * oref[0];
     struct arrayref * aref[0];
+    void * ref[0];
     // primitive array:
     uint8_t u8[0];
     uint16_t u16[0];

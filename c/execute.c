@@ -9,23 +9,33 @@
 #include "native_types_allocate.h"
 #include "parse_type.h"
 #include "execute_helper.h"
+#include "vm_instance.h"
 
 void op_aaload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   uint32_t value = arrayref->u32[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
 
 void op_aastore(struct vm * vm)
 {
-  uint32_t value = operand_stack_pop_u32(vm->current_frame);
+  void * ref = operand_stack_pop_ref(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
-  arrayref->u32[index] = value;
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
+
+  arrayref->ref[index] = ref;
 }
 
 void op_aconst_null(struct vm * vm)
@@ -72,6 +82,9 @@ void op_anewarray(struct vm * vm, uint32_t index)
                                                  index);
 
   int32_t count = operand_stack_pop_u32(vm->current_frame);
+  if (count < 0)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NegativeArraySizeException"));
+
   struct arrayref * arrayref = ref_array_allocate(vm, count);
   assert(arrayref != nullptr);
   arrayref->class_entry = class_entry;
@@ -94,6 +107,8 @@ void op_areturn(struct vm * vm)
 void op_arraylength(struct vm * vm)
 {
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
   int32_t length = arrayref->length;
   operand_stack_push_u32(vm->current_frame, length);
 }
@@ -131,6 +146,8 @@ void op_astore_3(struct vm * vm)
 void op_athrow(struct vm * vm)
 {
   struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
+  if (objectref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
   vm_exception(vm, objectref);
 }
 
@@ -138,7 +155,11 @@ void op_baload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   int8_t value = arrayref->u8[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
@@ -148,7 +169,11 @@ void op_bastore(struct vm * vm)
   uint8_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   arrayref->u8[index] = value;
 }
 
@@ -166,7 +191,11 @@ void op_caload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   uint16_t value = arrayref->u16[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
@@ -176,7 +205,11 @@ void op_castore(struct vm * vm)
   uint16_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   arrayref->u16[index] = value;
 }
 
@@ -190,9 +223,8 @@ void op_checkcast(struct vm * vm, uint32_t index)
                                 vm->current_frame->class_entry,
                                 index,
                                 objectref);
-    if (!isinstance) {
-      assert(!"ClassCastException");
-    }
+    if (!isinstance)
+      return vm_exception(vm, vm_instance_create(vm, "java/lang/ClassCastException"));
   }
 }
 
@@ -229,7 +261,11 @@ void op_daload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   uint64_t value = arrayref->u64[index];
   operand_stack_push_u64(vm->current_frame, value);
 }
@@ -239,7 +275,11 @@ void op_dastore(struct vm * vm)
   int64_t value = operand_stack_pop_u64(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   arrayref->u64[index] = value;
 }
 
@@ -511,7 +551,11 @@ void op_faload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   uint32_t value = arrayref->u32[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
@@ -521,7 +565,11 @@ void op_fastore(struct vm * vm)
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   arrayref->u32[index] = value;
 }
 
@@ -697,7 +745,8 @@ void op_getfield(struct vm * vm, uint32_t index)
   debugf("getfield instance_index %d\n", field_entry->instance_index);
 
   struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
-  assert(objectref != nullptr);
+  if (objectref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
   case 'B': [[fallthrough]];
@@ -723,7 +772,7 @@ void op_getfield(struct vm * vm, uint32_t index)
     }
     break;
   default:
-    assert(false);
+    assert(!"invalid field_descriptor_constant");
   }
 }
 
@@ -836,7 +885,11 @@ void op_iaload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   int32_t value = arrayref->u32[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
@@ -854,7 +907,11 @@ void op_iastore(struct vm * vm)
   uint32_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   arrayref->u32[index] = value;
 }
 
@@ -897,6 +954,8 @@ void op_idiv(struct vm * vm)
 {
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  if (value2 == 0)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArithmeticException"));
   int32_t result = value1 / value2;
   operand_stack_push_u32(vm->current_frame, result);
 }
@@ -1123,7 +1182,8 @@ void op_invokedynamic(struct vm * vm, uint32_t index)
 void op_invokeinterface(struct vm * vm, uint32_t index, uint32_t count)
 {
   struct objectref * objectref = operand_stack_peek_ref(vm->current_frame, count);
-  assert(objectref != nullptr);
+  if (objectref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
   struct class_entry * class_entry = objectref->class_entry;
 
   struct method_entry method_entry =
@@ -1138,6 +1198,23 @@ void op_invokeinterface(struct vm * vm, uint32_t index, uint32_t count)
 
 void op_invokespecial(struct vm * vm, uint32_t index)
 {
+  struct class_entry * origin_class_entry = vm->current_frame->class_entry;
+
+  struct constant * interfacemethodref_constant = &origin_class_entry->class_file->constant_pool[index - 1];
+  assert(interfacemethodref_constant->tag == CONSTANT_Methodref);
+  struct constant * nameandtype_constant = &origin_class_entry->class_file->constant_pool[interfacemethodref_constant->interfacemethodref.name_and_type_index - 1];
+  assert(nameandtype_constant->tag == CONSTANT_NameAndType);
+  struct constant * method_descriptor_constant = &origin_class_entry->class_file->constant_pool[nameandtype_constant->nameandtype.descriptor_index - 1];
+  assert(method_descriptor_constant->tag == CONSTANT_Utf8);
+
+  uint8_t return_type;
+  int nargs = descriptor_nargs(method_descriptor_constant, &return_type);
+  (void)return_type;
+
+  struct objectref * objectref = operand_stack_peek_ref(vm->current_frame, nargs + 1);
+  if (objectref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+
   struct method_entry * method_entry =
     class_resolver_lookup_method_from_methodref_index(vm->class_hash_table.length,
                                                       vm->class_hash_table.entry,
@@ -1178,9 +1255,9 @@ void op_invokevirtual(struct vm * vm, uint32_t index)
   (void)return_type;
 
   struct objectref * objectref = operand_stack_peek_ref(vm->current_frame, nargs + 1);
-  assert(objectref != nullptr);
+  if (objectref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
   struct class_entry * class_entry = objectref->class_entry;
-  debugf("class_entry: %p\n", class_entry);
 
   struct method_entry method_entry =
     class_resolver_lookup_method_from_interfacemethodref_index(vm->class_hash_table.length,
@@ -1204,6 +1281,8 @@ void op_irem(struct vm * vm)
 {
   int32_t value2 = operand_stack_pop_u32(vm->current_frame);
   int32_t value1 = operand_stack_pop_u32(vm->current_frame);
+  if (value2 == 0)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArithmeticException"));
   int32_t result = value1 % value2;
   operand_stack_push_u32(vm->current_frame, result);
 }
@@ -1366,7 +1445,11 @@ void op_laload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   int64_t value = arrayref->u64[index];
   operand_stack_push_u64(vm->current_frame, value);
 }
@@ -1384,7 +1467,11 @@ void op_lastore(struct vm * vm)
   uint64_t value = operand_stack_pop_u64(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   arrayref->u64[index] = value;
 }
 
@@ -1461,6 +1548,8 @@ void op_ldiv(struct vm * vm)
 {
   int64_t value2 = operand_stack_pop_u64(vm->current_frame);
   int64_t value1 = operand_stack_pop_u64(vm->current_frame);
+  if (value2 == 0)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArithmeticException"));
   int64_t result = value1 / value2;
   operand_stack_push_u64(vm->current_frame, result);
 }
@@ -1546,6 +1635,8 @@ void op_lrem(struct vm * vm)
 {
   int64_t value2 = operand_stack_pop_u64(vm->current_frame);
   int64_t value1 = operand_stack_pop_u64(vm->current_frame);
+  if (value2 == 0)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArithmeticException"));
   int64_t result = value1 % value2;
   operand_stack_push_u64(vm->current_frame, result);
 }
@@ -1699,7 +1790,10 @@ void op_multianewarray(struct vm * vm, uint32_t index, uint32_t dimensions)
   assert(dimensions > 0);
   int32_t dims[dimensions];
   for (int i = 0; i < dimensions; i++) {
-    dims[dimensions - i - 1] = operand_stack_pop_u32(vm->current_frame);
+    int32_t dim = operand_stack_pop_u32(vm->current_frame);
+    if (dim < 0)
+      return vm_exception(vm, vm_instance_create(vm, "java/lang/NegativeArraySizeException"));
+    dims[dimensions - i - 1] = dim;
   }
   struct arrayref * arrayref = _multiarray(vm, dims, dimensions, 0, type + 1, type_end);
   operand_stack_push_ref(vm->current_frame, arrayref);
@@ -1742,6 +1836,8 @@ void op_new(struct vm * vm, uint32_t index)
 void op_newarray(struct vm * vm, uint32_t atype)
 {
   int32_t count = operand_stack_pop_u32(vm->current_frame);
+  if (count < 0)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NegativeArraySizeException"));
   int32_t element_size = array_element_size(atype);
   struct arrayref * arrayref = prim_array_allocate(vm, element_size, count);
   assert(arrayref != nullptr);
@@ -1809,7 +1905,8 @@ void op_putfield(struct vm * vm, uint32_t index)
     {
       uint32_t value = operand_stack_pop_u32(vm->current_frame);
       struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
-      assert(objectref != nullptr);
+      if (objectref == nullptr)
+        return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
       objectref->u32[field_entry->instance_index] = value;
     }
     break;
@@ -1819,7 +1916,8 @@ void op_putfield(struct vm * vm, uint32_t index)
       uint32_t high = operand_stack_pop_u32(vm->current_frame);
       uint32_t low = operand_stack_pop_u32(vm->current_frame);
       struct objectref * objectref = operand_stack_pop_ref(vm->current_frame);
-      assert(objectref != nullptr);
+      if (objectref == nullptr)
+        return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
       objectref->u32[field_entry->instance_index + 1] = high;
       objectref->u32[field_entry->instance_index] = low;
     }
@@ -1896,7 +1994,11 @@ void op_saload(struct vm * vm)
 {
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   int16_t value = arrayref->u16[index];
   operand_stack_push_u32(vm->current_frame, value);
 }
@@ -1906,7 +2008,11 @@ void op_sastore(struct vm * vm)
   uint16_t value = operand_stack_pop_u32(vm->current_frame);
   int32_t index = operand_stack_pop_u32(vm->current_frame);
   struct arrayref * arrayref = operand_stack_pop_ref(vm->current_frame);
-  assert(arrayref->length > 0 && index >= 0 && index < arrayref->length);
+  if (arrayref == nullptr)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/NullPointerException"));
+  assert(arrayref->length > 0);
+  if (index < 0 || index >= arrayref->length)
+    return vm_exception(vm, vm_instance_create(vm, "java/lang/ArrayIndexOutOfBoundsException"));
   arrayref->u16[index] = value;
 }
 
