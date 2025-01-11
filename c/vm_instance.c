@@ -21,3 +21,22 @@ struct objectref * vm_instance_create(struct vm * vm, const char * class_name)
 
   return objectref;
 }
+
+struct objectref * vm_instance_string_from_constant(struct vm * vm, struct constant * constant)
+{
+  int32_t count = constant->utf8.length;
+  struct arrayref * arrayref = prim_array_allocate(vm, 1, count);
+  assert(arrayref != nullptr);
+  arrayref->class_entry = nullptr; // byte[]
+  arrayref->length = constant->utf8.length;
+  for (int i = 0; i < constant->utf8.length; i++) {
+    arrayref->u8[i] = constant->utf8.bytes[i];
+  }
+
+  struct objectref * objectref = vm_instance_create(vm, "java/lang/String");
+  assert(objectref != nullptr);
+  assert(objectref->class_entry->instance_fields_count >= 1);
+  objectref->aref[0] = arrayref;
+
+  return objectref;
+}

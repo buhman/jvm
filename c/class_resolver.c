@@ -441,13 +441,21 @@ struct method_entry class_resolver_lookup_method_from_interfacemethodref_index(i
       struct attribute_info * attribute = find_attribute(code_index,
                                                          method_info->attributes_count,
                                                          method_info->attributes);
-      assert(attribute != nullptr);
 
-      return (struct method_entry){
-        .class_entry = class_entry,
-        .method_info = method_info,
-        .code_attribute = attribute->code,
-      };
+      if ((method_info->access_flags & METHOD_ACC_NATIVE) != 0) {
+        return (struct method_entry){
+          .class_entry = class_entry,
+          .method_info = method_info,
+          .code_attribute = nullptr,
+        };
+      } else {
+        assert(attribute != nullptr);
+        return (struct method_entry){
+          .class_entry = class_entry,
+          .method_info = method_info,
+          .code_attribute = attribute->code,
+        };
+      }
     }
 
     if (class_entry->class_file->super_class == 0)
@@ -606,24 +614,12 @@ struct objectref * class_resolver_lookup_string(struct vm * vm,
   struct constant * utf8_constant = &class_entry->class_file->constant_pool[string_constant->string.string_index - 1];
   assert(utf8_constant->tag == CONSTANT_Utf8);
 
-  int32_t count = utf8_constant->utf8.length;
-  struct arrayref * arrayref = prim_array_allocate(vm, 1, count);
-  assert(arrayref != nullptr);
-  arrayref->class_entry = nullptr; // byte[]
-  arrayref->length = utf8_constant->utf8.length;
-  for (int i = 0; i < utf8_constant->utf8.length; i++) {
-    arrayref->u8[i] = utf8_constant->utf8.bytes[i];
-  }
-
-  struct objectref * objectref = vm_instance_create(vm, "java/lang/String");
-  assert(objectref != nullptr);
-  assert(objectref->class_entry->instance_fields_count >= 1);
-  objectref->aref[0] = arrayref;
+  struct objectref * string_objectref = vm_instance_string_from_constant(vm, utf8_constant);
 
   // cache the result
-  class_entry->attribute_entry[string_index - 1].string_objectref = objectref;
+  class_entry->attribute_entry[string_index - 1].string_objectref = string_objectref;
 
-  return objectref;
+  return string_objectref;
 }
 
 bool class_resolver_instanceof(int class_hash_table_length,

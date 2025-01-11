@@ -3,10 +3,12 @@
 #include "string.h"
 #include "printf.h"
 #include "native.h"
+#include "native/class.h"
+#include "native/loader.h"
 #include "native/math.h"
 #include "native/memory.h"
+#include "native/object.h"
 #include "native/printstream.h"
-#include "native/loader.h"
 
 typedef void (* native_func_t)(struct vm * vm, uint32_t * args);
 
@@ -101,6 +103,24 @@ const static struct native_method native_method[] = {
     .method_name = "getBuffer",
     .method_descriptor = "()I",
     .func = native_jvm_internal_loader_getbuffer_0,
+  },
+  {
+    .class_name = "java/lang/Class",
+    .method_name = "getClassName",
+    .method_descriptor = "()Ljava/lang/String;",
+    .func = native_java_lang_class_getclassname_1,
+  },
+  {
+    .class_name = "java/lang/Object",
+    .method_name = "getClass",
+    .method_descriptor = "()Ljava/lang/Class;",
+    .func = native_java_lang_object_getclass_1,
+  },
+  {
+    .class_name = "java/lang/Object",
+    .method_name = "hashCode",
+    .method_descriptor = "()I",
+    .func = native_java_lang_object_hashcode_1,
   },
 };
 

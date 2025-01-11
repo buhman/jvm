@@ -21,9 +21,11 @@ OBJ = \
 	c/malloc.o \
 	c/memory_allocator.o \
 	c/native.o \
+	c/native/class.o \
 	c/native/loader.o \
 	c/native/math.o \
 	c/native/memory.o \
+	c/native/object.o \
 	c/native/printstream.o \
 	c/parse.o \
 	c/parse_type.o \
