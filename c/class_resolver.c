@@ -628,6 +628,13 @@ bool class_resolver_instanceof(int class_hash_table_length,
                                const int class_index,
                                struct objectref * objectref)
 {
+  struct constant * class_constant = &origin_class_entry->class_file->constant_pool[class_index - 1];
+  assert(class_constant->tag == CONSTANT_Class);
+  struct constant * class_name_constant =  &origin_class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  assert(class_name_constant->tag == CONSTANT_Utf8);
+
+  int class_name_ix = 0;
+
   struct class_entry * index_class_entry =
     class_resolver_lookup_class_from_class_index(class_hash_table_length,
                                                  class_hash_table,
@@ -636,7 +643,38 @@ bool class_resolver_instanceof(int class_hash_table_length,
   assert(index_class_entry != nullptr);
 
   assert(objectref != nullptr);
-  struct class_entry * class_entry = objectref->class_entry;
+
+  struct class_entry * class_entry;
+
+  while (true) {
+    struct tag * tag = (struct tag *)objectref;
+    if (tag->type == TAG_TYPE_REF_ARRAY || tag->type == TAG_TYPE_PRIM_ARRAY) {
+      if (class_name_constant->utf8.bytes[class_name_ix] != '[')
+        return false;
+
+      class_name_ix += 1;
+
+      struct arrayref * arrayref = (struct arrayref *)objectref;
+      if (arrayref->class_entry != nullptr) {
+        class_entry = arrayref->class_entry;
+        break;
+      } else {
+        // FIXME: instanceof is allowed on zero-length arrays
+        assert(arrayref->length > 0);
+        objectref = arrayref->oref[0];
+      }
+    } else if (tag->type == TAG_TYPE_OBJECT) {
+      class_entry = objectref->class_entry;
+      break;
+    } else {
+      assert(!"invalid tag type");
+    }
+  }
+
+  assert(class_entry != nullptr);
+  if (class_name_constant->utf8.bytes[class_name_ix] == '[')
+    return false;
+
   while (true) {
     debugf("class_entry: %p\n", class_entry);
 

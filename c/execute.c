@@ -1745,15 +1745,34 @@ static struct arrayref * _multiarray(struct vm * vm, int32_t * dims, int num_dim
   int32_t count = dims[level];
   struct arrayref * arrayref;
   int32_t element_size;
-  if (*type == 'L' || *type == '[') {
+  if (*type == '[') {
     element_size = (sizeof (void *));
     arrayref = ref_array_allocate(vm, count);
+    assert(arrayref != nullptr);
+    arrayref->class_entry = nullptr;
+  } else if (*type == 'L') {
+    element_size = (sizeof (void *));
+    arrayref = ref_array_allocate(vm, count);
+    assert(arrayref != nullptr);
+
+    int type_length = type_end - type;
+
+    struct parse_type_ret parse_type_ret = parse_type(type,
+                                                      type_length);
+
+    struct class_entry * class_entry = class_resolver_lookup_class(vm->class_hash_table.length,
+                                                                   vm->class_hash_table.entry,
+                                                                   parse_type_ret.bytes,
+                                                                   parse_type_ret.length);
+    assert(class_entry != nullptr);
+
+    arrayref->class_entry = class_entry;
   } else {
     element_size = field_size_array(*type);
     arrayref = prim_array_allocate(vm, element_size, count);
+    assert(arrayref != nullptr);
+    arrayref->class_entry = nullptr;
   }
-  assert(arrayref != nullptr);
-  arrayref->class_entry = nullptr;
 
   int32_t array_element_size = count * element_size; // bytes
   int32_t u32_count = (array_element_size + 3) / 4;  // u32 units
