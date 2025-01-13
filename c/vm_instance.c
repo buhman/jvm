@@ -25,12 +25,12 @@ struct objectref * vm_instance_create(struct vm * vm, const char * class_name)
 struct objectref * vm_instance_string_from_constant(struct vm * vm, struct constant * constant)
 {
   int32_t count = constant->utf8.length;
-  struct arrayref * arrayref = prim_array_allocate(vm, 1, count);
+  struct arrayref * arrayref = prim_array_allocate(vm, 2, count);
   assert(arrayref != nullptr);
   arrayref->class_entry = nullptr; // byte[]
   arrayref->length = constant->utf8.length;
   for (int i = 0; i < constant->utf8.length; i++) {
-    arrayref->u8[i] = constant->utf8.bytes[i];
+    arrayref->u16[i] = constant->utf8.bytes[i];
   }
 
   struct objectref * objectref = vm_instance_create(vm, "java/lang/String");
