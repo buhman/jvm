@@ -78,6 +78,20 @@ void print_string(const char * s, int length)
   }
 }
 
+void print_bytes(const uint8_t * s, int length)
+{
+  for (int i = 0; i < length; i++) {
+    print_char(s[i]);
+  }
+}
+
+void print_chars(const uint16_t * s, int length)
+{
+  for (int i = 0; i < length; i++) {
+    print_char(s[i]);
+  }
+}
+
 void print_cstring(const char * s)
 {
   while (*s != 0) {

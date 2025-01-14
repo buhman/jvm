@@ -6,6 +6,8 @@
 #include <stdio.h>
 #endif
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,6 +22,8 @@ static inline void print_char(char c)
 }
 
 void print_string(const char * s, int length);
+void print_bytes(const uint8_t * s, int length);
+void print_chars(const uint16_t * s, int length);
 void print_cstring(const char * s);
 
 void _printf(const char * format, ...);

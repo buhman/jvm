@@ -409,7 +409,7 @@ void vm_exception(struct vm * vm, struct objectref * objectref)
       printc(')');
       prints("\n    ");
       struct arrayref * arrayref = string_objectref->aref[0];
-      print__string(arrayref->u8, arrayref->length);
+      print_chars(arrayref->u16, arrayref->length);
       printc('\n');
     }
   }

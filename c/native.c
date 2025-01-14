@@ -88,9 +88,21 @@ const static struct native_method native_method[] = {
   },
   {
     .class_name = "java/io/PrintStream",
-    .method_name = "write",
+    .method_name = "_write",
     .method_descriptor = "([B)V",
-    .func = native_java_io_printstream_write_1,
+    .func = native_java_io_printstream_write_ba_1,
+  },
+  {
+    .class_name = "java/io/PrintStream",
+    .method_name = "_write",
+    .method_descriptor = "([C)V",
+    .func = native_java_io_printstream_write_ca_1,
+  },
+  {
+    .class_name = "java/io/PrintStream",
+    .method_name = "_write",
+    .method_descriptor = "(Ljava/lang/String;)V",
+    .func = native_java_io_printstream_write_s_1,
   },
   {
     .class_name = "jvm/internal/Loader",

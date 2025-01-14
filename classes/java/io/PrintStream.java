@@ -10,94 +10,94 @@ public class PrintStream
 
     private static final byte[] newline = {'\n'};
 
-    public static native void write(byte[] buf);
+    private static native void _write(byte[] buf);
 
-    public static void write(String s) {
-        write(s.getBytes());
-    }
+    private static native void _write(char[] buf);
+
+    private static native void _write(String s);
 
     public void print(byte[] buf) {
-        write(buf);
+        _write(buf);
     }
 
     public void print(boolean b) {
-        write(String.valueOf(b));
+        _write(String.valueOf(b));
     }
 
     public void print(char c) {
-        write(String.valueOf(c));
+        _write(String.valueOf(c));
     }
 
     public void print(int i) {
-        write(String.valueOf(i));
+        _write(String.valueOf(i));
     }
 
     public void print(long l) {
-        write(String.valueOf(l));
+        _write(String.valueOf(l));
     }
 
     public void print(float f) {
-        write(String.valueOf(f));
+        _write(String.valueOf(f));
     }
 
     public void print(double d) {
-        write(String.valueOf(d));
+        _write(String.valueOf(d));
     }
 
     public void print(Object obj) {
-        write(String.valueOf(obj));
+        _write(String.valueOf(obj));
     }
 
     public void print(String s) {
-        write(String.valueOf(s));
+        _write(String.valueOf(s));
     }
 
     public void println() {
-        write(newline);
+        _write(newline);
     }
 
     public void println(byte[] buf) {
-        write(buf);
-        write(newline);
+        _write(buf);
+        _write(newline);
     }
 
     public void println(boolean b) {
-        write(String.valueOf(b));
-        write(newline);
+        _write(String.valueOf(b));
+        _write(newline);
     }
 
     public void println(char c) {
-        write(String.valueOf(c));
-        write(newline);
+        _write(String.valueOf(c));
+        _write(newline);
     }
 
     public void println(int i) {
-        write(String.valueOf(i));
-        write(newline);
+        _write(String.valueOf(i));
+        _write(newline);
     }
 
     public void println(long l) {
-        write(String.valueOf(l));
-        write(newline);
+        _write(String.valueOf(l));
+        _write(newline);
     }
 
     public void println(float f) {
-        write(String.valueOf(f));
-        write(newline);
+        _write(String.valueOf(f));
+        _write(newline);
     }
 
     public void println(double d) {
-        write(String.valueOf(d));
-        write(newline);
+        _write(String.valueOf(d));
+        _write(newline);
     }
 
     public void println(Object obj) {
-        write(String.valueOf(obj));
-        write(newline);
+        _write(String.valueOf(obj));
+        _write(newline);
     }
 
     public void println(String s) {
-        write(String.valueOf(s));
-        write(newline);
+        _write(String.valueOf(s));
+        _write(newline);
     }
 }
