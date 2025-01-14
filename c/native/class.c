@@ -2,7 +2,7 @@
 #include "printf.h"
 #include "vm_instance.h"
 
-void native_java_lang_class_getclassname_1(struct vm * vm, uint32_t * args)
+void native_java_lang_class_getname_1(struct vm * vm, uint32_t * args)
 {
   struct objectref * objectref = (struct objectref *)args[0];
   assert(objectref != nullptr);

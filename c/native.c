@@ -118,19 +118,19 @@ const static struct native_method native_method[] = {
   },
   {
     .class_name = "java/lang/Class",
-    .method_name = "getClassName",
+    .method_name = "_getName",
     .method_descriptor = "()Ljava/lang/String;",
-    .func = native_java_lang_class_getclassname_1,
+    .func = native_java_lang_class_getname_1,
   },
   {
     .class_name = "java/lang/Object",
-    .method_name = "getClass",
+    .method_name = "_getClass",
     .method_descriptor = "()Ljava/lang/Class;",
     .func = native_java_lang_object_getclass_1,
   },
   {
     .class_name = "java/lang/Object",
-    .method_name = "hashCode",
+    .method_name = "_hashCode",
     .method_descriptor = "()I",
     .func = native_java_lang_object_hashcode_1,
   },

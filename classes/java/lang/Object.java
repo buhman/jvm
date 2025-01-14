@@ -3,11 +3,28 @@ package java.lang;
 public class Object {
     public Object() {}
 
-    public final native Class getClass();
+    protected Object clone()
+        throws CloneNotSupportedException {
+        throw new CloneNotSupportedException();
+    }
 
-    public native int hashCode();
+    public boolean equals(Object obj) {
+        return this == obj;
+    }
+
+    private final native Class<?> _getClass();
+
+    public final Class<?> getClass() {
+        return _getClass();
+    }
+
+    private native int _hashCode();
+
+    public int hashCode() {
+        return _hashCode();
+    }
 
     public String toString() {
-        return getClass().getName() + "@" + Integer.toString(hashCode());
+        return getClass().getName() + "@" + Integer.toHexString(hashCode());
     }
 }
