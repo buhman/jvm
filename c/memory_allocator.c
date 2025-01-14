@@ -6,8 +6,8 @@
 
 #define block_power (5UL)
 #define block_size (1UL << block_power)
-static uint8_t memory[0x400];
-//static uint8_t memory[0x100000];
+//static uint8_t memory[0x400];
+static uint8_t memory[0x100000];
 static uint8_t free_list[((sizeof (memory)) / block_size)];
 const int free_list_length = (sizeof (free_list));
 static uint32_t free_ix;
@@ -70,8 +70,10 @@ void * memory_allocate(uint32_t size)
 
   while (true) {
     uint32_t ix_offset = find_contiguous_blocks(blocks, &zero_crossings);
-    if (zero_crossings > 1)
-      return nullptr; // memory allocation failed
+    if (zero_crossings > 1) {
+      printf("memory-allocate: memory allocation failed\n");
+      return nullptr;
+    }
     if (ix_offset == blocks)
       break;
     uint32_t next_free_ix = (free_ix + ix_offset + 1) & (free_list_length - 1);
