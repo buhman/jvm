@@ -1,6 +1,24 @@
 package java.lang;
 
 public class Double {
+    public static final int MAX_EXPONENT = 1023;
+
+    public static final double MAX_VALUE = 0x1.fffffffffffffp+1023;
+
+    public static final int MIN_EXPONENT = -1022;
+
+    public static final double MIN_NORMAL = 0x1.0p-1022;
+
+    public static final double MIN_VALUE = 0x0.0000000000001p-1022;
+
+    public static final double NaN = 0.0 / 0.0;
+
+    public static final double NEGATIVE_INFINITY = -1.0 / 0.0;
+
+    public static final double POSITIVE_INFINITY = 1.0 / 0.0;
+
+    public static final int SIZE = 64;
+
     public static String toString(double f) {
         long integer = (long)f;
         double frac = (f - (double)integer) * 10000.0;
