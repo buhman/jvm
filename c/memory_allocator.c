@@ -142,6 +142,21 @@ void memory_iterate_allocated(memory_iterate_func_t func)
   }
 }
 
+int32_t memory_count_free_memory()
+{
+  int sum = 0;
+  for (int i = 0; i < free_list_length; i++) {
+    if (free_list[i] == 0)
+      sum += 1;
+  }
+  return sum * block_size;
+}
+
+int32_t memory_count_total_memory()
+{
+  return (sizeof (memory));
+}
+
 #if 0
 int main()
 {

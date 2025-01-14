@@ -2,7 +2,17 @@ package java.lang;
 
 import java.lang.DecimalDigits;
 
-public class Long {
+
+public final class Long
+//    extends Number
+//    implements Comparable<Long> {
+{
+    public static final long MAX_VALUE = 9223372036854775807L;
+
+    public static final long MIN_VALUE = -9223372036854775808L;
+
+    public static final int SIZE = 64;
+
     public static int stringSize(long n) {
         int sign_digits = 0;
         if (n < 0) {

@@ -9,6 +9,7 @@
 #include "native/memory.h"
 #include "native/object.h"
 #include "native/printstream.h"
+#include "native/runtime.h"
 
 typedef void (* native_func_t)(struct vm * vm, uint32_t * args);
 
@@ -133,6 +134,24 @@ const static struct native_method native_method[] = {
     .method_name = "_hashCode",
     .method_descriptor = "()I",
     .func = native_java_lang_object_hashcode_1,
+  },
+  {
+    .class_name = "java/lang/Runtime",
+    .method_name = "_freeMemory",
+    .method_descriptor = "()I",
+    .func = native_java_lang_runtime_freememory_0,
+  },
+  {
+    .class_name = "java/lang/Runtime",
+    .method_name = "_gc",
+    .method_descriptor = "()V",
+    .func = native_java_lang_runtime_gc_0,
+  },
+  {
+    .class_name = "java/lang/Runtime",
+    .method_name = "_totalMemory",
+    .method_descriptor = "()I",
+    .func = native_java_lang_runtime_totalmemory_0,
   },
 };
 

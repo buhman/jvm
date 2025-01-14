@@ -2,7 +2,6 @@ package java.lang;
 
 import java.lang.DecimalDigits;
 
-
 public final class Integer
     extends Number
     implements Comparable<Integer> {
