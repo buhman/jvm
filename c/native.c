@@ -10,6 +10,7 @@
 #include "native/object.h"
 #include "native/printstream.h"
 #include "native/runtime.h"
+#include "native/system.h"
 
 typedef void (* native_func_t)(struct vm * vm, uint32_t * args);
 
@@ -126,14 +127,8 @@ const static struct native_method native_method[] = {
   {
     .class_name = "java/lang/Object",
     .method_name = "_getClass",
-    .method_descriptor = "()Ljava/lang/Class;",
+    .method_descriptor = "(Ljava/lang/Object;)Ljava/lang/Class;",
     .func = native_java_lang_object_getclass_1,
-  },
-  {
-    .class_name = "java/lang/Object",
-    .method_name = "_hashCode",
-    .method_descriptor = "()I",
-    .func = native_java_lang_object_hashcode_1,
   },
   {
     .class_name = "java/lang/Runtime",
@@ -152,6 +147,12 @@ const static struct native_method native_method[] = {
     .method_name = "_totalMemory",
     .method_descriptor = "()I",
     .func = native_java_lang_runtime_totalmemory_0,
+  },
+  {
+    .class_name = "java/lang/System",
+    .method_name = "_hashCode",
+    .method_descriptor = "(Ljava/lang/Object;)I",
+    .func = native_java_lang_system_hashcode_1,
   },
 };
 

@@ -1,5 +1,4 @@
 #include "object.h"
-#include "printf.h"
 #include "vm_instance.h"
 
 void native_java_lang_object_getclass_1(struct vm * vm, uint32_t * args)
@@ -14,10 +13,4 @@ void native_java_lang_object_getclass_1(struct vm * vm, uint32_t * args)
   class_objectref->oref[0] = objectref;
 
   operand_stack_push_ref(vm->current_frame, class_objectref);
-}
-
-void native_java_lang_object_hashcode_1(struct vm * vm, uint32_t * args)
-{
-  struct objectref * objectref = (struct objectref *)args[0];
-  operand_stack_push_u32(vm->current_frame, (uint32_t)objectref); // objectref as integer
 }

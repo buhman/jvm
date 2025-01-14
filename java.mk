@@ -28,6 +28,7 @@ OBJ = \
 	c/native/object.o \
 	c/native/printstream.o \
 	c/native/runtime.o \
+	c/native/system.o \
 	c/parse.o \
 	c/parse_type.o \
 	c/printf.o \

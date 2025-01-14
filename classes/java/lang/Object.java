@@ -12,16 +12,14 @@ public class Object {
         return this == obj;
     }
 
-    private final native Class<?> _getClass();
+    private final native static Class<?> _getClass(Object o);
 
     public final Class<?> getClass() {
-        return _getClass();
+        return _getClass(this);
     }
 
-    private native int _hashCode();
-
     public int hashCode() {
-        return _hashCode();
+        return System.identityHashCode(this);
     }
 
     public String toString() {
