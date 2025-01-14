@@ -1,8 +1,11 @@
 package java.lang;
 
-public class Number {
+public abstract class Number {
     public byte byteValue() {
         return (byte)intValue();
+    }
+
+    public Number() {
     }
 
     public abstract double doubleValue();
