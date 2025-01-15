@@ -267,7 +267,6 @@ struct hash_table_entry * hash_table_find3(int hash_table_length,
   hash = fnv_1(hash, key2, key2_length);
   hash = fnv_1(hash, key3, key3_length);
   hash &= (hash_table_length - 1);
-
   struct hash_table_entry * e = &entry[hash];
 
   while (e != nullptr && e->key != nullptr) {

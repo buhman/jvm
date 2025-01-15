@@ -73,26 +73,50 @@ void op_aload_3(struct vm * vm)
   operand_stack_push_u32(vm->current_frame, objectref);
 }
 
+static struct arrayref * _multiarray(struct vm * vm, int32_t * dims, int num_dimensions, int level, uint8_t * type, uint8_t * type_end);
+
 void op_anewarray(struct vm * vm, uint32_t index)
 {
-  struct class_entry * class_entry =
-    class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
-                                                 vm->class_hash_table.entry,
-                                                 vm->current_frame->class_entry,
-                                                 index);
+  // The run-time constant pool item at that index must be a symbolic reference to a class, array, or interface type
+
+  struct constant * class_constant = &vm->current_frame->class_entry->class_file->constant_pool[index - 1];
+  assert(class_constant->tag == CONSTANT_Class);
+  struct constant * type_constant = &vm->current_frame->class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
+  assert(type_constant->tag == CONSTANT_Utf8);
+
+  debugs("type_constant: ");
+  debug_print__constant__utf8_string(type_constant);
+  debugc('\n');
+
+  uint8_t * type = type_constant->utf8.bytes;
+  uint8_t * type_end = type + type_constant->utf8.length;
 
   int32_t count = operand_stack_pop_u32(vm->current_frame);
   if (count < 0)
     return vm_exception(vm, vm_instance_create(vm, "java/lang/NegativeArraySizeException"));
 
-  struct arrayref * arrayref = ref_array_allocate(vm, count);
-  assert(arrayref != nullptr);
-  arrayref->class_entry = class_entry;
-
-  /* All components of the new array are initialized to null, the default value
-     for reference types */
-  for (int i = 0; i < count; i++) {
-    arrayref->oref[i] = nullptr;
+  struct arrayref * arrayref;
+  if (*type == '[') {
+    const int dimensions = 1;
+    int32_t dims[dimensions];
+    dims[0] = count;
+    arrayref = _multiarray(vm, dims, dimensions, 0, type, type_end);
+    assert(arrayref != nullptr);
+  } else {
+    assert(!(*type == 'L' && *(type_end - 1) == ';'));
+    struct class_entry * class_entry =
+      class_resolver_lookup_class_from_class_index(vm->class_hash_table.length,
+                                                   vm->class_hash_table.entry,
+                                                   vm->current_frame->class_entry,
+                                                   index);
+    arrayref = ref_array_allocate(vm, count);
+    assert(arrayref != nullptr);
+    arrayref->class_entry = class_entry;
+    /* All components of the new array are initialized to null, the default value
+       for reference types */
+    for (int i = 0; i < count; i++) {
+      arrayref->oref[i] = nullptr;
+    }
   }
 
   operand_stack_push_ref(vm->current_frame, arrayref);
@@ -1755,6 +1779,7 @@ static struct arrayref * _multiarray(struct vm * vm, int32_t * dims, int num_dim
 
     int type_length = type_end - type;
 
+    //printf("_multiarray parse type\n");
     struct parse_type_ret parse_type_ret = parse_type(type,
                                                       type_length);
 
@@ -1777,10 +1802,10 @@ static struct arrayref * _multiarray(struct vm * vm, int32_t * dims, int num_dim
   debugf("u32_count: %d\n", u32_count);
   for (int i = 0; i < u32_count; i++) {
     if (level == num_dimensions - 1) {
-      assert(*type != '[');
+      //assert(*type != '[');
       arrayref->u32[1] = 0;
     } else {
-      assert(*type == '[');
+      //assert(*type == '[');
       arrayref->aref[i] = _multiarray(vm, dims, num_dimensions, level + 1, type + 1, type_end);
     }
   }

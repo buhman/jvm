@@ -21,7 +21,6 @@ import model.Vec2;
 import model.FacePTN;
 import model.ModelObject;
 import java.misc.Memory;
-import java.misc.Resource;
 import filesystem.iso9660.VolumeParser;
 import filesystem.iso9660.DirectoryRecordHandler;
 import filesystem.iso9660.DirectoryRecord;
@@ -342,13 +341,15 @@ public class JavaCube {
         int texture = TextureMemoryAllocation.texture_regions[1][0] + 512 + (512 * 512 * 2 * 2);
 
         // java_powered
-        int[] java_powered = Resource.getResource("images/java_powered");
-        int java_powered_length = (java_powered == null) ? 0 : java_powered.length;
+        //int[] java_powered = Resource.getResource("images/java_powered");
+        //int java_powered_length = (java_powered == null) ? 0 : java_powered.length;
         //System.out.print("images/java_powered length: ");
         //System.out.println(java_powered_length);
 
-        for (int i = 0; i < java_powered_length; i++) {
-            Memory.putU4(MemoryMap.texture_memory64 + texture, java_powered[i]);
+        //for (int i = 0; i < java_powered_length; i++) {
+        for (int i = 0; i < 128 * 128; i++) {
+            //Memory.putU4(MemoryMap.texture_memory64 + texture, java_powered[i]);
+            Memory.putU4(MemoryMap.texture_memory64 + texture, 0);
             texture += 4;
         }
     }

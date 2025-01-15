@@ -52,7 +52,7 @@ function make_header () {
         echo '#include <stdint.h>' >> "${filename}"
         echo '' >> "${filename}"
         echo '#ifdef __cplusplus' >> "${filename}"
-        echo 'extern C {' >> "${filename}"
+        echo 'extern "C" {' >> "${filename}"
         echo '#endif' >> "${filename}"
         echo '' >> "${filename}"
         echo "extern uint32_t _binary_${name}_start __asm(\"_binary_${name}_start\");" >> "${filename}"
@@ -83,9 +83,14 @@ declare -a boot_classes=(
     java/io/PrintStream.class
     java/lang/DecimalDigits.class
     java/lang/Integer.class
+    java/lang/Float.class
+    java/lang/Number.class
     java/lang/Object.class
     java/lang/String.class
     java/lang/System.class
+    java/lang/Exception.class
+    java/lang/Throwable.class
+    java/lang/Backtrace.class
     java/misc/Memory.class
     sega/dreamcast/gdrom/G1IF.class
     sega/dreamcast/gdrom/GdromIF.class

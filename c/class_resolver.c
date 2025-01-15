@@ -283,6 +283,7 @@ struct class_entry * class_resolver_lookup_class(int class_hash_table_length,
   debugf("class_resolver_lookup_class: ");
   for (int i = 0; i < class_name_length; i++) { debugc(class_name[i]); }
   debugc('\n');
+  debugf("length: %d\n", class_hash_table_length);
 
   struct hash_table_entry * e = hash_table_find(class_hash_table_length,
                                                 class_hash_table,

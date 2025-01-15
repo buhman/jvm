@@ -35,7 +35,7 @@ const static struct native_method native_method[] = {
     .func = native_java_lang_math_cos_1,
   },
   {
-    .class_name = "javva/lang/Math",
+    .class_name = "java/lang/Math",
     .method_name = "abs",
     .method_descriptor = "(F)F",
     .func = native_java_lang_math_abs_1,
@@ -212,6 +212,14 @@ void native_method_call(struct vm * vm,
                                                  method_descriptor_constant->utf8.bytes,
                                                  method_descriptor_constant->utf8.length
                                                  );
+  if (e == nullptr) {
+    print_bytes(class_name_constant->utf8.bytes, class_name_constant->utf8.length);
+    printc(' ');
+    print_bytes(method_name_constant->utf8.bytes, method_name_constant->utf8.length);
+    printc(' ');
+    print_bytes(method_descriptor_constant->utf8.bytes, method_descriptor_constant->utf8.length);
+    printc('\n');
+  }
   assert(e != nullptr);
   assert(e->value != nullptr);
 

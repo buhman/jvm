@@ -9,8 +9,10 @@
 uint8_t * file_read(const char * path, size_t * file_size)
 {
   int ret;
-  debugf("file_read: ", path);
+  //debugf("file_read: %s\n", path);
   FILE * f = fopen(path, "rb");
+  if (f == nullptr)
+    printf("file_read: %s\n", path);
   assert(f != nullptr);
   ret = fseek(f, 0L, SEEK_END);
   assert(ret != -1);

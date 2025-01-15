@@ -9,9 +9,14 @@ CLASS_PATH = \
 	classes/java/io/PrintStream.class.o \
 	classes/java/lang/DecimalDigits.class.o \
 	classes/java/lang/Integer.class.o \
+	classes/java/lang/Float.class.o \
+	classes/java/lang/Number.class.o \
 	classes/java/lang/Object.class.o \
 	classes/java/lang/String.class.o \
 	classes/java/lang/System.class.o \
+	classes/java/lang/Exception.class.o \
+	classes/java/lang/Throwable.class.o \
+	classes/java/lang/Backtrace.class.o \
 	classes/java/misc/Memory.class.o \
 	classes/sega/dreamcast/gdrom/G1IF.class.o \
 	classes/sega/dreamcast/gdrom/GdromIF.class.o \

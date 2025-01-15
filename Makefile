@@ -10,7 +10,7 @@ CFLAGS += -Wall -Werror -Wfatal-errors -Wno-error=unused-variable -fstack-protec
 CFLAGS += -I$(MAKEFILE_PATH)/
 CFLAGS += -I$(MAKEFILE_PATH)/c
 CFLAGS += -DDEBUG
-#CFLAGS += -DDEBUG_PRINT
+CFLAGS += -DDEBUG_PRINT
 LDFLAGS = -lm
 OPT ?= -O0
 DEPFLAGS = -MMD -MP
