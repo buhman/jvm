@@ -1,0 +1,253 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>Building and running the Dreamcast JVM</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='index.css' rel='stylesheet' type='text/css' /> 
+<meta content='howto.tex' name='src' /> 
+</head><body>
+   <div class='maketitle'>
+                                                                  
+
+                                                                  
+                                                                  
+
+                                                                  
+
+<h2 class='titleHead'>Building and running the Dreamcast JVM</h2>
+ <div class='author'></div><br />
+<div class='date'></div>
+   </div>
+   <h3 class='likesectionHead'><a id='x1-1000'></a>Contents</h3>
+   <div class='tableofcontents'>
+   <span class='sectionToc'><a href='#x1-2000' id='QQ2-1-2'>Introduction</a></span>
+<br />   <span class='sectionToc'><a href='#x1-3000' id='QQ2-1-3'>Additional notes</a></span>
+<br />   <span class='subsectionToc'><a href='#x1-4000' id='QQ2-1-4'>Generate classpath</a></span>
+<br />   <span class='subsectionToc'><a href='#x1-5000' id='QQ2-1-5'>Flycast settings</a></span>
+<br />   <span class='subsectionToc'><a href='#x1-6000' id='QQ2-1-6'>Run the Dreamcast JVM on Linux/Windows/macOS</a></span>
+<br />   <span class='subsectionToc'><a href='#x1-7000' id='QQ2-1-7'>JVM debug print</a></span>
+<br />   <span class='sectionToc'><a href='#x1-8000' id='QQ2-1-8'>Unsolved problems</a></span>
+<br />   <span class='subsectionToc'><a href='#x1-9000' id='QQ2-1-9'>Boot class path</a></span>
+<br />   <span class='subsectionToc'><a href='#x1-10000' id='QQ2-1-10'>Nested class filenames contain the dollar-sign character</a></span>
+<br />   <span class='subsectionToc'><a href='#x1-11000' id='QQ2-1-11'>Unused class/method removal</a></span>
+   </div>
+   <h3 class='sectionHead'><a id='x1-2000'></a>Introduction</h3>
+<!-- l. 28 --><p class='noindent'>The <span class='cmtt-10'>jvm</span> project’s Dreamcast build system depends on the <span class='cmtt-10'>dreamcast</span> project. This
+dependency is limited mostly to sharing Make rules. Clone both of these as siblings of
+the same parent directory, as in:
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-1'>
+git clone https://github.com/buhman/dreamcast
+
+git clone https://github.com/buhman/jvm
+</pre>
+<!-- l. 36 --><p class='nopar'>
+</p><!-- l. 38 --><p class='indent'>   If you would like to use a <span class='cmtt-10'>.cdi</span> image, the build process also depends on <span class='cmtt-10'>cdi4dc</span>.
+It is assumed that this tool exists in the same directory that contains the <span class='cmtt-10'>dreamcast</span>
+and <span class='cmtt-10'>jvm</span> directories. On Linux, do:
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-2'>
+curl -LO https://files.dcemulation.org/software/pctools/cdi4dc/cdi4dc_02b_linux.zip
+
+unzip cdi4dc_02b_linux.zip
+
+chmod +x cdi4dc
+</pre>
+<!-- l. 48 --><p class='nopar'>
+</p><!-- l. 50 --><p class='indent'>   To build everything, do the following:
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-3'>
+cd jvm
+
+sh generate_classpath.sh
+
+rm -f main.bin main.elf jvm.iso
+
+make -f Makefile.dreamcast.mk TARGET=sh-elf- jvm.iso
+
+../cdi4dc jvm.iso jvm.cdi
+</pre>
+<!-- l. 62 --><p class='nopar'>
+</p><!-- l. 64 --><p class='indent'>   You should change the value of <span class='cmtt-10'>TARGET=sh-elf-</span> to whatever matches your GCC
+SH installation. If for example your GCC is named <span class='cmtt-10'>sh4-none-elf-gcc</span> then the
+correct <span class='cmtt-10'>TARGET</span> value would be <span class='cmtt-10'>TARGET=sh4-none-elf-</span> (including the trailing
+hyphen).
+</p><!-- l. 69 --><p class='indent'>   You can then run the generated <span class='cmtt-10'>jvm.cdi</span> on Dreamcast hardware or
+emulators.
+</p><!-- l. 72 --><p class='noindent'>
+</p>
+   <h3 class='sectionHead'><a id='x1-3000'></a>Additional notes</h3>
+<!-- l. 74 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead'><a id='x1-4000'></a>Generate classpath</h4>
+<!-- l. 76 --><p class='noindent'>The <span class='cmtt-10'>generate_classpath.sh</span> script is terrible. It is a “quick hack” to work around
+<a href='#x1-8000doc'>multiple unsolved problems</a>.
+</p><!-- l. 79 --><p class='indent'>   If you wish to modify the build process to include newly-written classes, you
+should append them to the <span class='cmtt-10'>application_classes</span> array in <span class='cmtt-10'>generate_classpath.sh</span>.
+</p><!-- l. 83 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead'><a id='x1-5000'></a>Flycast settings</h4>
+<!-- l. 85 --><p class='noindent'>I recommend the following Flycast settings:
+</p>
+                                                                  
+
+                                                                  
+     <ul class='itemize1'>
+     <li class='itemize'>Video <span class='tcrm-1000'>→</span> Transparent Sorting <span class='tcrm-1000'>→</span> Per Pixel (selected)
+     </li>
+     <li class='itemize'>Video <span class='tcrm-1000'>→</span> Rendering Options <span class='tcrm-1000'>→</span> Full Framebuffer Emulation (checked)
+     </li>
+     <li class='itemize'>Video <span class='tcrm-1000'>→</span> Advanced <span class='tcrm-1000'>→</span> Copy Rendered Textures to VRAM (checked)
+     </li>
+     <li class='itemize'>Advanced <span class='tcrm-1000'>→</span> Other <span class='tcrm-1000'>→</span> Serial Console (checked)</li></ul>
+<!-- l. 94 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead'><a id='x1-6000'></a>Run the Dreamcast JVM on Linux/Windows/macOS</h4>
+<!-- l. 96 --><p class='noindent'>The Dreamcast JVM can also run as a application on a PC operating system. This
+can be useful for testing general Java features independently of running on a
+Dreamcast.
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-4'>
+make clean
+
+make main
+</pre>
+<!-- l. 104 --><p class='nopar'>
+</p><!-- l. 106 --><p class='indent'>   You should run <span class='cmtt-10'>make clean</span> any time you wish to swap between the PC and
+Dreamcast versions of the JVM.
+</p><!-- l. 109 --><p class='indent'>   Compile one of the tests as an example:
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-5'>
+make classes/test/TestIntegerBitCount.class
+</pre>
+<!-- l. 113 --><p class='nopar'>
+</p><!-- l. 115 --><p class='indent'>   Run the Dreamcast JVM like this:
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-6'>
+cd classes
+
+# ../main [entry_class_name] [class_file...]
+
+../main test/TestIntegerBitCount test/*.class java/lang/*.class java/io/*.class
+</pre>
+<!-- l. 123 --><p class='nopar'>
+</p><!-- l. 125 --><p class='indent'>   Note that for no specific reason, the Dreamcast JVM main method declaration
+is
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-7'>
+public static void main()
+</pre>
+<!-- l. 128 --><p class='nopar'> rather than the standard
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-8'>
+public static void main(String[] args)
+</pre>
+<!-- l. 132 --><p class='nopar'> I may change this in the future (it is not hard to support either, or even
+both).
+</p><!-- l. 136 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead'><a id='x1-7000'></a>JVM debug print</h4>
+<!-- l. 138 --><p class='noindent'><span class='cmtt-10'>DEBUG_PRINT</span> is <span class='cmbx-10'>very slow</span> and unintelligibly verbose for non-trivial programs. It is
+mostly useful for doing low-level debugging of the JVM itself for very simple
+programs.
+</p><!-- l. 142 --><p class='indent'>   This can be disabled/enabled in either <span class='cmtt-10'>Makefile</span> or <span class='cmtt-10'>Makefile.dreamcast.mk</span> by
+commenting/uncommenting the line
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-9'>
+CFLAGS += -DDEBUG_PRINT
+</pre>
+<!-- l. 146 --><p class='nopar'>
+</p><!-- l. 148 --><p class='indent'>   When changing <span class='cmtt-10'>CFLAGS</span>, remove all previously-built object files with the
+command:
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-10'>
+make clean
+</pre>
+<!-- l. 153 --><p class='nopar'>
+</p><!-- l. 155 --><p class='noindent'>
+</p>
+   <h3 class='sectionHead'><a id='x1-8000'></a>Unsolved problems</h3>
+<p><a id='x1-8000doc'></a>
+</p><!-- l. 158 --><p class='noindent'>There are a few issues that currently cause the build process to be uglier than I’d like
+it to be. I welcome any suggestions regarding any of these topics:
+</p><!-- l. 161 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead'><a id='x1-9000'></a>Boot class path</h4>
+<!-- l. 163 --><p class='noindent'>The Dreamcast JVM includes its own versions the classes from <span class='cmtt-10'>java.lang</span>. The
+OpenJDK <span class='cmtt-10'>javac</span>, however, will attempt to link against OpenJDK’s own version of
+<span class='cmtt-10'>java.lang</span>.
+</p><!-- l. 167 --><p class='indent'>   In many cases, this will coincidentally not cause issues. However, it is better to
+explicitly reference the Dreamcast JVM’s version of <span class='cmtt-10'>java.lang</span> to be able to catch
+any linking errors as early as possible (<span class='cmtt-10'>javac</span>’s error messages are also much better
+than those you’d get from <span class='cmtt-10'>jvm.bin</span>).
+</p><!-- l. 172 --><p class='indent'>   However, <span class='cmtt-10'>javac</span> doesn’t appear to support this in a convenient way. The best
+invocation I’ve found so far is:
+                                                                  
+
+                                                                  
+</p>
+   <pre class='verbatim' id='verbatim-11'>
+cd jvm/classes
+
+javac -Xlint:-options --source 8 --target 8 --boot-class-path . path/to/YourClass.java
+</pre>
+<!-- l. 179 --><p class='nopar'>
+</p><!-- l. 181 --><p class='indent'>   This does limit you to Java 8 language features, but this appears to be the only
+way to enable the <span class='cmtt-10'>--boot-class-path</span> option, for which there is no clear
+replacement in newer versions.
+</p><!-- l. 185 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead'><a id='x1-10000'></a>Nested class filenames contain the dollar-sign character</h4>
+<!-- l. 187 --><p class='noindent'>I have not managed to make my Make rules tolerant of <span class='tctt-1000'>$</span> characters in filenames.
+This is the main reason why <span class='cmtt-10'>generate_classpath.sh</span> exists, and it’s also the reason
+why it’s terrible.
+</p><!-- l. 191 --><p class='noindent'>
+</p>
+   <h4 class='subsectionHead'><a id='x1-11000'></a>Unused class/method removal</h4>
+<!-- l. 193 --><p class='noindent'>It would be nice to have a build process/tool that works like this:
+</p>
+     <ul class='itemize1'>
+     <li class='itemize'>give the name of the “main”/entrypoint class as a command-line argument
+     </li>
+     <li class='itemize'>automatically/recursively      calculate      the      minimum      set      of
+     classes/methods/fields that “main” depends on
+     </li>
+     <li class='itemize'>from the full library of available classes, emit a reduced/minimal set of
+     (compiled) class files that only contain the methods and fields that are
+     reachable via “main”.</li></ul>
+<!-- l. 204 --><p class='indent'>   I will create this tool at some point.
+</p>
+    
+</body> 
+</html>

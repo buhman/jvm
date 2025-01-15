@@ -1,0 +1,206 @@
+\documentclass[20pt]{article}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={Dreamcast},
+    pdfpagemode=FullScreen,
+    }
+
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+\title{Building and running the Dreamcast JVM}
+\date{}
+
+\setcounter{secnumdepth}{0}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\section{Introduction}
+
+The \texttt{jvm} project's Dreamcast build system depends on the
+\texttt{dreamcast} project. This dependency is limited mostly to sharing Make
+rules. Clone both of these as siblings of the same parent directory, as in:
+
+\begin{verbatim}
+git clone https://github.com/buhman/dreamcast
+
+git clone https://github.com/buhman/jvm
+\end{verbatim}
+
+If you would like to use a \texttt{.cdi} image, the build process also depends
+on \texttt{cdi4dc}. It is assumed that this tool exists in the same directory
+that contains the \texttt{dreamcast} and \texttt{jvm} directories. On Linux, do:
+
+\begin{verbatim}
+curl -LO https://files.dcemulation.org/software/pctools/cdi4dc/cdi4dc_02b_linux.zip
+
+unzip cdi4dc_02b_linux.zip
+
+chmod +x cdi4dc
+\end{verbatim}
+
+To build everything, do the following:
+
+\begin{verbatim}
+cd jvm
+
+sh generate_classpath.sh
+
+rm -f main.bin main.elf jvm.iso
+
+make -f Makefile.dreamcast.mk TARGET=sh-elf- jvm.iso
+
+../cdi4dc jvm.iso jvm.cdi
+\end{verbatim}
+
+You should change the value of \texttt{TARGET=sh-elf-} to whatever matches your
+GCC SH installation. If for example your GCC is named \texttt{sh4-none-elf-gcc}
+then the correct \texttt{TARGET} value would be \texttt{TARGET=sh4-none-elf-}
+(including the trailing hyphen).
+
+You can then run the generated \texttt{jvm.cdi} on Dreamcast hardware or
+emulators.
+
+\section{Additional notes}
+
+\subsection{Generate classpath}
+
+The \texttt{generate\_classpath.sh} script is terrible. It is a ``quick hack''
+to work around \hyperref[sec:unsolved]{multiple unsolved problems}.
+
+If you wish to modify the build process to include newly-written classes, you
+should append them to the \texttt{application\_classes} array in
+\texttt{generate\_classpath.sh}.
+
+\subsection{Flycast settings}
+
+I recommend the following Flycast settings:
+
+\begin{itemize}
+\item Video → Transparent Sorting → Per Pixel (selected)
+\item Video → Rendering Options → Full Framebuffer Emulation (checked)
+\item Video → Advanced → Copy Rendered Textures to VRAM (checked)
+\item Advanced → Other → Serial Console (checked)
+\end{itemize}
+
+\subsection{Run the Dreamcast JVM on Linux/Windows/macOS}
+
+The Dreamcast JVM can also run as a application on a PC operating system. This
+can be useful for testing general Java features independently of running on a
+Dreamcast.
+
+\begin{verbatim}
+make clean
+
+make main
+\end{verbatim}
+
+You should run \texttt{make clean} any time you wish to swap between the PC and
+Dreamcast versions of the JVM.
+
+Compile one of the tests as an example:
+
+\begin{verbatim}
+make classes/test/TestIntegerBitCount.class
+\end{verbatim}
+
+Run the Dreamcast JVM like this:
+
+\begin{verbatim}
+cd classes
+
+# ../main [entry_class_name] [class_file...]
+
+../main test/TestIntegerBitCount test/*.class java/lang/*.class java/io/*.class
+\end{verbatim}
+
+Note that for no specific reason, the Dreamcast JVM main method declaration is
+\begin{verbatim}
+public static void main()
+\end{verbatim}
+rather than the standard
+\begin{verbatim}
+public static void main(String[] args)
+\end{verbatim}
+I may change this in the future (it is not hard to support either, or even
+both).
+
+\subsection{JVM debug print}
+
+\texttt{DEBUG\_PRINT} is \textbf{very slow} and unintelligibly verbose for
+non-trivial programs. It is mostly useful for doing low-level debugging of the
+JVM itself for very simple programs.
+
+This can be disabled/enabled in either \texttt{Makefile} or
+\texttt{Makefile.dreamcast.mk} by commenting/uncommenting the line
+\begin{verbatim}
+CFLAGS += -DDEBUG_PRINT
+\end{verbatim}
+
+When changing \texttt{CFLAGS}, remove all previously-built object files with the
+command:
+
+\begin{verbatim}
+make clean
+\end{verbatim}
+
+\section{Unsolved problems}
+\label{sec:unsolved}
+
+There are a few issues that currently cause the build process to be uglier than
+I'd like it to be. I welcome any suggestions regarding any of these topics:
+
+\subsection{Boot class path}
+
+The Dreamcast JVM includes its own versions the classes from
+\texttt{java.lang}. The OpenJDK \texttt{javac}, however, will attempt to link
+against OpenJDK's own version of \texttt{java.lang}.
+
+In many cases, this will coincidentally not cause issues. However, it is better
+to explicitly reference the Dreamcast JVM's version of \texttt{java.lang} to be
+able to catch any linking errors as early as possible (\texttt{javac}'s error
+messages are also much better than those you'd get from \texttt{jvm.bin}).
+
+However, \texttt{javac} doesn't appear to support this in a convenient way. The
+best invocation I've found so far is:
+
+\begin{verbatim}
+cd jvm/classes
+
+javac -Xlint:-options --source 8 --target 8 --boot-class-path . path/to/YourClass.java
+\end{verbatim}
+
+This does limit you to Java 8 language features, but this appears to be the only
+way to enable the \texttt{--boot-class-path} option, for which there is no clear
+replacement in newer versions.
+
+\subsection{Nested class filenames contain the dollar-sign character}
+
+I have not managed to make my Make rules tolerant of \texttt{\$} characters in
+filenames. This is the main reason why \texttt{generate\_classpath.sh} exists,
+and it's also the reason why it's terrible.
+
+\subsection{Unused class/method removal}
+
+It would be nice to have a build process/tool that works like this:
+
+\begin{itemize}
+\item give the name of the ``main''/entrypoint class as a command-line argument
+\item automatically/recursively calculate the minimum set of
+  classes/methods/fields that ``main'' depends on
+\item from the full library of available classes, emit a reduced/minimal set of
+  (compiled) class files that only contain the methods and fields that are
+  reachable via ``main''.
+\end{itemize}
+
+I will create this tool at some point.
+
+\end{document}
