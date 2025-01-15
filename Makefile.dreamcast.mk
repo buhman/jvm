@@ -82,64 +82,9 @@ jvm.iso: boot.bin main.bin zero.bin
 		/=$(LIB)/COPYRIGH.TXT \
 		/=$(LIB)/ABSTRACT.TXT \
 		/=$(LIB)/BIBLIOGR.TXT \
-		classes/example/GdromDirectoryRecordHandler.class \
-		classes/example/GdromClassLoader.class \
-		classes/filesystem/iso9660/ByteParser.class \
-		classes/filesystem/iso9660/DirectoryRecord.class \
-		classes/filesystem/iso9660/ExtentReader.class \
-		classes/filesystem/iso9660/PrimaryVolumeDescriptor.class \
-		classes/filesystem/iso9660/VolumeParser.class \
-		classes/java/io/PrintStream.class \
-		classes/java/lang/DecimalDigits.class \
-		classes/java/lang/Integer.class \
-		classes/java/lang/Float.class \
-		classes/java/lang/Number.class \
-		classes/java/lang/Object.class \
-		classes/java/lang/String.class \
-		classes/java/lang/System.class \
-		classes/java/lang/Exception.class \
-		classes/java/lang/Throwable.class \
-		classes/java/lang/Backtrace.class \
-		classes/java/misc/Memory.class \
-		classes/jvm/internal/Loader.class \
-		classes/sega/dreamcast/gdrom/G1IF.class \
-		classes/sega/dreamcast/gdrom/GdromIF.class \
-		classes/sega/dreamcast/gdrom/GdromBits.class \
-		classes/sega/dreamcast/gdrom/Gdrom.class \
-		classes/sega/dreamcast/gdrom/GdromExtentReader.class \
-		classes/sega/dreamcast/gdrom/GdromCommandPacketFormat_cd_read.class \
-		classes/sega/dreamcast/gdrom/GdromCommandPacketFormat.class \
-		classes/sega/dreamcast/gdrom/GdromCommandPacketFormat_get_toc.class \
-		classes/sega/dreamcast/gdrom/GdromCommandPacketInterface.class \
-		classes/sega/dreamcast/gdrom/GdromProtocol.class \
-		classes/Main.class \
-		classes/example/JavaCube.class \
-		classes/example/JavaCubeDirectoryRecordHandler.class \
-		classes/model/FacePTN.class \
-		classes/model/ModelObject.class \
-		classes/model/CubeModel.class \
-		classes/model/Vec2.class \
-		classes/model/Vec3.class \
-		classes/sega/dreamcast/holly/Background.class \
-		classes/sega/dreamcast/holly/CoreBits.class \
-		classes/sega/dreamcast/holly/Core.class \
-		classes/sega/dreamcast/holly/VideoOutput.class \
-		classes/sega/dreamcast/holly/VideoOutputMode.class \
-		classes/sega/dreamcast/holly/ISPTSP.class \
-		classes/sega/dreamcast/holly/RegionArray.class \
-		classes/sega/dreamcast/holly/RegionArray_OPBSize.class \
-		classes/sega/dreamcast/holly/TABits.class \
-		classes/sega/dreamcast/holly/TAFIFOPolygonConverter.class \
-		classes/sega/dreamcast/holly/TAGlobalParameter.class \
-		classes/sega/dreamcast/holly/TAGlobalParameter_end_of_list.class \
-		classes/sega/dreamcast/holly/TAGlobalParameter_polygon_type_0.class \
-		classes/sega/dreamcast/holly/TAVertexParameter.class \
-		classes/sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class \
-		classes/sega/dreamcast/holly/TextureMemoryAllocation.class \
-		classes/java/lang/Math.class \
-		classes/java/misc/Resource.class \
 		images/java_text.data \
-		images/java_cup.data
+		images/java_cup.data \
+		$(shell cat classes.txt)
 
 main.elf: LDSCRIPT = $(LIB)/main.lds
 main.elf: $(START_OBJ) $(OBJ) $(MAIN_OBJ) $(MAIN_DREAMCAST_OBJ) $(LIBGCC_OBJ) $(CLASS_PATH)
