@@ -129,6 +129,7 @@ function boot_sources () {
 declare -a application_classes=(
     Main.class
     example/JavaCube.class
+    example/JavaCubeDirectoryRecordHandler.class
     model/FacePTN.class
     model/ModelObject.class
     model/CubeModel.class
