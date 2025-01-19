@@ -16,7 +16,6 @@
 (const uint8_t *)&_binary_classes_java_lang_Exception_class_start,
 (const uint8_t *)&_binary_classes_java_lang_Throwable_class_start,
 (const uint8_t *)&_binary_classes_java_lang_Backtrace_class_start,
-(const uint8_t *)&_binary_classes_java_misc_Memory_class_start,
 (const uint8_t *)&_binary_classes_sega_dreamcast_gdrom_G1IF_class_start,
 (const uint8_t *)&_binary_classes_sega_dreamcast_gdrom_GdromIF_class_start,
 (const uint8_t *)&_binary_classes_sega_dreamcast_gdrom_GdromBits_class_start,
@@ -28,3 +27,4 @@
 (const uint8_t *)&_binary_classes_sega_dreamcast_gdrom_GdromCommandPacketInterface_class_start,
 (const uint8_t *)&_binary_classes_sega_dreamcast_gdrom_GdromProtocol_class_start,
 (const uint8_t *)&_binary_classes_jvm_internal_Loader_class_start,
+(const uint8_t *)&_binary_classes_jvm_internal_Memory_class_start,

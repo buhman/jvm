@@ -1,7 +1,7 @@
 package sega.dreamcast.holly;
 
 import sega.dreamcast.MemoryMap;
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 // this is for a "type 2" region array.
 // region header type is specified in FPU_PARAM_CFG

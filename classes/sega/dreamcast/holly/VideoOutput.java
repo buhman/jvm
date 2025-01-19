@@ -1,6 +1,6 @@
 package sega.dreamcast.holly;
 
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 public class VideoOutput {
     public static void set_framebuffer_resolution(int x_size, int y_size)

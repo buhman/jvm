@@ -1,7 +1,7 @@
 package sega.dreamcast.gdrom;
 
 import sega.dreamcast.gdrom.G1IF;
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 public class GdromIF {
     // transfer_length is in bytes

@@ -1,7 +1,7 @@
 package example;
 
 import sega.dreamcast.holly.Holly;
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 class DreamcastVideo {
     public static void main() {

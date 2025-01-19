@@ -1,6 +1,6 @@
 package p;
 
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 class Native {
     public static void main() {

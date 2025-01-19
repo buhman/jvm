@@ -2,7 +2,7 @@ package sega.dreamcast.holly;
 
 import sega.dreamcast.MemoryMap;
 import sega.dreamcast.holly.ISPTSP;
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 public class Background {
     private Background() {

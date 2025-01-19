@@ -1,6 +1,6 @@
 package java.nio;
 
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 public class ByteOrder {
     public static final ByteOrder BIG_ENDIAN = new ByteOrder();

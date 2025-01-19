@@ -1,4 +1,4 @@
-package java.misc;
+package jvm.internal;
 
 public class Memory {
     public static native void putU4(int address, int value);

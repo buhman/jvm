@@ -91,7 +91,6 @@ declare -a boot_classes=(
     java/lang/Exception.class
     java/lang/Throwable.class
     java/lang/Backtrace.class
-    java/misc/Memory.class
     sega/dreamcast/gdrom/G1IF.class
     sega/dreamcast/gdrom/GdromIF.class
     sega/dreamcast/gdrom/GdromBits.class
@@ -103,6 +102,7 @@ declare -a boot_classes=(
     sega/dreamcast/gdrom/GdromCommandPacketInterface.class
     sega/dreamcast/gdrom/GdromProtocol.class
     jvm/internal/Loader.class
+    jvm/internal/Memory.class
 )
 
 function boot_classes () {
@@ -152,7 +152,6 @@ declare -a application_classes=(
     sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class
     sega/dreamcast/holly/TextureMemoryAllocation.class
     java/lang/Math.class
-    java/misc/Resource.class
 )
 
 function application_classes () {

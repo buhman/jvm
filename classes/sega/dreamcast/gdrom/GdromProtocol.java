@@ -1,6 +1,6 @@
 package sega.dreamcast.gdrom;
 
-import java.misc.Memory;
+import jvm.internal.Memory;
 import sega.dreamcast.gdrom.GdromCommandPacketFormat;
 
 public class GdromProtocol {

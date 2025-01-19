@@ -2,7 +2,7 @@ package sega.dreamcast.holly;
 
 import sega.dreamcast.holly.Holly;
 import sega.dreamcast.holly.CoreBits;
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 public class Core {
     private Core() {

@@ -17,7 +17,6 @@ CLASS_PATH = \
 	classes/java/lang/Exception.class.o \
 	classes/java/lang/Throwable.class.o \
 	classes/java/lang/Backtrace.class.o \
-	classes/java/misc/Memory.class.o \
 	classes/sega/dreamcast/gdrom/G1IF.class.o \
 	classes/sega/dreamcast/gdrom/GdromIF.class.o \
 	classes/sega/dreamcast/gdrom/GdromBits.class.o \
@@ -28,4 +27,5 @@ CLASS_PATH = \
 	classes/sega/dreamcast/gdrom/GdromCommandPacketFormat_get_toc.class.o \
 	classes/sega/dreamcast/gdrom/GdromCommandPacketInterface.class.o \
 	classes/sega/dreamcast/gdrom/GdromProtocol.class.o \
-	classes/jvm/internal/Loader.class.o
+	classes/jvm/internal/Loader.class.o \
+	classes/jvm/internal/Memory.class.o

@@ -20,7 +20,6 @@ import model.Vec3;
 import model.Vec2;
 import model.FacePTN;
 import model.ModelObject;
-import java.misc.Memory;
 import filesystem.iso9660.VolumeParser;
 import filesystem.iso9660.DirectoryRecordHandler;
 import filesystem.iso9660.DirectoryRecord;
@@ -29,7 +28,7 @@ import sega.dreamcast.gdrom.GdromProtocol;
 import sega.dreamcast.gdrom.GdromIF;
 import sega.dreamcast.gdrom.G1IF;
 import sega.dreamcast.gdrom.Gdrom;
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 class JavaCubeDirectoryRecordHandler implements DirectoryRecordHandler {
     int[] texture_extents;

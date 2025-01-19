@@ -5,7 +5,7 @@ import sega.dreamcast.holly.CoreBits;
 import sega.dreamcast.holly.TABits;
 import sega.dreamcast.systembus.Systembus;
 import sega.dreamcast.systembus.SystembusBits;
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 public class TAFIFOPolygonConverter {
     private TAFIFOPolygonConverter() {

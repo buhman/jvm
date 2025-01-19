@@ -16,7 +16,6 @@
 #include "classes/java/lang/Exception.class.h"
 #include "classes/java/lang/Throwable.class.h"
 #include "classes/java/lang/Backtrace.class.h"
-#include "classes/java/misc/Memory.class.h"
 #include "classes/sega/dreamcast/gdrom/G1IF.class.h"
 #include "classes/sega/dreamcast/gdrom/GdromIF.class.h"
 #include "classes/sega/dreamcast/gdrom/GdromBits.class.h"
@@ -28,3 +27,4 @@
 #include "classes/sega/dreamcast/gdrom/GdromCommandPacketInterface.class.h"
 #include "classes/sega/dreamcast/gdrom/GdromProtocol.class.h"
 #include "classes/jvm/internal/Loader.class.h"
+#include "classes/jvm/internal/Memory.class.h"

@@ -1,7 +1,7 @@
 package p;
 
 import jvm.internal.Loader;
-import java.misc.Memory;
+import jvm.internal.Memory;
 
 class TestLoader {
     static byte[][] buffers;

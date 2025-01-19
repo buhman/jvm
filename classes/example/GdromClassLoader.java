@@ -4,7 +4,7 @@ import sega.dreamcast.gdrom.GdromExtentReader;
 import sega.dreamcast.gdrom.GdromProtocol;
 import sega.dreamcast.gdrom.GdromIF;
 import sega.dreamcast.gdrom.G1IF;
-import java.misc.Memory;
+import jvm.internal.Memory;
 import filesystem.iso9660.VolumeParser;
 import filesystem.iso9660.DirectoryRecordHandler;
 import filesystem.iso9660.DirectoryRecord;
