@@ -10,7 +10,7 @@ void native_java_lang_object_getclass_1(struct vm * vm, uint32_t * args)
   assert(class_objectref != nullptr);
   assert(class_objectref->class_entry->instance_fields_count >= 1);
 
-  class_objectref->oref[0] = objectref;
+  class_objectref->oref[0] = (struct objectref *)objectref->class_entry;
 
   operand_stack_push_ref(vm->current_frame, class_objectref);
 }
