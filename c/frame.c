@@ -14,6 +14,7 @@
 #include "find_attribute.h"
 #include "backtrace.h"
 #include "native_types.h"
+#include "native_types_allocate.h"
 
 int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_type)
 {
@@ -347,7 +348,11 @@ void vm_method_return(struct vm * vm)
     break;
   }
   assert(old_frame->operand_stack_ix == 0);
+  #ifdef MAIN_STRING_ARRAY
+  if (vm->frame_stack.ix > 1) {
+  #else
   if (vm->frame_stack.ix > 0) {
+  #endif
     debugs("vm_method_return\n");
     debugs("current_frame:\n  class:  ");
     debug_print__class_file__class_name(vm->current_frame->class_entry->class_file);
@@ -443,7 +448,11 @@ void vm_execute(struct vm * vm)
     decode_print_instruction(vm->current_frame->code_attribute->code, vm->current_frame->pc);
 #endif
     decode_execute_instruction(vm, vm->current_frame->code_attribute->code, vm->current_frame->pc);
+    #ifdef MAIN_STRING_ARRAY
+    if (vm->frame_stack.ix == 1) {
+    #else
     if (vm->frame_stack.ix == 0) {
+    #endif
       debugf("terminate\n");
       break;
     }
@@ -465,7 +474,11 @@ struct vm * vm_start(int class_hash_table_length,
 
   const uint8_t * method_name = (const uint8_t *)"main";
   int method_name_length = string_length((const char *)method_name);
+  #ifdef MAIN_STRING_ARRAY
+  const uint8_t * method_descriptor = (const uint8_t *)"([Ljava/lang/String;)V";
+  #else
   const uint8_t * method_descriptor = (const uint8_t *)"()V";
+  #endif
   int method_descriptor_length = string_length((const char *)method_descriptor);
 
   struct method_entry method_entry =
@@ -491,6 +504,28 @@ struct vm * vm_start(int class_hash_table_length,
   vm.data_stack.capacity = 0x100000;
   uint32_t data[vm.data_stack.capacity];
   vm.data_stack.data = data;
+
+  #ifdef MAIN_STRING_ARRAY
+  {
+    vm.current_frame = stack_push_frame(&vm.frame_stack, 1);
+    vm.current_frame->operand_stack = stack_push_data(&vm.data_stack, 1);
+    vm.current_frame->operand_stack_ix = 0;
+    vm.current_frame->initialization_frame = 0;
+    vm.current_frame->return_type = 0;
+
+    // create empty arrayref
+
+    struct arrayref * arrayref = ref_array_allocate(&vm, 0);
+    assert(arrayref != nullptr);
+    struct class_entry * string_class_entry = class_resolver_lookup_class(vm.class_hash_table.length,
+                                                                          vm.class_hash_table.entry,
+                                                                          (const uint8_t *)"java/lang/String",
+                                                                          16);
+    assert(class_entry != nullptr);
+    arrayref->class_entry = string_class_entry;
+    operand_stack_push_ref(vm.current_frame, arrayref);
+  }
+  #endif // MAIN_STRING_ARRAY
 
   vm_static_method_call(&vm, class_entry, &method_entry);
 
