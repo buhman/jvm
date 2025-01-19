@@ -3,7 +3,7 @@
 
 %.class: %.java
 	cd ./classes ; \
-	javac -Xlint:-options --source 8 --target 8 --boot-class-path . $(<:classes/%=%)
+	javac -Xlint:-options -source 8 -target 8 --boot-class-path . $(<:classes/%=%)
 
 OBJ = \
 	c/backtrace.o \
