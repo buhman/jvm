@@ -15,7 +15,7 @@ OBJ = \
 	c/execute.o \
 	c/fatal.o \
 	c/find_attribute.o \
-	c/frame.o \
+	c/vm.o \
 	c/gc.o \
 	c/hash_table.o \
 	c/malloc.o \
@@ -42,6 +42,7 @@ MAIN_DREAMCAST_OBJ = \
 
 MAIN_HOSTED_OBJ = \
 	c/file.o \
+	c/native/libcinputstream.o \
 	c/main_hosted.o
 
 PRINT_CLASS_OBJ = \

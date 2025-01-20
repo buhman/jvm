@@ -1,7 +1,7 @@
 #pragma once
 
 #include "native_types.h"
-#include "frame.h"
+#include "vm.h"
 
 struct backtrace_entry {
   struct class_file * class_file;

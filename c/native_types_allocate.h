@@ -1,8 +1,9 @@
 #pragma once
 
 #include "native_types.h"
-#include "frame.h"
 #include "gc.h"
+#include "vm.h"
+#include "memory_allocator.h"
 
 static inline void * gc_memory_allocate(struct vm * vm, int size)
 {

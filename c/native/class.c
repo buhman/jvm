@@ -1,6 +1,7 @@
 #include "class.h"
 #include "printf.h"
 #include "vm_instance.h"
+#include "class_resolver.h"
 
 void native_java_lang_class_getname_1(struct vm * vm, uint32_t * args)
 {

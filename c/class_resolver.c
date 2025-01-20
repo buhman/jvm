@@ -13,7 +13,6 @@
 #include "fatal.h"
 #include "parse_type.h"
 #include "find_attribute.h"
-#include "frame.h"
 #include "native_types_allocate.h"
 #include "vm_instance.h"
 

@@ -4,6 +4,7 @@
 #include "malloc.h"
 #include "loader.h"
 #include "native.h"
+#include "class_resolver.h"
 
 static uint8_t loader_buffer[0x100000] __attribute__ ((aligned (32)));
 

@@ -4,7 +4,6 @@
 #include "class_file.h"
 #include "bytes.h"
 #include "decode.h"
-#include "frame.h"
 #include "class_resolver.h"
 #include "printf.h"
 #include "string.h"
@@ -104,20 +103,26 @@ bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry)
 
       for (int j = 0; j < field_info->attributes_count; j++) {
         if (field_info->attributes[j].attribute_name_index == constantvalue_name_index) {
-          struct attribute_info * attribute = &field_info->attributes[j];
-          struct constant * constantvalue = &class_file->constant_pool[attribute->constantvalue->constantvalue_index - 1];
-          assert(constantvalue->tag == CONSTANT_Integer); // also need to support CONSTANT_String
-
           struct constant * name_constant = &class_file->constant_pool[field_info->name_index - 1];
           assert(name_constant->tag == CONSTANT_Utf8);
-
           struct field_entry * field_entry = class_resolver_lookup_field(class_entry->fields.length,
                                                                          class_entry->fields.entry,
                                                                          name_constant->utf8.bytes,
                                                                          name_constant->utf8.length);
           assert(field_entry != nullptr);
-          class_entry->static_fields[field_entry->static_index] = constantvalue->integer.bytes;
-          debugf("  constantvalue: %d\n", constantvalue->integer.bytes);
+
+          struct attribute_info * attribute = &field_info->attributes[j];
+          struct constant * constantvalue = &class_file->constant_pool[attribute->constantvalue->constantvalue_index - 1];
+          if (constantvalue->tag == CONSTANT_Integer) {
+            class_entry->static_fields[field_entry->static_index] = constantvalue->integer.bytes;
+          } else if (constantvalue->tag == CONSTANT_String) {
+            struct objectref * objectref = class_resolver_lookup_string(vm,
+                                                                        class_entry,
+                                                                        attribute->constantvalue->constantvalue_index);
+            class_entry->static_fields[field_entry->static_index] = (int32_t)objectref;
+          } else {
+            assert(!"invalid constantvalue tag");
+          }
           break;
 
         }

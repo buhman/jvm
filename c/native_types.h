@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 #include "assert.h"
-#include "class_resolver.h"
 #include "memory_allocator.h"
 
 enum tag_type {

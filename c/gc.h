@@ -1,6 +1,6 @@
 #pragma once
 
-#include "frame.h"
+#include "vm.h"
 
 void gc_mark(struct vm * vm);
 void gc_sweep();

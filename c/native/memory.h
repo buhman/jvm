@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "frame.h"
+#include "vm.h"
 
 void native_java_misc_memory_putU4_2(struct vm * vm, uint32_t * args);
 void native_java_misc_memory_putU2_2(struct vm * vm, uint32_t * args);

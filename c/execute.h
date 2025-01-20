@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "frame.h"
+#include "vm.h"
 
 void op_aaload(struct vm * vm);
 void op_aastore(struct vm * vm);

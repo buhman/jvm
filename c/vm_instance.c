@@ -1,6 +1,7 @@
 #include "string.h"
 #include "native_types_allocate.h"
 #include "vm_instance.h"
+#include "class_resolver.h"
 
 struct objectref * vm_instance_create(struct vm * vm, const char * class_name)
 {

@@ -1,6 +1,8 @@
-#include "frame.h"
+#include "gc.h"
 #include "memory_allocator.h"
 #include "printf.h"
+#include "hash_table.h"
+#include "native_types.h"
 
 static void walk_address(void * address);
 

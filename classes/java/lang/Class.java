@@ -1,7 +1,7 @@
 package java.lang;
 
 public final class Class<T> {
-    private Object klass; // struct class_entry *
+    private int class_entry; // is actually struct class_entry *
     private String name;
 
     private Class() {

@@ -1,8 +1,3 @@
-// declared here due to circular frame.h include in class_resolver.h
-struct objectref * class_resolver_lookup_string(struct vm * vm,
-                                                struct class_entry * class_entry,
-                                                const int string_index);
-
 static inline struct field_entry * field_entry_from_constant_index(int class_hash_table_length,
                                                                    struct hash_table_entry * class_hash_table,
                                                                    struct class_entry * origin_class_entry,

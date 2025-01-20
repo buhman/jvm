@@ -1,6 +1,6 @@
 #pragma once
 
-#include "frame.h"
+#include "vm.h"
 
 void native_method_call(struct vm * vm,
                         struct constant * class_name_constant,

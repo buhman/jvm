@@ -4,6 +4,7 @@
 #include "printf.h"
 #include "native.h"
 #include "native/class.h"
+#include "native/libcinputstream.h"
 #include "native/loader.h"
 #include "native/math.h"
 #include "native/memory.h"
@@ -160,6 +161,26 @@ const static struct native_method native_method[] = {
     .method_descriptor = "(Ljava/lang/Object;)I",
     .func = native_java_lang_system_hashcode_1,
   },
+#if !defined(__dreamcast__)
+  {
+    .class_name = "jvm/internal/LibcInputStream",
+    .method_name = "_open",
+    .method_descriptor = "([B)I",
+    .func = native_jvm_internal_libcinputstream_open_1,
+  },
+  {
+    .class_name = "jvm/internal/LibcInputStream",
+    .method_name = "_close",
+    .method_descriptor = "(I)V",
+    .func = native_jvm_internal_libcinputstream_close_1,
+  },
+  {
+    .class_name = "jvm/internal/LibcInputStream",
+    .method_name = "_read",
+    .method_descriptor = "(I)I",
+    .func = native_jvm_internal_libcinputstream_read_1,
+  },
+#endif
 };
 
 struct hash_table_entry * native_init_hash_table(int * hash_table_length)
