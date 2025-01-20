@@ -16,6 +16,25 @@ void native_jvm_internal_libcinputstream_open_1(struct vm * vm, uint32_t * args)
   operand_stack_push_u32(vm->current_frame, (uint32_t)file);
 }
 
+void native_jvm_internal_libcinputstream_available_1(struct vm * vm, uint32_t * args)
+{
+  FILE * file = (FILE *)args[0];
+  assert(file != nullptr);
+
+  int current = fseek(file, 0L, SEEK_CUR);
+  int ret_end = fseek(file, 0L, SEEK_END);
+  assert(ret_end != -1);
+  int ftell_end = ftell(file);
+  assert(ftell_end != -1);
+  int ret_set = fseek(file, current, SEEK_SET);
+  assert(ret_set != -1);
+
+  assert(ftell_end >= current);
+  int available = ftell_end - current;
+
+  operand_stack_push_u32(vm->current_frame, available);
+}
+
 void native_jvm_internal_libcinputstream_close_1(struct vm * vm, uint32_t * args)
 {
   FILE * file = (FILE *)args[0];

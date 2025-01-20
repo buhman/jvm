@@ -170,6 +170,12 @@ const static struct native_method native_method[] = {
   },
   {
     .class_name = "jvm/internal/LibcInputStream",
+    .method_name = "_available",
+    .method_descriptor = "(I)I",
+    .func = native_jvm_internal_libcinputstream_available_1,
+  },
+  {
+    .class_name = "jvm/internal/LibcInputStream",
     .method_name = "_close",
     .method_descriptor = "(I)V",
     .func = native_jvm_internal_libcinputstream_close_1,

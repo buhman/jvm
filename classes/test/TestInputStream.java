@@ -10,7 +10,15 @@ class TestInputStream {
     public static void main() throws IOException {
         Path path = FileSystems.getDefault().getPath("/home/bilbo/source.txt");
         InputStream is = Files.newInputStream(path);
-        char c = (char)is.read();
-        System.out.println(c);
+        int available = is.available();
+        System.out.print("available: ");
+        System.out.println(available);
+
+        byte[] buf = new byte[available];
+        int read = is.read(buf, 0, available);
+        System.out.print("read: ");
+        System.out.println(read);
+
+        System.out.println(buf);
     }
 }
