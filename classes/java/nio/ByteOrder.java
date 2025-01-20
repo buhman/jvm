@@ -12,4 +12,12 @@ public class ByteOrder {
     public static ByteOrder nativeOrder() {
         return NATIVE_ORDER;
     }
+
+    public String toString() {
+        if (this == BIG_ENDIAN) {
+            return "BIG_ENDIAN";
+        } else {
+            return "LITTLE_ENDIAN";
+        }
+    }
 }

@@ -47,4 +47,5 @@ MAIN_HOSTED_OBJ = \
 
 PRINT_CLASS_OBJ = \
 	c/file.o \
+	c/native/libcinputstream.o \
 	c/print_class.o

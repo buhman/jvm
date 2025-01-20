@@ -23,6 +23,7 @@ struct native_method {
 };
 
 const static struct native_method native_method[] = {
+  // Math
   {
     .class_name = "java/lang/Math",
     .method_name = "sin",
@@ -41,54 +42,92 @@ const static struct native_method native_method[] = {
     .method_descriptor = "(F)F",
     .func = native_java_lang_math_abs_1,
   },
+  // Memory
   {
-    .class_name = "java/misc/Memory",
+    .class_name = "jvm/internal/Memory",
     .method_name = "putU4",
     .method_descriptor = "(II)V",
-    .func = native_java_misc_memory_putU4_2,
+    .func = native_jvm_internal_memory_putU4_2,
   },
   {
-    .class_name = "java/misc/Memory",
+    .class_name = "jvm/internal/Memory",
     .method_name = "putU2",
-    .method_descriptor = "(II)V",
-    .func = native_java_misc_memory_putU2_2,
+    .method_descriptor = "(IS)V",
+    .func = native_jvm_internal_memory_putU2_2,
   },
   {
-    .class_name = "java/misc/Memory",
+    .class_name = "jvm/internal/Memory",
     .method_name = "putU1",
-    .method_descriptor = "(II)V",
-    .func = native_java_misc_memory_putU1_2,
+    .method_descriptor = "(IB)V",
+    .func = native_jvm_internal_memory_putU1_2,
   },
   {
-    .class_name = "java/misc/Memory",
+    .class_name = "jvm/internal/Memory",
     .method_name = "getU4",
     .method_descriptor = "(I)I",
-    .func = native_java_misc_memory_getU4_1,
+    .func = native_jvm_internal_memory_getU4_1,
   },
   {
-    .class_name = "java/misc/Memory",
+    .class_name = "jvm/internal/Memory",
     .method_name = "getU2",
-    .method_descriptor = "(I)I",
-    .func = native_java_misc_memory_getU2_1,
+    .method_descriptor = "(I)S",
+    .func = native_jvm_internal_memory_getU2_1,
   },
   {
-    .class_name = "java/misc/Memory",
+    .class_name = "jvm/internal/Memory",
     .method_name = "getU1",
-    .method_descriptor = "(I)I",
-    .func = native_java_misc_memory_getU1_1,
+    .method_descriptor = "(I)B",
+    .func = native_jvm_internal_memory_getU1_1,
   },
   {
-    .class_name = "java/misc/Memory",
-    .method_name = "putSQ1",
-    .method_descriptor = "(Ljava/lang/Object;I)V",
-    .func = native_java_misc_memory_putSQ1_2,
+    .class_name = "jvm/internal/Memory",
+    .method_name = "putU4",
+    .method_descriptor = "(IIZ)V",
+    .func = native_jvm_internal_memory_putUnalignedU4_3,
   },
   {
-    .class_name = "java/misc/Memory",
+    .class_name = "jvm/internal/Memory",
+    .method_name = "putU2",
+    .method_descriptor = "(ISZ)V",
+    .func = native_jvm_internal_memory_putUnalignedU2_3,
+  },
+  {
+    .class_name = "jvm/internal/Memory",
+    .method_name = "putF4",
+    .method_descriptor = "(IFZ)V",
+    .func = native_jvm_internal_memory_putUnalignedU4_3,
+  },
+  {
+    .class_name = "jvm/internal/Memory",
+    .method_name = "getU4",
+    .method_descriptor = "(IZ)I",
+    .func = native_jvm_internal_memory_getUnalignedU4_2,
+  },
+  {
+    .class_name = "jvm/internal/Memory",
+    .method_name = "getU2",
+    .method_descriptor = "(IZ)S",
+    .func = native_jvm_internal_memory_getUnalignedU2_2,
+  },
+  {
+    .class_name = "jvm/internal/Memory",
+    .method_name = "getF4",
+    .method_descriptor = "(IZ)F",
+    .func = native_jvm_internal_memory_getUnalignedU4_2,
+  },
+  {
+    .class_name = "jvm/internal/Memory",
     .method_name = "isBigEndian",
     .method_descriptor = "()Z",
-    .func = native_java_misc_memory_isbigendian_0,
+    .func = native_jvm_internal_memory_isbigendian_0,
   },
+  {
+    .class_name = "jvm/internal/Memory",
+    .method_name = "allocate",
+    .method_descriptor = "(I)I",
+    .func = native_jvm_internal_memory_allocate_1,
+  },
+  // PrintStream
   {
     .class_name = "java/io/PrintStream",
     .method_name = "_write",
@@ -107,6 +146,7 @@ const static struct native_method native_method[] = {
     .method_descriptor = "(Ljava/lang/String;)V",
     .func = native_java_io_printstream_write_s_1,
   },
+  // Loader
   {
     .class_name = "jvm/internal/Loader",
     .method_name = "load",
@@ -119,6 +159,7 @@ const static struct native_method native_method[] = {
     .method_descriptor = "()I",
     .func = native_jvm_internal_loader_getbuffer_0,
   },
+  // Class
   {
     .class_name = "java/lang/Class",
     .method_name = "_getName",
@@ -131,12 +172,14 @@ const static struct native_method native_method[] = {
     .method_descriptor = "(Ljava/lang/Object;)Ljava/lang/String;",
     .func = native_java_lang_class_getsuperclass_1,
   },
+  // Object
   {
     .class_name = "java/lang/Object",
     .method_name = "_getClass",
     .method_descriptor = "(Ljava/lang/Object;)Ljava/lang/Class;",
     .func = native_java_lang_object_getclass_1,
   },
+  // Runtime
   {
     .class_name = "java/lang/Runtime",
     .method_name = "_freeMemory",
@@ -155,6 +198,7 @@ const static struct native_method native_method[] = {
     .method_descriptor = "()I",
     .func = native_java_lang_runtime_totalmemory_0,
   },
+  // System
   {
     .class_name = "java/lang/System",
     .method_name = "_hashCode",

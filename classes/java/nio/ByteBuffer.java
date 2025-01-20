@@ -1,24 +1,162 @@
 package java.nio;
 
-public class ByteBuffer extends Buffer {
-    private int offset;
+import jvm.internal.Memory;
+
+public class ByteBuffer
+    extends Buffer
+    implements Comparable<ByteBuffer> {
+
     private boolean bigEndian;
-    //private boolean sameEndian;
 
-    private byte[] array;
-
-    private ByteBuffer(byte[] array, int offset, int length) {
-        super(-1, 0, length, length);
-        this.array = array;
-        this.order(ByteOrder.BIG_ENDIAN);
+    private ByteBuffer(int address, int position, int limit, int capacity, int bigEndian) {
+        super(address, position, limit, capacity);
+        bigEndian = bigEndian;
     }
 
-    public static ByteBuffer wrap(byte[] array) {
-        return new ByteBuffer(array, 0, array.length);
+    public static ByteBuffer allocateDirect(int capacity) {
+        int address = Memory.allocate(capacity);
+        return new ByteBuffer(address, 0, capacity, capacity, true);
     }
 
-    public static ByteBuffer wrap(byte[] array, int offset, int length) {
-        return new ByteBuffer(array, offset, length);
+    public final byte[] array() {
+        throw new UnsupportedOperationException();
+    }
+
+    public final int arrayOffset() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static int mismatch(ByteBuffer a,
+                                ByteBuffer b)
+    {
+        int remA = a.limit - a.position;
+        int remB = b.limit - b.position;
+        int length = remA > remB ? remB : remA;
+        int offA = a.position;
+        int offB = b.position;
+        for (int i = 0; i < length; i++) {
+            if (a.get(offA + i) != b.get(offB + i))
+                return i;
+        }
+        if (remA != remB)
+            return length;
+        return -1;
+    }
+
+    public int compareTo(ByteBuffer that) {
+        int pos = mismatch(this, that);
+        if (pos >= 0) {
+            return this.get(this.position + pos) - that.get(that.position + pos);
+        } else {
+            int thisRem = this.limit - this.position;
+            int thatRem = that.limit - that.position;
+            return thisRem - thatRem;
+        }
+    }
+
+    public boolean equals(Object ob) {
+        if (this == ob)
+            return true;
+        if (!(ob instanceof ByteBuffer))
+            return false;
+        ByteBuffer other = (ByteBuffer)ob;
+        int pos = ByteBuffer.mismatch(this, other);
+        return pos == -1;
+    }
+
+    public byte get() {
+        if (position >= limit)
+            throw new IndexOutOfBoundsException();
+        byte b = Memory.getU1(address + position);
+        position += 1;
+        return b;
+    }
+
+    public ByteBuffer get(byte[] dst) {
+        return get(dst, 0, dst.length);
+    }
+
+    public ByteBuffer get(byte[] dst,
+                          int offset,
+                          int length) {
+        int rem = limit - position;
+        if (rem < length) {
+            throw new BufferUnderflowException();
+        }
+        if (offset < 0 || offset > dst.length || length < 0 || length > (dst.length - offset)) {
+            throw new IndexOutOfBoundsException();
+        }
+        for (int i = offset; i < offset + length; i++)
+            dst[i] = get();
+
+        return this;
+    }
+
+    public byte get(int index) {
+        if (index < 0 || index > limit)
+            throw new IndexOutOfBoundsException();
+        return Memory.getU1(address + index);
+    }
+
+    public float getFloat() {
+        if (limit - position < 4)
+            throw new BufferUnderflowException();
+        float f = Memory.getUnalignedF4(address + position, bigEndian);
+        position += 4;
+        return f;
+    }
+
+    public float getFloat(int index) {
+        if (index < 0 || index >= (limit - 3))
+            throw new IndexOutOfBoundsException();
+        float f = Memory.getUnalignedF4(address + index, bigEndian);
+        return f;
+    }
+
+    public int getInt() {
+        if (limit - position < 4)
+            throw new BufferUnderflowException();
+        int i = Memory.getUnalignedU4(address + position, bigEndian);
+        position += 4;
+        return i;
+    }
+
+    public int getInt(int index) {
+        if (index < 0 || index >= (limit - 3))
+            throw new IndexOutOfBoundsException();
+        in i = Memory.getUnalignedU4(address + index, bigEndian);
+        return i;
+    }
+
+    public short getShort() {
+        if (limit - position < 2)
+            throw new BufferUnderflowException();
+        short i = Memory.getUnalignedU2(address + position, bigEndian);
+        position += 4;
+        return i;
+    }
+
+    public short getShort(short index) {
+        if (index < 0 || index >= (limit - 1))
+            throw new IndexOutOfBoundsException();
+        in i = Memory.getUnalignedU2(address + index, bigEndian);
+        return i;
+    }
+
+    public final boolean hasArray() {
+        return false;
+    }
+
+    public int hashCode() {
+        int h = 1;
+        int limit = this.limit;
+        for (int i = position; i < limit; i++) {
+            h = 31 * h + (int)get(i);
+        }
+    }
+
+    public boolean isDirect() {
+        return true;
     }
 
     public ByteOrder order() {
@@ -27,103 +165,128 @@ public class ByteBuffer extends Buffer {
 
     public ByteBuffer order(ByteOrder bo) {
         bigEndian = (bo == ByteOrder.BIG_ENDIAN);
-        //sameEndian = (bo == ByteOrder.nativeOrder());
         return this;
     }
 
-    public ByteBuffer offset(int off) {
-        offset = off;
-        return this;
-    }
-
-    private static int intBE(int i0, int i1, int i2, int i3) {
-        return ((i0 << 24)
-              | (i1 << 16)
-              | (i2 << 8)
-              | (i3 << 0));
-    }
-
-    private static int intLE(int i0, int i1, int i2, int i3) {
-        return ((i0 << 0)
-              | (i1 << 8)
-              | (i2 << 16)
-              | (i3 << 24));
-    }
-
-    private static int shortBE(int i0, int i1) {
-        return ((i0 << 8)
-              | (i1 << 0));
-    }
-
-    private static int shortLE(int i0, int i1) {
-        return ((i0 << 0)
-              | (i1 << 8));
-    }
-
-    private int ix(int pos) {
-        return offset + pos;
-    }
-
-    public byte get() {
-        byte i0 = array[ix(position)];
+    public ByteBuffer put(byte b) {
+        if (position >= limit)
+            throw new IndexOutOfBoundsException();
+        Memory.putU1(address + position);
         position += 1;
-        return i0;
+        return this;
     }
 
-    public byte get(int pos) {
-        byte i0 = array[ix(pos)];
-        return i0;
+    public final ByteBuffer put(byte[] src) {
+        return put(src, 0, src.length);
     }
 
-    public short getShort() {
-        int i0 = array[ix(position) + 0];
-        int i1 = array[ix(position) + 1];
+    public ByteBuffer put(byte[] src,
+                          int offset,
+                          int length) {
+        int rem = limit - position;
+        if (rem < length) {
+            throw new BufferUnderflowException();
+        }
+        if (offset < 0 || offset > src.length || length < 0 || length > (src.length - offset)) {
+            throw new IndexOutOfBoundsException();
+        }
+        for (int i = offset; i < offset + length; i++)
+            put(src[i]);
+        return this;
+    }
 
-        position += 2;
-
-        if (bigEndian) {
-            return (short)shortBE(i0, i1);
-        } else {
-            return (short)shortLE(i0, i1);
+    public ByteBuffer put(ByteBuffer src) {
+        int rem = limit - position;
+        if (rem < src.length) {
+            throw new BufferUnderflowException();
+        }
+        if (src == this) {
+            throw new IllegalArgumentException();
+        }
+        for (int i = src.position; i < src.limit; i++) {
+            put(src.get(i));
         }
     }
 
-    public short getShort(int pos) {
-        int i0 = array[ix(pos) + 0];
-        int i1 = array[ix(pos) + 1];
-
-        if (bigEndian) {
-            return (short)shortBE(i0, i1);
-        } else {
-            return (short)shortLE(i0, i1);
-        }
+    public ByteBuffer put(int index,
+                          byte b) {
+        if (index < 0 || index > limit)
+            throw new IndexOutOfBoundsException();
+        Memory.putU1(address + index, b);
+        return this;
     }
 
-    public int getInt() {
-        int i0 = array[ix(position) + 0];
-        int i1 = array[ix(position) + 1];
-        int i2 = array[ix(position) + 2];
-        int i3 = array[ix(position) + 3];
-
+    public ByteBuffer putFloat(float value) {
+        if (limit - position < 4)
+            throw new BufferUnderflowException();
+        Memory.putUnalignedF4(address + position, value, bigEndian);
         position += 4;
-
-        if (bigEndian) {
-            return intBE(i0, i1, i2, i3);
-        } else {
-            return intLE(i0, i1, i2, i3);
-        }
+        return this;
     }
 
-    public int getInt(int pos) {
-        int i0 = array[ix(pos) + 0];
-        int i1 = array[ix(pos) + 1];
-        int i2 = array[ix(pos) + 2];
-        int i3 = array[ix(pos) + 3];
+    public ByteBuffer putFloat(int index,
+                               float value) {
+        if (index < 0 || index >= (limit - 3))
+            throw new IndexOutOfBoundsException();
+        Memory.putUnalignedF4(address + index, value, bigEndian);
+        return this;
+    }
 
-        if (bigEndian) {
-            return intBE(i0, i1, i2, i3);
-        } else {
-            return intLE(i0, i1, i2, i3);
-        }
+    public ByteBuffer putInt(int value) {
+        if (limit - position < 4)
+            throw new BufferUnderflowException();
+        Memory.putUnalignedU4(address + position, value, bigEndian);
+        position += 4;
+        return this;
+    }
+
+    public ByteBuffer putInt(int index,
+                             int value) {
+        if (index < 0 || index >= (limit - 3))
+            throw new IndexOutOfBoundsException();
+        Memory.putUnalignedU4(address + index, value, bigEndian);
+        return this;
+    }
+
+    public ByteBuffer putShort(short value) {
+        if (limit - position < 4)
+            throw new BufferUnderflowException();
+        Memory.putUnalignedU2(address + position, value, bigEndian);
+        position += 4;
+        return this;
+    }
+
+    public ByteBuffer putShort(int index,
+                               short value) {
+        if (index < 0 || index >= (limit - 1))
+            throw new IndexOutOfBoundsException();
+        Memory.putUnalignedU2(address + index, value, bigEndian);
+        return this;
+    }
+
+    public ByteBuffer slice() {
+        return new ByteBuffer(address,
+                              position,
+                              limit,
+                              capacity,
+                              bigEndian);
+    }
+
+    public String toString() {
+        return getClass().getName()
+            + "[pos=" + position
+            + " lim=" + limit
+            + " cap=" + capacity
+            + "]";
+    }
+
+    public static ByteBuffer wrap(byte[] array) {
+        throw new UnsupportedOperationException();
+    }
+
+    public static ByteBuffer wrap(byte[] array,
+                                  int offset,
+                                  int length) {
+        throw new UnsupportedOperationException();
     }
 }

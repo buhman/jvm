@@ -1,38 +1,69 @@
 package java.nio;
 
-class Buffer {
-    protected int mark = -1;
-    protected int position = 0;
-    protected int limit;
-    protected final int capacity;
+public abstract class Buffer {
+    private final int address;
+    private int position;
+    private int limit;
+    private final int capacity;
 
-    Buffer(int mark, int position, int limit, int capacity) {
-        this.mark = mark;
+    protected Buffer(int address, int position, int limit, int capacity) {
+        this.address = address;
         this.position = position;
         this.limit = limit;
         this.capacity = capacity;
-    }
-
-    public final int position() {
-        return position;
-    }
-
-    public final int limit() {
-        return limit;
     }
 
     public final int capacity() {
         return capacity;
     }
 
-    public Buffer limit(int limit) {
-        this.limit = limit;
-        if (position > limit) position = limit;
-        if (mark > limit) mark = -1;
+    public final Buffer clear() {
+        position = 0;
+        limit = capacity;
+        return this;
+    }
+
+    public final Buffer flip() {
+        limit = position;
+        position = 0;
         return this;
     }
 
     public final boolean hasRemaining() {
         return position < limit;
+    }
+
+    public final int limit() {
+        return limit;
+    }
+
+    public Buffer limit(int newLimit) {
+        if (newLimit < 0 || newLimit > capacity)
+            throw new IllegalArgumentException();
+        this.limit = newLimit;
+        if (position > newLimit) position = newLimit;
+        return this;
+    }
+
+    public final int position() {
+        return position;
+    }
+
+    public final Buffer position(int newPosition) {
+        if (newPosition < 0 || newPosition > limit)
+            throw new IllegalArgumentException();
+        position = newPosition;
+    }
+
+    public final int remaining() {
+        int elements = limit - position;
+        if (elements < 0)
+            elements = 0;
+        return elements;
+    }
+
+    public final Buffer rewind() {
+        position = 0;
+        return this;
     }
 }
