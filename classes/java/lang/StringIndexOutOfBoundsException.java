@@ -7,7 +7,7 @@ public class StringIndexOutOfBoundsException extends IndexOutOfBoundsException {
     }
 
     public StringIndexOutOfBoundsException(int index) {
-        super(index);
+        super(Integer.toString(index));
     }
 
     public StringIndexOutOfBoundsException(String s) {

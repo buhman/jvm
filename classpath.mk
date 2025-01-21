@@ -28,4 +28,58 @@ CLASS_PATH = \
 	classes/sega/dreamcast/gdrom/GdromCommandPacketInterface.class.o \
 	classes/sega/dreamcast/gdrom/GdromProtocol.class.o \
 	classes/jvm/internal/Loader.class.o \
-	classes/jvm/internal/Memory.class.o
+	classes/jvm/internal/Memory.class.o \
+	classes/java/io/IOException.class.o \
+	classes/java/nio/BufferUnderflowException.class.o \
+	classes/java/nio/BufferOverflowException.class.o \
+	classes/java/lang/IllegalStateException.class.o \
+	classes/java/lang/UnsupportedOperationException.class.o \
+	classes/java/lang/IllegalAccessException.class.o \
+	classes/java/lang/IllegalArgumentException.class.o \
+	classes/java/lang/SecurityException.class.o \
+	classes/java/lang/InterruptedException.class.o \
+	classes/java/lang/ArrayStoreException.class.o \
+	classes/java/lang/IndexOutOfBoundsException.class.o \
+	classes/java/lang/CloneNotSupportedException.class.o \
+	classes/java/lang/ArithmeticException.class.o \
+	classes/java/lang/StringIndexOutOfBoundsException.class.o \
+	classes/java/lang/NegativeArraySizeException.class.o \
+	classes/java/lang/RuntimeException.class.o \
+	classes/java/lang/NullPointerException.class.o \
+	classes/java/lang/NumberFormatException.class.o \
+	classes/java/lang/ArrayIndexOutOfBoundsException.class.o \
+	classes/java/lang/IllegalMonitorStateException.class.o \
+	classes/java/lang/InstantiationException.class.o \
+	classes/java/lang/Exception.class.o \
+	classes/java/lang/IllegalThreadStateException.class.o \
+	classes/java/lang/ClassCastException.class.o \
+	classes/java/lang/ClassNotFoundException.class.o \
+	classes/Main.class.o \
+	classes/example/JavaCube.class.o \
+	classes/example/JavaCubeDirectoryRecordHandler.class.o \
+	classes/java/lang/Math.class.o \
+	classes/java/nio/ByteBuffer.class.o \
+	classes/java/nio/Buffer.class.o \
+	classes/jvm/internal/SH4Intrinsic.class.o \
+	classes/model/FacePTN.class.o \
+	classes/model/ModelObject.class.o \
+	classes/model/CubeModel.class.o \
+	classes/model/Vec2.class.o \
+	classes/model/Vec3.class.o \
+	classes/sega/dreamcast/holly/Background.class.o \
+	classes/sega/dreamcast/holly/Core.class.o \
+	classes/sega/dreamcast/holly/CoreBits.class.o \
+	classes/sega/dreamcast/holly/VideoOutput.class.o \
+	classes/sega/dreamcast/holly/VideoOutputMode.class.o \
+	classes/sega/dreamcast/holly/ISPTSP.class.o \
+	classes/sega/dreamcast/holly/RegionArray.class.o \
+	classes/sega/dreamcast/holly/RegionArray_OPBSize.class.o \
+	classes/sega/dreamcast/holly/TABits.class.o \
+	classes/sega/dreamcast/holly/TAFIFOPolygonConverter.class.o \
+	classes/sega/dreamcast/holly/TAGlobalParameter.class.o \
+	classes/sega/dreamcast/holly/TAGlobalParameter_end_of_list.class.o \
+	classes/sega/dreamcast/holly/TAGlobalParameter_polygon_type_0.class.o \
+	classes/sega/dreamcast/holly/TAVertexParameter.class.o \
+	classes/sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class.o \
+	classes/sega/dreamcast/holly/TextureMemoryAllocation.class.o \
+	classes/sega/dreamcast/sh7091/StoreQueueBuffer.class.o

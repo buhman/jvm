@@ -236,7 +236,7 @@ public class JavaCube {
             transform_vertex(position, texture, face[i]);
             vt0.base_color = colors[n];
 
-            Memory.putSQ1(vt0, MemoryMap.ta_fifo_polygon_converter);
+            vt0.submit();
         }
     }
 
@@ -251,21 +251,21 @@ public class JavaCube {
         vt0.y = quad[0].y;
         vt0.u = quad_uv[0].x;
         vt0.v = quad_uv[0].y;
-        Memory.putSQ1(vt0, MemoryMap.ta_fifo_polygon_converter);
+        vt0.submit();
 
         vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
         vt0.x = quad[1].x;
         vt0.y = quad[1].y;
         vt0.u = quad_uv[1].x;
         vt0.v = quad_uv[1].y;
-        Memory.putSQ1(vt0, MemoryMap.ta_fifo_polygon_converter);
+        vt0.submit();
 
         vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
         vt0.x = quad[3].x;
         vt0.y = quad[3].y;
         vt0.u = quad_uv[3].x;
         vt0.v = quad_uv[3].y;
-        Memory.putSQ1(vt0, MemoryMap.ta_fifo_polygon_converter);
+        vt0.submit();
 
         vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter
                                    | TAParameter.para_control__end_of_strip;
@@ -273,12 +273,12 @@ public class JavaCube {
         vt0.y = quad[2].y;
         vt0.u = quad_uv[2].x;
         vt0.v = quad_uv[2].y;
-        Memory.putSQ1(vt0, MemoryMap.ta_fifo_polygon_converter);
+        vt0.submit();
     }
 
     public static void transfer_cube_scene() {
         // global parameters
-        Memory.putSQ1(gt0[0], MemoryMap.ta_fifo_polygon_converter);
+        gt0[0].submit();
 
         // triangle parameters
         ModelObject obj = CubeModel.objects[0];
@@ -287,18 +287,18 @@ public class JavaCube {
         }
 
         // end of list
-        Memory.putSQ1(eol, MemoryMap.ta_fifo_polygon_converter);
+        eol.submit();
     }
 
     public static void transfer_splash_scene() {
         // global parameters
-        Memory.putSQ1(gt0[1], MemoryMap.ta_fifo_polygon_converter);
+        gt0[1].submit();
 
         // quad parameters
         transform_quad();
 
         // end of list
-        Memory.putSQ1(eol, MemoryMap.ta_fifo_polygon_converter);
+        eol.submit();
     }
 
     public static void transfer_textures() {
@@ -361,7 +361,9 @@ public class JavaCube {
                                     framebuffer_width / 32,
                                     framebuffer_height / 32);
         transfer_splash_scene();
+        System.out.println("wait_tl");
         TAFIFOPolygonConverter.wait_translucent_list();
+        System.out.println("wait_tl_end");
 
         Core.start_render(TextureMemoryAllocation.region_array_start[0],
                           TextureMemoryAllocation.isp_tsp_parameters_start[0],
@@ -378,8 +380,6 @@ public class JavaCube {
     }
 
     public static void main() {
-        System.out.println(Memory.getU4(Holly.FB_R_SOF1));
-
         int ta_alloc =
               TABits.ta_alloc_ctrl__opb_mode__increasing_addresses
             | TABits.ta_alloc_ctrl__pt_opb__no_list
@@ -400,9 +400,11 @@ public class JavaCube {
 
         transfer_java_powered();
 
+        System.out.println("background");
         Background.background(TextureMemoryAllocation.background_start[0],
                               0x00c0c0c0); // sega white
 
+        System.out.println("region_array");
         int num_render_passes = opb_size.length;
         RegionArray.region_array(framebuffer_width / 32,
                                  framebuffer_height / 32,
@@ -411,12 +413,14 @@ public class JavaCube {
                                  TextureMemoryAllocation.region_array_start[0],
                                  TextureMemoryAllocation.object_list_start[0]);
 
+        System.out.println("core_init");
         Core.init();
 
         for (int i = 0; i < 2; i++) {
             boot_splash(ta_alloc, opb_size_total);
         }
 
+        System.out.println("transfer_textures");
         transfer_textures();
 
         int background_color = 0xff100a00;
@@ -432,6 +436,7 @@ public class JavaCube {
                                  TextureMemoryAllocation.region_array_start[1],
                                  TextureMemoryAllocation.object_list_start[1]);
 
+        System.out.println("main");
         int core = 0;
         int ta = 0;
         while (true) {

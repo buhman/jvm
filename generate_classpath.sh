@@ -103,6 +103,64 @@ declare -a boot_classes=(
     sega/dreamcast/gdrom/GdromProtocol.class
     jvm/internal/Loader.class
     jvm/internal/Memory.class
+
+    # exceptions
+    java/io/IOException.class
+    java/nio/BufferUnderflowException.class
+    java/nio/BufferOverflowException.class
+    java/lang/IllegalStateException.class
+    java/lang/UnsupportedOperationException.class
+    java/lang/IllegalAccessException.class
+    java/lang/IllegalArgumentException.class
+    java/lang/SecurityException.class
+    java/lang/InterruptedException.class
+    java/lang/ArrayStoreException.class
+    java/lang/IndexOutOfBoundsException.class
+    java/lang/CloneNotSupportedException.class
+    java/lang/ArithmeticException.class
+    java/lang/StringIndexOutOfBoundsException.class
+    java/lang/NegativeArraySizeException.class
+    java/lang/RuntimeException.class
+    java/lang/NullPointerException.class
+    java/lang/NumberFormatException.class
+    java/lang/ArrayIndexOutOfBoundsException.class
+    java/lang/IllegalMonitorStateException.class
+    java/lang/InstantiationException.class
+    java/lang/Exception.class
+    java/lang/IllegalThreadStateException.class
+    java/lang/ClassCastException.class
+    java/lang/ClassNotFoundException.class
+
+    # application
+    Main.class
+    example/JavaCube.class
+    example/JavaCubeDirectoryRecordHandler.class
+    java/lang/Math.class
+    java/nio/ByteBuffer.class
+    java/nio/Buffer.class
+    jvm/internal/SH4Intrinsic.class
+    model/FacePTN.class
+    model/ModelObject.class
+    model/CubeModel.class
+    model/Vec2.class
+    model/Vec3.class
+    sega/dreamcast/holly/Background.class
+    sega/dreamcast/holly/Core.class
+    sega/dreamcast/holly/CoreBits.class
+    sega/dreamcast/holly/VideoOutput.class
+    sega/dreamcast/holly/VideoOutputMode.class
+    sega/dreamcast/holly/ISPTSP.class
+    sega/dreamcast/holly/RegionArray.class
+    sega/dreamcast/holly/RegionArray_OPBSize.class
+    sega/dreamcast/holly/TABits.class
+    sega/dreamcast/holly/TAFIFOPolygonConverter.class
+    sega/dreamcast/holly/TAGlobalParameter.class
+    sega/dreamcast/holly/TAGlobalParameter_end_of_list.class
+    sega/dreamcast/holly/TAGlobalParameter_polygon_type_0.class
+    sega/dreamcast/holly/TAVertexParameter.class
+    sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class
+    sega/dreamcast/holly/TextureMemoryAllocation.class
+    sega/dreamcast/sh7091/StoreQueueBuffer.class
 )
 
 function boot_classes () {
@@ -127,31 +185,7 @@ function boot_sources () {
 }
 
 declare -a application_classes=(
-    Main.class
-    example/JavaCube.class
-    example/JavaCubeDirectoryRecordHandler.class
-    model/FacePTN.class
-    model/ModelObject.class
-    model/CubeModel.class
-    model/Vec2.class
-    model/Vec3.class
-    sega/dreamcast/holly/Background.class
-    sega/dreamcast/holly/Core.class
-    sega/dreamcast/holly/CoreBits.class
-    sega/dreamcast/holly/VideoOutput.class
-    sega/dreamcast/holly/VideoOutputMode.class
-    sega/dreamcast/holly/ISPTSP.class
-    sega/dreamcast/holly/RegionArray.class
-    sega/dreamcast/holly/RegionArray_OPBSize.class
-    sega/dreamcast/holly/TABits.class
-    sega/dreamcast/holly/TAFIFOPolygonConverter.class
-    sega/dreamcast/holly/TAGlobalParameter.class
-    sega/dreamcast/holly/TAGlobalParameter_end_of_list.class
-    sega/dreamcast/holly/TAGlobalParameter_polygon_type_0.class
-    sega/dreamcast/holly/TAVertexParameter.class
-    sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class
-    sega/dreamcast/holly/TextureMemoryAllocation.class
-    java/lang/Math.class
+
 )
 
 function application_classes () {
@@ -185,7 +219,7 @@ function find_sources () {
 
 set -eux
 
-find . -name '*.class' -exec rm -f {} \;
+find . -name '*.class' -not -path "./classes/java/*" -exec rm -f {} \;
 
 make -f Makefile.dreamcast.mk $(boot_sources | java_to_class)
 find . -name '*.class' | rename_class_files

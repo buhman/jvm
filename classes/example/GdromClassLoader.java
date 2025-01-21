@@ -35,6 +35,10 @@ class GdromDirectoryRecordHandler implements DirectoryRecordHandler {
         byte[] buf = dr.array;
         int offset = dr.offset + DirectoryRecord.FILE_IDENTIFIER_START;
 
+        for (int i = offset; i < offset + length; i++)
+            System.out.print(buf[i]);
+        System.out.println();
+
         int ix = 0;
         for (int i = length - 5; i < length; i++) {
             if (buf[offset + i] != class_ext[ix]) {

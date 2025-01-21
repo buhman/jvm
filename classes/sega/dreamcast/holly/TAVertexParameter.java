@@ -29,6 +29,7 @@ public class TAVertexParameter {
             this.base_color = base_color;
         }
         public void submit() {
+            System.out.println(this.address);
             putInt(0, parameter_control_word);
             putFloat(4, x);
             putFloat(8, y);
