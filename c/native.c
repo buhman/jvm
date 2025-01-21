@@ -52,6 +52,12 @@ const static struct native_method native_method[] = {
   },
   {
     .class_name = "jvm/internal/Memory",
+    .method_name = "putF4",
+    .method_descriptor = "(IF)V",
+    .func = native_jvm_internal_memory_putU4_2,
+  },
+  {
+    .class_name = "jvm/internal/Memory",
     .method_name = "putU2",
     .method_descriptor = "(IS)V",
     .func = native_jvm_internal_memory_putU2_2,
@@ -66,6 +72,12 @@ const static struct native_method native_method[] = {
     .class_name = "jvm/internal/Memory",
     .method_name = "getU4",
     .method_descriptor = "(I)I",
+    .func = native_jvm_internal_memory_getU4_1,
+  },
+  {
+    .class_name = "jvm/internal/Memory",
+    .method_name = "getF4",
+    .method_descriptor = "(I)F",
     .func = native_jvm_internal_memory_getU4_1,
   },
   {

@@ -2,10 +2,12 @@ package jvm.internal;
 
 public class Memory {
     public static native void putU4(int address, int value);
+    public static native void putF4(int address, float value);
     public static native void putU2(int address, short value);
     public static native void putU1(int address, byte value);
 
     public static native int getU4(int address);
+    public static native float getF4(int address);
     public static native short getU2(int address);
     public static native byte getU1(int address);
 

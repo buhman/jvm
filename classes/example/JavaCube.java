@@ -82,21 +82,10 @@ public class JavaCube {
     static final int framebuffer_width = 640;
     static final int framebuffer_height = 480;
 
-    static TAGlobalParameter.polygon_type_0[] gt0;
-    static TAVertexParameter.polygon_type_3 vt0;
-    static TAGlobalParameter.end_of_list eol;
-
     static Vec2[] quad;
     static Vec2[] quad_uv;
 
     static float theta;
-
-    static int colors[] = {
-        5156825, 14787722, 9529551,
-        4729017, 10213073, 15956866,
-        5362273, 8377157, 9797796,
-        11479204, 4042586, 16676239
-    };
 
     public static int[] texture_extents;
 
@@ -105,89 +94,38 @@ public class JavaCube {
         "JAVA_TEX.DAT;1",
     };
 
+    static final int parameter_control_word = TAParameter.para_control__para_type__polygon_or_modifier_volume
+                                            | TAParameter.para_control__list_type__translucent
+                                            | TAParameter.obj_control__col_type__packed_color
+                                            | TAParameter.obj_control__texture;
+
+    static final int isp_tsp_instruction_word = ISPTSP.isp_tsp_instruction_word__depth_compare_mode__greater
+                                              | ISPTSP.isp_tsp_instruction_word__culling_mode__no_culling;
+
+    static final int tsp_instruction_word = ISPTSP.tsp_instruction_word__src_alpha_instr__src_alpha
+                                          | ISPTSP.tsp_instruction_word__dst_alpha_instr__inverse_src_alpha
+                                          | ISPTSP.tsp_instruction_word__fog_control__no_fog
+                                          | ISPTSP.tsp_instruction_word__texture_u_size__512
+                                          | ISPTSP.tsp_instruction_word__texture_v_size__1024
+                                          | ISPTSP.tsp_instruction_word__use_alpha;
+
+    static final int texture_address = TextureMemoryAllocation.texture_regions[1][0] + 512;
+    static final int texture_control_word = ISPTSP.texture_control_word__pixel_format__4444
+                                          | ISPTSP.texture_control_word__scan_order__non_twiddled
+                                          | ISPTSP.texture_control_word__texture_address(texture_address / 8);
+
     static {
         texture_extents = new int[texture_filenames.length];
         for (int i = 0; i < texture_filenames.length; i++) {
             texture_extents[i] = -1;
         }
-
-        int parameter_control_word = TAParameter.para_control__para_type__polygon_or_modifier_volume
-                                   | TAParameter.para_control__list_type__translucent
-                                   | TAParameter.obj_control__col_type__packed_color
-                                   | TAParameter.obj_control__texture;
-
-        int isp_tsp_instruction_word = ISPTSP.isp_tsp_instruction_word__depth_compare_mode__greater
-                                     | ISPTSP.isp_tsp_instruction_word__culling_mode__no_culling;
-
-        int tsp_instruction_word = ISPTSP.tsp_instruction_word__src_alpha_instr__src_alpha
-                                 | ISPTSP.tsp_instruction_word__dst_alpha_instr__inverse_src_alpha
-                                 | ISPTSP.tsp_instruction_word__fog_control__no_fog
-                                 | ISPTSP.tsp_instruction_word__texture_u_size__512
-                                 | ISPTSP.tsp_instruction_word__texture_v_size__1024
-                                 | ISPTSP.tsp_instruction_word__use_alpha;
-
-        int texture_address = TextureMemoryAllocation.texture_regions[1][0] + 512;
-        int texture_control_word = ISPTSP.texture_control_word__pixel_format__4444
-                                 | ISPTSP.texture_control_word__scan_order__non_twiddled
-                                 | ISPTSP.texture_control_word__texture_address(texture_address / 8);
-
-        int data_size_for_sort_dma = 0;
-        int next_address_for_sort_dma = 0;
-
-        gt0 = new TAGlobalParameter.polygon_type_0[2];
-        gt0[0] = new TAGlobalParameter.polygon_type_0(parameter_control_word,
-                                                      isp_tsp_instruction_word,
-                                                      tsp_instruction_word,
-                                                      texture_control_word,
-                                                      data_size_for_sort_dma,
-                                                      next_address_for_sort_dma);
-
-        tsp_instruction_word = ISPTSP.tsp_instruction_word__src_alpha_instr__src_alpha
-                             | ISPTSP.tsp_instruction_word__dst_alpha_instr__inverse_src_alpha
-                             | ISPTSP.tsp_instruction_word__fog_control__no_fog
-                             | ISPTSP.tsp_instruction_word__texture_u_size__128
-                             | ISPTSP.tsp_instruction_word__texture_v_size__64
-                             | ISPTSP.tsp_instruction_word__use_alpha;
-
-        texture_address = TextureMemoryAllocation.texture_regions[1][0] + 512 + (512 * 512 * 2 * 2);
-        texture_control_word = ISPTSP.texture_control_word__pixel_format__4444
-                             | ISPTSP.texture_control_word__scan_order__non_twiddled
-                             | ISPTSP.texture_control_word__texture_address(texture_address / 8);
-
-        gt0[1] = new TAGlobalParameter.polygon_type_0(parameter_control_word,
-                                                      isp_tsp_instruction_word,
-                                                      tsp_instruction_word,
-                                                      texture_control_word,
-                                                      data_size_for_sort_dma,
-                                                      next_address_for_sort_dma);
-
-        vt0 = new TAVertexParameter.polygon_type_3(0,    // parameter_control_word
-                                                   0.0f, // x
-                                                   0.0f, // y
-                                                   0.0f, // z
-                                                   0.0f, // u
-                                                   0.0f, // v
-                                                   0,    // color
-                                                   0);   // offset_color
-
-        eol = new TAGlobalParameter.end_of_list(TAParameter.para_control__para_type__end_of_list);
-
-        float x = 256.0f;
-        float y = 208.0f;
-        quad = new Vec2[4];
-        quad[0] = new Vec2(x +   0.0f, y +  0.0f);
-        quad[1] = new Vec2(x + 128.0f, y +  0.0f);
-        quad[2] = new Vec2(x + 128.0f, y + 64.0f);
-        quad[3] = new Vec2(x +   0.0f, y + 64.0f);
-
-        quad_uv = new Vec2[4];
-        quad_uv[0] = new Vec2(0.0f, 0.0f);
-        quad_uv[1] = new Vec2(1.0f, 0.0f);
-        quad_uv[2] = new Vec2(1.0f, 1.0f);
-        quad_uv[3] = new Vec2(0.0f, 1.0f);
     }
 
-    public static void transform_vertex(Vec3[] position, Vec2[] texture, FacePTN ptn) {
+    public static void transform_vertex(int parameter_control_word,
+                                        Vec3[] position,
+                                        Vec2[] texture,
+                                        FacePTN ptn) {
+
         float px = position[ptn.position].x;
         float py = position[ptn.position].y;
         float pz = position[ptn.position].z;
@@ -221,64 +159,33 @@ public class JavaCube {
         float y = -y2 * 240f + 240f;
         float z = 1.0f / z2;
 
-        vt0.x = x;
-        vt0.y = y;
-        vt0.z = z;
-        vt0.u = texture[ptn.texture].x;
-        vt0.v = texture[ptn.texture].y;
+        TAVertexParameter.polygon_type_3(parameter_control_word,
+                                         x,
+                                         y,
+                                         z,
+                                         texture[ptn.texture].x, // u
+                                         texture[ptn.texture].y, // v
+                                         0xff000000,  // base_color
+                                         0); // offset_color
     }
 
     public static void transform_triangle(int n, Vec3[] position, Vec2[] texture, FacePTN[] face) {
         for (int i = 0; i < 3; i++) {
-            vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
+            int parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
             if (i == 2)
-                vt0.parameter_control_word |= TAParameter.para_control__end_of_strip;
-            transform_vertex(position, texture, face[i]);
-            vt0.base_color = colors[n];
-
-            vt0.submit();
+                parameter_control_word |= TAParameter.para_control__end_of_strip;
+            transform_vertex(parameter_control_word, position, texture, face[i]);
         }
-    }
-
-    public static void transform_quad() {
-        // strip order:
-        // 0 1 3 2
-
-        vt0.z = 0.1f;
-
-        vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
-        vt0.x = quad[0].x;
-        vt0.y = quad[0].y;
-        vt0.u = quad_uv[0].x;
-        vt0.v = quad_uv[0].y;
-        vt0.submit();
-
-        vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
-        vt0.x = quad[1].x;
-        vt0.y = quad[1].y;
-        vt0.u = quad_uv[1].x;
-        vt0.v = quad_uv[1].y;
-        vt0.submit();
-
-        vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter;
-        vt0.x = quad[3].x;
-        vt0.y = quad[3].y;
-        vt0.u = quad_uv[3].x;
-        vt0.v = quad_uv[3].y;
-        vt0.submit();
-
-        vt0.parameter_control_word = TAParameter.para_control__para_type__vertex_parameter
-                                   | TAParameter.para_control__end_of_strip;
-        vt0.x = quad[2].x;
-        vt0.y = quad[2].y;
-        vt0.u = quad_uv[2].x;
-        vt0.v = quad_uv[2].y;
-        vt0.submit();
     }
 
     public static void transfer_cube_scene() {
         // global parameters
-        gt0[0].submit();
+        TAGlobalParameter.polygon_type_0(parameter_control_word,
+                                         isp_tsp_instruction_word,
+                                         tsp_instruction_word,
+                                         texture_control_word,
+                                         0,  // data_size_for_sort_dma
+                                         0); // next_address_for_sort_dma
 
         // triangle parameters
         ModelObject obj = CubeModel.objects[0];
@@ -287,18 +194,7 @@ public class JavaCube {
         }
 
         // end of list
-        eol.submit();
-    }
-
-    public static void transfer_splash_scene() {
-        // global parameters
-        gt0[1].submit();
-
-        // quad parameters
-        transform_quad();
-
-        // end of list
-        eol.submit();
+        TAGlobalParameter.end_of_list(TAParameter.para_control__para_type__end_of_list);
     }
 
     public static void transfer_textures() {
@@ -333,52 +229,6 @@ public class JavaCube {
         }
     }
 
-    public static void transfer_java_powered() {
-        int texture = TextureMemoryAllocation.texture_regions[1][0] + 512 + (512 * 512 * 2 * 2);
-
-        // java_powered
-        //int[] java_powered = Resource.getResource("images/java_powered");
-        //int java_powered_length = (java_powered == null) ? 0 : java_powered.length;
-        //System.out.print("images/java_powered length: ");
-        //System.out.println(java_powered_length);
-
-        //for (int i = 0; i < java_powered_length; i++) {
-        for (int i = 0; i < 128 * 128; i++) {
-            //Memory.putU4(MemoryMap.texture_memory64 + texture, java_powered[i]);
-            Memory.putU4(MemoryMap.texture_memory64 + texture, 0);
-            texture += 4;
-        }
-    }
-
-    public static void boot_splash(int ta_alloc, int opb_size_total) {
-        // unpipelined render loop
-        TAFIFOPolygonConverter.init(TextureMemoryAllocation.isp_tsp_parameters_start[0],
-                                    TextureMemoryAllocation.isp_tsp_parameters_end[0],
-                                    TextureMemoryAllocation.object_list_start[0],
-                                    TextureMemoryAllocation.object_list_end[0],
-                                    opb_size_total,
-                                    ta_alloc,
-                                    framebuffer_width / 32,
-                                    framebuffer_height / 32);
-        transfer_splash_scene();
-        System.out.println("wait_tl");
-        TAFIFOPolygonConverter.wait_translucent_list();
-        System.out.println("wait_tl_end");
-
-        Core.start_render(TextureMemoryAllocation.region_array_start[0],
-                          TextureMemoryAllocation.isp_tsp_parameters_start[0],
-                          TextureMemoryAllocation.background_start[0],
-                          TextureMemoryAllocation.framebuffer_start[0],
-                          framebuffer_width);
-        Core.wait_end_of_render_tsp();
-
-        while ((CoreBits.spg_status__vsync(Memory.getU4(Holly.SPG_STATUS)) == 0));
-        while (!(CoreBits.spg_status__vsync(Memory.getU4(Holly.SPG_STATUS)) == 0));
-        VideoOutput.set_framebuffer_resolution(640, 480);
-        VideoOutput.set_mode(VideoOutputMode.vga);
-        Memory.putU4(Holly.FB_R_SOF1, TextureMemoryAllocation.framebuffer_start[0]);
-    }
-
     public static void main() {
         int ta_alloc =
               TABits.ta_alloc_ctrl__opb_mode__increasing_addresses
@@ -398,13 +248,14 @@ public class JavaCube {
         };
         int opb_size_total = opb_size[0].total();
 
-        transfer_java_powered();
-
-        System.out.println("background");
+        int background_color = 0xff100a00;
         Background.background(TextureMemoryAllocation.background_start[0],
                               0x00c0c0c0); // sega white
+        Background.background(TextureMemoryAllocation.background_start[1],
+                              0x00c0c0c0);//background_color); // dark black
 
-        System.out.println("region_array");
+        Memory.putU4(Holly.VO_BORDER_COL, background_color);
+
         int num_render_passes = opb_size.length;
         RegionArray.region_array(framebuffer_width / 32,
                                  framebuffer_height / 32,
@@ -412,23 +263,6 @@ public class JavaCube {
                                  num_render_passes,
                                  TextureMemoryAllocation.region_array_start[0],
                                  TextureMemoryAllocation.object_list_start[0]);
-
-        System.out.println("core_init");
-        Core.init();
-
-        for (int i = 0; i < 2; i++) {
-            boot_splash(ta_alloc, opb_size_total);
-        }
-
-        System.out.println("transfer_textures");
-        transfer_textures();
-
-        int background_color = 0xff100a00;
-        Background.background(TextureMemoryAllocation.background_start[1],
-                              background_color);
-
-        Memory.putU4(Holly.VO_BORDER_COL, background_color);
-
         RegionArray.region_array(framebuffer_width / 32,
                                  framebuffer_height / 32,
                                  opb_size,
@@ -436,7 +270,13 @@ public class JavaCube {
                                  TextureMemoryAllocation.region_array_start[1],
                                  TextureMemoryAllocation.object_list_start[1]);
 
-        System.out.println("main");
+        Core.init();
+
+        transfer_textures();
+
+        VideoOutput.set_framebuffer_resolution(640, 480);
+        VideoOutput.set_mode(VideoOutputMode.vga);
+
         int core = 0;
         int ta = 0;
         while (true) {

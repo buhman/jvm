@@ -77,9 +77,6 @@ CLASS_PATH = \
 	classes/sega/dreamcast/holly/TABits.class.o \
 	classes/sega/dreamcast/holly/TAFIFOPolygonConverter.class.o \
 	classes/sega/dreamcast/holly/TAGlobalParameter.class.o \
-	classes/sega/dreamcast/holly/TAGlobalParameter_end_of_list.class.o \
-	classes/sega/dreamcast/holly/TAGlobalParameter_polygon_type_0.class.o \
 	classes/sega/dreamcast/holly/TAVertexParameter.class.o \
-	classes/sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class.o \
 	classes/sega/dreamcast/holly/TextureMemoryAllocation.class.o \
 	classes/sega/dreamcast/sh7091/StoreQueueBuffer.class.o

@@ -155,10 +155,7 @@ declare -a boot_classes=(
     sega/dreamcast/holly/TABits.class
     sega/dreamcast/holly/TAFIFOPolygonConverter.class
     sega/dreamcast/holly/TAGlobalParameter.class
-    sega/dreamcast/holly/TAGlobalParameter_end_of_list.class
-    sega/dreamcast/holly/TAGlobalParameter_polygon_type_0.class
     sega/dreamcast/holly/TAVertexParameter.class
-    sega/dreamcast/holly/TAVertexParameter_polygon_type_3.class
     sega/dreamcast/holly/TextureMemoryAllocation.class
     sega/dreamcast/sh7091/StoreQueueBuffer.class
 )
