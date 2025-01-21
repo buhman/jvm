@@ -1,10 +1,10 @@
 package java.nio;
 
 public abstract class Buffer {
-    private final int address;
-    private int position;
-    private int limit;
-    private final int capacity;
+    protected final int address;
+    protected int position;
+    protected int limit;
+    protected final int capacity;
 
     protected Buffer(int address, int position, int limit, int capacity) {
         this.address = address;
@@ -53,6 +53,7 @@ public abstract class Buffer {
         if (newPosition < 0 || newPosition > limit)
             throw new IllegalArgumentException();
         position = newPosition;
+        return this;
     }
 
     public final int remaining() {

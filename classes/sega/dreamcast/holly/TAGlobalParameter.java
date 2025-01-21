@@ -1,33 +1,39 @@
 package sega.dreamcast.holly;
 
+import sega.dreamcast.MemoryMap;
+import sega.dreamcast.sh7091.StoreQueueBuffer;
+import jvm.internal.SH4Intrinsic;
+import jvm.internal.Memory;
 
 public class TAGlobalParameter {
-    public static class end_of_list {
+    public static class end_of_list
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
-        public int _res0;
-        public int _res1;
-        public int _res2;
-        public int _res3;
-        public int _res4;
-        public int _res5;
-        public int _res6;
         public end_of_list(int parameter_control_word
                            ) {
+            super();
             this.parameter_control_word = parameter_control_word;
-            this._res0 = 0;
-            this._res1 = 0;
-            this._res2 = 0;
-            this._res3 = 0;
-            this._res4 = 0;
-            this._res5 = 0;
-            this._res6 = 0;
+        }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, 0);
+            putInt(8, 0);
+            putInt(12, 0);
+            putInt(16, 0);
+            putInt(20, 0);
+            putInt(24, 0);
+            putInt(28, 0);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            SH4Intrinsic.pref1(MemoryMap.store_queue);
         }
     }
-    public static class user_tile_clip {
+    public static class user_tile_clip
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
-        public int _res0;
-        public int _res1;
-        public int _res2;
         public int user_clip_x_min;
         public int user_clip_y_min;
         public int user_clip_x_max;
@@ -38,21 +44,32 @@ public class TAGlobalParameter {
                               int user_clip_x_max,
                               int user_clip_y_max
                               ) {
+            super();
             this.parameter_control_word = parameter_control_word;
-            this._res0 = 0;
-            this._res1 = 0;
-            this._res2 = 0;
             this.user_clip_x_min = user_clip_x_min;
             this.user_clip_y_min = user_clip_y_min;
             this.user_clip_x_max = user_clip_x_max;
             this.user_clip_y_max = user_clip_y_max;
         }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, 0);
+            putInt(8, 0);
+            putInt(12, 0);
+            putInt(16, user_clip_x_min);
+            putInt(20, user_clip_y_min);
+            putInt(24, user_clip_x_max);
+            putInt(28, user_clip_y_max);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            SH4Intrinsic.pref1(MemoryMap.store_queue);
+        }
     }
-    public static class object_list_set {
+    public static class object_list_set
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
         public int object_pointer;
-        public int _res0;
-        public int _res1;
         public int bounding_box_x_min;
         public int bounding_box_y_min;
         public int bounding_box_x_max;
@@ -64,23 +81,35 @@ public class TAGlobalParameter {
                                int bounding_box_x_max,
                                int bounding_box_y_max
                                ) {
+            super();
             this.parameter_control_word = parameter_control_word;
             this.object_pointer = object_pointer;
-            this._res0 = 0;
-            this._res1 = 0;
             this.bounding_box_x_min = bounding_box_x_min;
             this.bounding_box_y_min = bounding_box_y_min;
             this.bounding_box_x_max = bounding_box_x_max;
             this.bounding_box_y_max = bounding_box_y_max;
         }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, object_pointer);
+            putInt(8, 0);
+            putInt(12, 0);
+            putInt(16, bounding_box_x_min);
+            putInt(20, bounding_box_y_min);
+            putInt(24, bounding_box_x_max);
+            putInt(28, bounding_box_y_max);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            SH4Intrinsic.pref1(MemoryMap.store_queue);
+        }
     }
-    public static class polygon_type_0 {
+    public static class polygon_type_0
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word;
         public int texture_control_word;
-        public int _res0;
-        public int _res1;
         public int data_size_for_sort_dma;
         public int next_address_for_sort_dma;
         public polygon_type_0(int parameter_control_word,
@@ -90,17 +119,31 @@ public class TAGlobalParameter {
                               int data_size_for_sort_dma,
                               int next_address_for_sort_dma
                               ) {
+            super();
             this.parameter_control_word = parameter_control_word;
             this.isp_tsp_instruction_word = isp_tsp_instruction_word;
             this.tsp_instruction_word = tsp_instruction_word;
             this.texture_control_word = texture_control_word;
-            this._res0 = 0;
-            this._res1 = 0;
             this.data_size_for_sort_dma = data_size_for_sort_dma;
             this.next_address_for_sort_dma = next_address_for_sort_dma;
         }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, isp_tsp_instruction_word);
+            putInt(8, tsp_instruction_word);
+            putInt(12, texture_control_word);
+            putInt(16, 0);
+            putInt(20, 0);
+            putInt(24, data_size_for_sort_dma);
+            putInt(28, next_address_for_sort_dma);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            SH4Intrinsic.pref1(MemoryMap.store_queue);
+        }
     }
-    public static class polygon_type_1 {
+    public static class polygon_type_1
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word;
@@ -118,6 +161,7 @@ public class TAGlobalParameter {
                               float face_color_g,
                               float face_color_b
                               ) {
+            super();
             this.parameter_control_word = parameter_control_word;
             this.isp_tsp_instruction_word = isp_tsp_instruction_word;
             this.tsp_instruction_word = tsp_instruction_word;
@@ -127,14 +171,27 @@ public class TAGlobalParameter {
             this.face_color_g = face_color_g;
             this.face_color_b = face_color_b;
         }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, isp_tsp_instruction_word);
+            putInt(8, tsp_instruction_word);
+            putInt(12, texture_control_word);
+            putFloat(16, face_color_alpha);
+            putFloat(20, face_color_r);
+            putFloat(24, face_color_g);
+            putFloat(28, face_color_b);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            SH4Intrinsic.pref1(MemoryMap.store_queue);
+        }
     }
-    public static class polygon_type_2 {
+    public static class polygon_type_2
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word;
         public int texture_control_word;
-        public int _res0;
-        public int _res1;
         public int data_size_for_sort_dma;
         public int next_address_for_sort_dma;
         public float face_color_alpha;
@@ -160,12 +217,11 @@ public class TAGlobalParameter {
                               float face_offset_color_g,
                               float face_offset_color_b
                               ) {
+            super();
             this.parameter_control_word = parameter_control_word;
             this.isp_tsp_instruction_word = isp_tsp_instruction_word;
             this.tsp_instruction_word = tsp_instruction_word;
             this.texture_control_word = texture_control_word;
-            this._res0 = 0;
-            this._res1 = 0;
             this.data_size_for_sort_dma = data_size_for_sort_dma;
             this.next_address_for_sort_dma = next_address_for_sort_dma;
             this.face_color_alpha = face_color_alpha;
@@ -177,8 +233,32 @@ public class TAGlobalParameter {
             this.face_offset_color_g = face_offset_color_g;
             this.face_offset_color_b = face_offset_color_b;
         }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, isp_tsp_instruction_word);
+            putInt(8, tsp_instruction_word);
+            putInt(12, texture_control_word);
+            putInt(16, 0);
+            putInt(20, 0);
+            putInt(24, data_size_for_sort_dma);
+            putInt(28, next_address_for_sort_dma);
+            putFloat(32, face_color_alpha);
+            putFloat(36, face_color_r);
+            putFloat(40, face_color_g);
+            putFloat(44, face_color_b);
+            putFloat(48, face_offset_color_alpha);
+            putFloat(52, face_offset_color_r);
+            putFloat(56, face_offset_color_g);
+            putFloat(60, face_offset_color_b);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            Memory.putU4(0xff00003c, MemoryMap.ta_fifo_polygon_converter); // QACR1
+            SH4Intrinsic.pref2(MemoryMap.store_queue);
+        }
     }
-    public static class polygon_type_3 {
+    public static class polygon_type_3
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word_0;
@@ -196,6 +276,7 @@ public class TAGlobalParameter {
                               int data_size_for_sort_dma,
                               int next_address_for_sort_dma
                               ) {
+            super();
             this.parameter_control_word = parameter_control_word;
             this.isp_tsp_instruction_word = isp_tsp_instruction_word;
             this.tsp_instruction_word_0 = tsp_instruction_word_0;
@@ -205,8 +286,23 @@ public class TAGlobalParameter {
             this.data_size_for_sort_dma = data_size_for_sort_dma;
             this.next_address_for_sort_dma = next_address_for_sort_dma;
         }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, isp_tsp_instruction_word);
+            putInt(8, tsp_instruction_word_0);
+            putInt(12, texture_control_word_0);
+            putInt(16, tsp_instruction_word_1);
+            putInt(20, texture_control_word_1);
+            putInt(24, data_size_for_sort_dma);
+            putInt(28, next_address_for_sort_dma);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            SH4Intrinsic.pref1(MemoryMap.store_queue);
+        }
     }
-    public static class polygon_type_4 {
+    public static class polygon_type_4
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word_0;
@@ -240,6 +336,7 @@ public class TAGlobalParameter {
                               float face_color_g_1,
                               float face_color_b_1
                               ) {
+            super();
             this.parameter_control_word = parameter_control_word;
             this.isp_tsp_instruction_word = isp_tsp_instruction_word;
             this.tsp_instruction_word_0 = tsp_instruction_word_0;
@@ -257,8 +354,32 @@ public class TAGlobalParameter {
             this.face_color_g_1 = face_color_g_1;
             this.face_color_b_1 = face_color_b_1;
         }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, isp_tsp_instruction_word);
+            putInt(8, tsp_instruction_word_0);
+            putInt(12, texture_control_word_0);
+            putInt(16, tsp_instruction_word_1);
+            putInt(20, texture_control_word_1);
+            putInt(24, data_size_for_sort_dma);
+            putInt(28, next_address_for_sort_dma);
+            putFloat(32, face_color_alpha_0);
+            putFloat(36, face_color_r_0);
+            putFloat(40, face_color_g_0);
+            putFloat(44, face_color_b_0);
+            putFloat(48, face_color_alpha_1);
+            putFloat(52, face_color_r_1);
+            putFloat(56, face_color_g_1);
+            putFloat(60, face_color_b_1);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            Memory.putU4(0xff00003c, MemoryMap.ta_fifo_polygon_converter); // QACR1
+            SH4Intrinsic.pref2(MemoryMap.store_queue);
+        }
     }
-    public static class sprite {
+    public static class sprite
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
         public int tsp_instruction_word;
@@ -276,6 +397,7 @@ public class TAGlobalParameter {
                       int data_size_for_sort_dma,
                       int next_address_for_sort_dma
                       ) {
+            super();
             this.parameter_control_word = parameter_control_word;
             this.isp_tsp_instruction_word = isp_tsp_instruction_word;
             this.tsp_instruction_word = tsp_instruction_word;
@@ -285,27 +407,43 @@ public class TAGlobalParameter {
             this.data_size_for_sort_dma = data_size_for_sort_dma;
             this.next_address_for_sort_dma = next_address_for_sort_dma;
         }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, isp_tsp_instruction_word);
+            putInt(8, tsp_instruction_word);
+            putInt(12, texture_control_word);
+            putInt(16, base_color);
+            putInt(20, offset_color);
+            putInt(24, data_size_for_sort_dma);
+            putInt(28, next_address_for_sort_dma);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            SH4Intrinsic.pref1(MemoryMap.store_queue);
+        }
     }
-    public static class modifier_volume {
+    public static class modifier_volume
+        extends StoreQueueBuffer
+    {
+
         public int parameter_control_word;
         public int isp_tsp_instruction_word;
-        public int _res0;
-        public int _res1;
-        public int _res2;
-        public int _res3;
-        public int _res4;
-        public int _res5;
         public modifier_volume(int parameter_control_word,
                                int isp_tsp_instruction_word
                                ) {
+            super();
             this.parameter_control_word = parameter_control_word;
             this.isp_tsp_instruction_word = isp_tsp_instruction_word;
-            this._res0 = 0;
-            this._res1 = 0;
-            this._res2 = 0;
-            this._res3 = 0;
-            this._res4 = 0;
-            this._res5 = 0;
+        }
+        public void submit() {
+            putInt(0, parameter_control_word);
+            putInt(4, isp_tsp_instruction_word);
+            putInt(8, 0);
+            putInt(12, 0);
+            putInt(16, 0);
+            putInt(20, 0);
+            putInt(24, 0);
+            putInt(28, 0);
+            Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0
+            SH4Intrinsic.pref1(MemoryMap.store_queue);
         }
     }
 }

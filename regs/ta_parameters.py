@@ -65,5 +65,7 @@ if __name__ == "__main__":
                          expected_offset=4,
                          expected_sizes={32, 64})
     render, out = renderer(indent_length=4)
-    render(render_declarations(get_type, package_name, class_name, declarations))
+    render(render_declarations(get_type, package_name, class_name, declarations,
+                               store_queue_buffer=True,
+                               get_byte=False))
     sys.stdout.write(out.getvalue())

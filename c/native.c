@@ -11,6 +11,7 @@
 #include "native/object.h"
 #include "native/printstream.h"
 #include "native/runtime.h"
+#include "native/sh4intrinsic.h"
 #include "native/system.h"
 
 typedef void (* native_func_t)(struct vm * vm, uint32_t * args);
@@ -229,6 +230,20 @@ const static struct native_method native_method[] = {
     .method_name = "_read",
     .method_descriptor = "(I)I",
     .func = native_jvm_internal_libcinputstream_read_1,
+  },
+#endif
+#if defined(__dreamcast__)
+  {
+    .class_name = "jvm/internal/SH4Intrinsic",
+    .method_name = "pref1",
+    .method_descriptor = "(I)V",
+    .func = native_jvm_internal_sh4intrinsic_pref1_1,
+  },
+  {
+    .class_name = "jvm/internal/SH4Intrinsic",
+    .method_name = "pref2",
+    .method_descriptor = "(I)V",
+    .func = native_jvm_internal_sh4intrinsic_pref2_1,
   },
 #endif
 };

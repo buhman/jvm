@@ -28,13 +28,13 @@ public class GdromProtocol {
         }
 
         int features = enable_dma ? GdromBits.features__dma__enable : GdromBits.features__dma__disable;
-        Memory.putU1(Gdrom.features, features);
+        Memory.putU1(Gdrom.features, (byte)features);
 
         int drive_select = GdromBits.drive_select__drive_select
                          | GdromBits.drive_select__lun(0);
-        Memory.putU1(Gdrom.drive_select, drive_select);
+        Memory.putU1(Gdrom.drive_select, (byte)drive_select);
 
-        Memory.putU1(Gdrom.command, GdromBits.command__code__packet_command);
+        Memory.putU1(Gdrom.command, (byte)GdromBits.command__code__packet_command);
 
         //System.out.println("words:");
         for (int i = 0; i < 6; i++) {
@@ -43,7 +43,7 @@ public class GdromProtocol {
             // little endian
             int word = ((i1 & 0xff) << 8) | (i0 & 0xff);
             //System.out.println(word);
-            Memory.putU2(Gdrom.data, word);
+            Memory.putU2(Gdrom.data, (byte)word);
         }
 
         /*

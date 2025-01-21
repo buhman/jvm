@@ -8,7 +8,7 @@ public class ByteBuffer
 
     private boolean bigEndian;
 
-    private ByteBuffer(int address, int position, int limit, int capacity, int bigEndian) {
+    protected ByteBuffer(int address, int position, int limit, int capacity, boolean bigEndian) {
         super(address, position, limit, capacity);
         bigEndian = bigEndian;
     }
@@ -124,7 +124,7 @@ public class ByteBuffer
     public int getInt(int index) {
         if (index < 0 || index >= (limit - 3))
             throw new IndexOutOfBoundsException();
-        in i = Memory.getUnalignedU4(address + index, bigEndian);
+        int i = Memory.getUnalignedU4(address + index, bigEndian);
         return i;
     }
 
@@ -139,7 +139,7 @@ public class ByteBuffer
     public short getShort(short index) {
         if (index < 0 || index >= (limit - 1))
             throw new IndexOutOfBoundsException();
-        in i = Memory.getUnalignedU2(address + index, bigEndian);
+        short i = Memory.getUnalignedU2(address + index, bigEndian);
         return i;
     }
 
@@ -153,6 +153,7 @@ public class ByteBuffer
         for (int i = position; i < limit; i++) {
             h = 31 * h + (int)get(i);
         }
+        return h;
     }
 
     public boolean isDirect() {
@@ -171,7 +172,7 @@ public class ByteBuffer
     public ByteBuffer put(byte b) {
         if (position >= limit)
             throw new IndexOutOfBoundsException();
-        Memory.putU1(address + position);
+        Memory.putU1(address + position, b);
         position += 1;
         return this;
     }
@@ -197,7 +198,8 @@ public class ByteBuffer
 
     public ByteBuffer put(ByteBuffer src) {
         int rem = limit - position;
-        if (rem < src.length) {
+        int srcRem = src.limit - src.position;
+        if (rem < srcRem) {
             throw new BufferUnderflowException();
         }
         if (src == this) {
@@ -206,6 +208,7 @@ public class ByteBuffer
         for (int i = src.position; i < src.limit; i++) {
             put(src.get(i));
         }
+        return this;
     }
 
     public ByteBuffer put(int index,
@@ -274,9 +277,9 @@ public class ByteBuffer
 
     public String toString() {
         return getClass().getName()
-            + "[pos=" + position
-            + " lim=" + limit
-            + " cap=" + capacity
+            + "[pos=" + Integer.toString(position)
+            + " lim=" + Integer.toString(limit)
+            + " cap=" + Integer.toString(capacity)
             + "]";
     }
 

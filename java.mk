@@ -38,7 +38,7 @@ OBJ = \
 MAIN_DREAMCAST_OBJ = \
 	c/main_dreamcast.o \
 	c/sh7091_scif.o \
-	images/java_powered.data.o
+	c/native/sh4intrinsic.o
 
 MAIN_HOSTED_OBJ = \
 	c/file.o \

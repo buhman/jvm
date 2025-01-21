@@ -30,9 +30,11 @@ def _render(out, lines, indent_length):
             else:
                 level += indent_length
 
+        """
         if level == 0 and l and l[-1] == ";":
             if should_autonewline(l):
                 out.write("\n")
+        """
     return out
 
 def renderer(indent_length=2):

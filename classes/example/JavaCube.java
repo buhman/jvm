@@ -55,9 +55,6 @@ class JavaCubeDirectoryRecordHandler implements DirectoryRecordHandler {
         byte[] buf = dr.array;
         int offset = dr.offset + DirectoryRecord.FILE_IDENTIFIER_START;
 
-        if (buf[offset] != (byte)'J')
-            return -1;
-
         for (int i = 0; i < texture_filenames.length; i++) {
             byte[] texture_filename = texture_filenames[i].getBytes();
             if (bytesEqual(buf, offset, texture_filename, length))

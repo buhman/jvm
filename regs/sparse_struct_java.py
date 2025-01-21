@@ -1,6 +1,6 @@
-def render_fields(get_type, fields, want_get_byte):
+def render_fields(get_type, fields):
     for field in fields:
-        if want_get_byte and field.name.startswith("_res"):
+        if field.name.startswith("_res"):
             continue
 
         field_type = get_type(field.name)
@@ -10,7 +10,7 @@ def render_fields(get_type, fields, want_get_byte):
             for i in range(field.array_length):
                 yield f"public {field_type} {field.name}{i};"
 
-def render_constructor(get_type, declaration, want_get_byte):
+def render_constructor(get_type, declaration, store_queue_buffer):
     initializer = f"public {declaration.name}("
     padding = " " * len(initializer)
     def start(i):
@@ -34,8 +34,10 @@ def render_constructor(get_type, declaration, want_get_byte):
     else:
         yield initializer + ') {'
 
+    yield "super();"
+
     for i, field in enumerate(declaration.fields):
-        if want_get_byte and field.name.startswith("_res"):
+        if field.name.startswith("_res"):
             continue
 
         value = field.name if not field.name.startswith('_res') else '0'
@@ -60,8 +62,8 @@ def render_get_byte(fields):
     yield "switch (ix) {"
     for field in fields:
         if "_res" in field.name:
-            pass
-        elif field.array_length == 1:
+            continue
+        if field.array_length == 1:
             yield f"case {ix}: return {field.name};"
         else:
             for i in range(field.array_length):
@@ -71,18 +73,55 @@ def render_get_byte(fields):
     yield "}"
     yield "}"
 
-def render_declaration(get_type, declaration, want_get_byte):
-    yield f"public static class {declaration.name} implements GdromCommandPacketInterface {{"
-    yield from render_fields(get_type, declaration.fields, want_get_byte)
-    yield from render_constructor(get_type, declaration, want_get_byte)
-    if want_get_byte:
-        yield from render_get_byte(declaration.fields)
+def render_submit(get_type, fields):
+    yield "public void submit() {"
+    for i, field in enumerate(fields):
+        index = i * 4
+        value = "0" if "_res" in field.name else field.name
+        field_type = get_type(field.name)
+        if field_type == "int":
+            yield f"putInt({index}, {value});"
+        elif field_type == "float":
+            yield f"putFloat({index}, {value});"
+        else:
+            assert False, field_type
+    yield "Memory.putU4(0xff000038, MemoryMap.ta_fifo_polygon_converter); // QACR0";
+    if len(fields) == 16:
+        yield "Memory.putU4(0xff00003c, MemoryMap.ta_fifo_polygon_converter); // QACR1";
+    if len(fields) == 8:
+        yield "SH4Intrinsic.pref1(MemoryMap.store_queue);"
+    else:
+        yield "SH4Intrinsic.pref2(MemoryMap.store_queue);"
+
     yield "}"
 
-def render_declarations(get_type, package_name, class_name, declarations, want_get_byte=False):
+def render_declaration(get_type, declaration, store_queue_buffer, get_byte):
+    yield f"public static class {declaration.name}"
+    if store_queue_buffer:
+        assert len(declaration.fields) in {8, 16}, len(declaration.fields)
+        yield "    extends StoreQueueBuffer"
+    if get_byte: # FIXME: hack?
+        yield "    implements GdromCommandPacketInterface"
+    yield "{"
+    yield ""
+    yield from render_fields(get_type, declaration.fields)
+    yield from render_constructor(get_type, declaration, store_queue_buffer)
+    if get_byte:
+        yield from render_get_byte(declaration.fields)
+    if store_queue_buffer:
+        yield from render_submit(get_type, declaration.fields)
+    yield "}"
+
+def render_declarations(get_type, package_name, class_name, declarations, *, store_queue_buffer, get_byte):
     yield f"package sega.dreamcast.{package_name};"
     yield ""
+    if store_queue_buffer:
+        yield "import sega.dreamcast.MemoryMap;"
+        yield "import sega.dreamcast.sh7091.StoreQueueBuffer;"
+        yield "import jvm.internal.SH4Intrinsic;"
+        yield "import jvm.internal.Memory;"
+        yield ""
     yield f"public class {class_name} {{"
     for declaration in declarations:
-        yield from render_declaration(get_type, declaration, want_get_byte)
+        yield from render_declaration(get_type, declaration, store_queue_buffer, get_byte)
     yield "}"

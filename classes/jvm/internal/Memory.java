@@ -17,8 +17,6 @@ public class Memory {
     public static native short getUnalignedU2(int address, boolean bigEndian);
     public static native float getUnalignedF4(int address, boolean bigEndian);
 
-    public static native void putSQ1(Object object, int address);
-
     public static native boolean isBigEndian();
 
     public static native int allocate(int size);
