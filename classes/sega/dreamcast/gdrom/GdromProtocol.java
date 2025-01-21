@@ -42,8 +42,7 @@ public class GdromProtocol {
             int i1 = command.getByte(i * 2 + 1);
             // little endian
             int word = ((i1 & 0xff) << 8) | (i0 & 0xff);
-            //System.out.println(word);
-            Memory.putU2(Gdrom.data, (byte)word);
+            Memory.putU2(Gdrom.data, (short)word);
         }
 
         /*
