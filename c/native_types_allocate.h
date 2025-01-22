@@ -4,6 +4,7 @@
 #include "gc.h"
 #include "vm.h"
 #include "memory_allocator.h"
+#include "compat.h"
 
 static inline void * gc_memory_allocate(struct vm * vm, int size)
 {

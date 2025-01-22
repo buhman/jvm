@@ -157,9 +157,9 @@ static void print_methodhandle_constant(const char * indent, struct constant * m
   for (int i = 0; i < (sizeof (indent2)) - 1; i++) indent2[i] = ' ';
 
   switch (methodhandle_constant->methodhandle.reference_kind) {
-  case REF_getField: [[fallthrough]];
-  case REF_getStatic: [[fallthrough]];
-  case REF_putField: [[fallthrough]];
+  case REF_getField: /* fall through */;
+  case REF_getStatic: /* fall through */;
+  case REF_putField: /* fall through */;
   case REF_putStatic:
     // If the value of the reference_kind item is 1 (REF_getField), 2
     // (REF_getStatic), 3 (REF_putField), or 4 (REF_putStatic), then the
@@ -169,7 +169,7 @@ static void print_methodhandle_constant(const char * indent, struct constant * m
     assert(constant->tag == CONSTANT_Fieldref);
     print_methodref(indent2, constant, constant_pool);
     break;
-  case REF_invokeVirtual: [[fallthrough]];
+  case REF_invokeVirtual: /* fall through */;
   case REF_newInvokeSpecial:
     // If the value of the reference_kind item is 5 (REF_invokeVirtual) or 8
     // (REF_newInvokeSpecial), then the constant_pool entry at that index must be
@@ -178,7 +178,7 @@ static void print_methodhandle_constant(const char * indent, struct constant * m
     assert(constant->tag == CONSTANT_Methodref);
     print_methodref(indent2, constant, constant_pool);
     break;
-  case REF_invokeStatic: [[fallthrough]];
+  case REF_invokeStatic: /* fall through */;
   case REF_invokeSpecial:
     // If the value of the reference_kind item is 6 (REF_invokeStatic) or 7
     // (REF_invokeSpecial), [...] the constant_pool entry at that index must be

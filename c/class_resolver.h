@@ -6,6 +6,7 @@
 #include "hash_table.h"
 #include "native_types.h"
 #include "vm.h"
+#include "compat.h"
 
 struct hash_table_entry * class_resolver_load_from_buffers(const uint8_t ** buffers,
                                                            int length,

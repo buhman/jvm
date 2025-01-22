@@ -144,8 +144,8 @@ struct class_file * class_file_parse(const uint8_t * buf)
     case CONSTANT_Class:
       constant->class.name_index = parse_u2(&buf);
       break;
-    case CONSTANT_Fieldref:             [[fallthrough]];
-    case CONSTANT_Methodref:            [[fallthrough]];
+    case CONSTANT_Fieldref:             /* fall through */;
+    case CONSTANT_Methodref:            /* fall through */;
     case CONSTANT_InterfaceMethodref:
       constant->fieldref.class_index = parse_u2(&buf);
       constant->fieldref.name_and_type_index = parse_u2(&buf);
@@ -153,11 +153,11 @@ struct class_file * class_file_parse(const uint8_t * buf)
     case CONSTANT_String:
       constant->string.string_index = parse_u2(&buf);
       break;
-    case CONSTANT_Integer:              [[fallthrough]];
+    case CONSTANT_Integer:              /* fall through */;
     case CONSTANT_Float:
       constant->integer.bytes = parse_u4(&buf);
       break;
-    case CONSTANT_Long:                 [[fallthrough]];
+    case CONSTANT_Long:                 /* fall through */;
     case CONSTANT_Double:
       {
         uint64_t high_bytes = parse_u4(&buf);
@@ -183,12 +183,12 @@ struct class_file * class_file_parse(const uint8_t * buf)
     case CONSTANT_MethodType:
       constant->methodtype.descriptor_index = parse_u2(&buf);
       break;
-    case CONSTANT_Dynamic:              [[fallthrough]];
+    case CONSTANT_Dynamic:              /* fall through */;
     case CONSTANT_InvokeDynamic:
       constant->dynamic.bootstrap_method_attr_index = parse_u2(&buf);
       constant->dynamic.name_and_type_index = parse_u2(&buf);
       break;
-    case CONSTANT_Module:               [[fallthrough]];
+    case CONSTANT_Module:               /* fall through */;
     case CONSTANT_Package:
       constant->module.name_index = parse_u2(&buf);
       break;

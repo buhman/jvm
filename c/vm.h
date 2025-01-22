@@ -2,6 +2,7 @@
 
 #include "frame_stack.h"
 #include "class_file.h"
+#include "compat.h"
 
 bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry);
 void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "compat.h"
 
 struct hash_table_entry {
   const uint8_t * key;

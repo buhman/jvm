@@ -1,18 +1,28 @@
 #include "math.h"
 
-void __attribute__ ((noinline)) __attribute__ ((optimize(0)))
+float __attribute__ ((noinline)) cosf(float f)
+{
+    return __builtin_cosf(f);
+}
+
+float __attribute__ ((noinline)) sinf(float f)
+{
+    return __builtin_sinf(f);
+}
+
+void
 native_java_lang_math_sin_1(struct vm * vm, uint32_t * args)
 {
   float arg = ((float *)args)[0];
-  float value = __builtin_sinf(arg);
+  float value = sinf(arg);
   operand_stack_push_f32(vm->current_frame, value);
 }
 
-void __attribute__ ((noinline)) __attribute__ ((optimize(0)))
+void
 native_java_lang_math_cos_1(struct vm * vm, uint32_t * args)
 {
   float arg = ((float *)args)[0];
-  float value = __builtin_cosf(arg);
+  float value = cosf(arg);
   operand_stack_push_f32(vm->current_frame, value);
 }
 

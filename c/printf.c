@@ -143,7 +143,7 @@ void _printf(const char * format, ...)
             print_char('0');
             print_char('x');
           }
-          [[fallthrough]];
+          /* fall through */;
         case FORMAT_BASE16:
           {
             uint32_t num = va_arg(args, uint32_t);

@@ -221,14 +221,14 @@ set -eux
 
 find . -name '*.class' -not -path "./classes/java/*" -exec rm -f {} \;
 
-make -f Makefile.dreamcast.mk $(boot_sources | java_to_class)
+make -f Makefile.dreamcast.mk TARGET=sh-elf- $(boot_sources | java_to_class)
 find . -name '*.class' | rename_class_files
 boot_classes | classpath_mk
 boot_classes | classpath_inc_c
 boot_classes | make_header
 boot_classes | classpath_h
 
-make -f Makefile.dreamcast.mk $(application_sources | java_to_class)
+make -f Makefile.dreamcast.mk TARGET=sh-elf- $(application_sources | java_to_class)
 find . -name '*.class' | rename_class_files
 
 boot_classes | sort > classes.txt

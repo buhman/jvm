@@ -64,20 +64,20 @@ enum ARRAY_TYPE {
 static inline int array_element_size(int atype)
 {
   switch (atype) {
-  case T_BOOLEAN: [[fallthrough]]; // 1 byte
-  case T_BYTE:                     // 1 byte
+  case T_BOOLEAN: /* fall through */; // 1 byte
+  case T_BYTE:                        // 1 byte
     return 1;
     break;
-  case T_CHAR:    [[fallthrough]]; // 2 bytes
-  case T_SHORT:                    // 2 bytes
+  case T_CHAR:    /* fall through */; // 2 bytes
+  case T_SHORT:                       // 2 bytes
     return 2;
     break;
-  case T_FLOAT:   [[fallthrough]]; // 4 bytes
-  case T_INT:                      // 4 bytes
+  case T_FLOAT:   /* fall through */; // 4 bytes
+  case T_INT:                         // 4 bytes
     return 4;
     break;
-  case T_DOUBLE:  [[fallthrough]]; // 8 bytes
-  case T_LONG:                     // 8 bytes
+  case T_DOUBLE:  /* fall through */; // 8 bytes
+  case T_LONG:                        // 8 bytes
     return 8;
     break;
   default:

@@ -33,7 +33,7 @@ int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_typ
     switch (byte) {
     case '[':
       break;
-    case 'D': [[fallthrough]];
+    case 'D': /* fall through */;
     case 'J':
       nargs += 2;
       break;
@@ -41,11 +41,11 @@ int descriptor_nargs(struct constant * descriptor_constant, uint8_t * return_typ
       nargs += 1;
       while (descriptor_constant->utf8.bytes[i] != ';') i += 1;
       break;
-    case 'B': [[fallthrough]];
-    case 'C': [[fallthrough]];
-    case 'F': [[fallthrough]];
-    case 'I': [[fallthrough]];
-    case 'S': [[fallthrough]];
+    case 'B': /* fall through */;
+    case 'C': /* fall through */;
+    case 'F': /* fall through */;
+    case 'I': /* fall through */;
+    case 'S': /* fall through */;
     case 'Z':
       nargs += 1;
       break;
@@ -304,20 +304,20 @@ void vm_method_return(struct vm * vm)
   */
 
   switch (old_frame->return_type) {
-  case 'B': [[fallthrough]];
-  case 'C': [[fallthrough]];
-  case 'F': [[fallthrough]];
-  case 'I': [[fallthrough]];
-  case 'L': [[fallthrough]];
-  case 'S': [[fallthrough]];
-  case 'Z': [[fallthrough]];
+  case 'B': /* fall through */;
+  case 'C': /* fall through */;
+  case 'F': /* fall through */;
+  case 'I': /* fall through */;
+  case 'L': /* fall through */;
+  case 'S': /* fall through */;
+  case 'Z': /* fall through */;
   case '[':
     {
       uint32_t value = operand_stack_pop_u32(old_frame);
       operand_stack_push_u32(vm->current_frame, value);
     }
     break;
-  case 'D': [[fallthrough]];
+  case 'D': /* fall through */;
   case 'J':
     {
       uint64_t value = operand_stack_pop_u64(old_frame);

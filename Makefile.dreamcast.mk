@@ -1,6 +1,8 @@
 all: $(patsubst %.cpp,%.elf,$(wildcard example/*.cpp))
 
-OPT = -Og
+OPT = -O2
+
+CSTD = -std=gnu11
 
 MAKEFILE_PATH := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 LIB ?= $(MAKEFILE_PATH)/dreamcast
@@ -48,7 +50,8 @@ LIBGCC_OBJ = \
 	libgcc/_sdivsi3.o \
 	libgcc/_fixsfdi.o \
 	libgcc/_div_table.o \
-	libgcc/_movmem_i4.o
+	libgcc/_movmem_i4.o \
+	libgcc/_set_fpscr.o
 
 include classpath.mk
 

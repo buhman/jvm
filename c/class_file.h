@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "compat.h"
 
 typedef uint64_t u8;
 typedef uint32_t u4;

@@ -2,6 +2,7 @@
 
 #include "native_types.h"
 #include "vm.h"
+#include "compat.h"
 
 struct backtrace_entry {
   struct class_file * class_file;

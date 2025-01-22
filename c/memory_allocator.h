@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "compat.h"
 
 void memory_reset_free_list();
 void * memory_allocate(uint32_t size);

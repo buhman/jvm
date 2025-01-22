@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vm.h"
+#include "compat.h"
 
 struct hash_table_entry * native_init_hash_table(int * hash_table_length);
 

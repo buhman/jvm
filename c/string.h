@@ -1,5 +1,7 @@
 #pragma once
 
+#include "compat.h"
+
 static inline int string_length(const char * s)
 {
   const char * si = s;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-
+#include "compat.h"
 #include "vm.h"
 
 void native_java_io_printstream_write_ba_1(struct vm * vm, uint32_t * args);

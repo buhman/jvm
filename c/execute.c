@@ -772,20 +772,20 @@ void op_getfield(struct vm * vm, uint32_t index)
   debugf("getfield instance_index %d\n", field_entry->instance_index);
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
-  case 'B': [[fallthrough]];
-  case 'C': [[fallthrough]];
-  case 'F': [[fallthrough]];
-  case 'I': [[fallthrough]];
-  case 'L': [[fallthrough]];
-  case 'S': [[fallthrough]];
-  case 'Z': [[fallthrough]];
+  case 'B': /* fall through */;
+  case 'C': /* fall through */;
+  case 'F': /* fall through */;
+  case 'I': /* fall through */;
+  case 'L': /* fall through */;
+  case 'S': /* fall through */;
+  case 'Z': /* fall through */;
   case '[':
     {
       void * value = objectref->oref[field_entry->instance_index];
       operand_stack_push_ref(vm->current_frame, value);
     }
     break;
-  case 'D': [[fallthrough]];
+  case 'D': /* fall through */;
   case 'J':
     {
       void * low = objectref->oref[field_entry->instance_index];
@@ -818,20 +818,20 @@ void op_getstatic(struct vm * vm, uint32_t index)
     return;
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
-  case 'B': [[fallthrough]];
-  case 'C': [[fallthrough]];
-  case 'F': [[fallthrough]];
-  case 'I': [[fallthrough]];
-  case 'L': [[fallthrough]];
-  case 'S': [[fallthrough]];
-  case 'Z': [[fallthrough]];
+  case 'B': /* fall through */;
+  case 'C': /* fall through */;
+  case 'F': /* fall through */;
+  case 'I': /* fall through */;
+  case 'L': /* fall through */;
+  case 'S': /* fall through */;
+  case 'Z': /* fall through */;
   case '[':
     {
       uint32_t value = class_entry->static_fields[field_entry->static_index];
       operand_stack_push_u32(vm->current_frame, value);
     }
     break;
-  case 'D': [[fallthrough]];
+  case 'D': /* fall through */;
   case 'J':
     {
       uint32_t low = class_entry->static_fields[field_entry->static_index];
@@ -1942,13 +1942,13 @@ void op_putfield(struct vm * vm, uint32_t index)
   debugf("putfield instance_index %d\n", field_entry->instance_index);
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
-  case 'B': [[fallthrough]];
-  case 'C': [[fallthrough]];
-  case 'F': [[fallthrough]];
-  case 'I': [[fallthrough]];
-  case 'L': [[fallthrough]];
-  case 'S': [[fallthrough]];
-  case 'Z': [[fallthrough]];
+  case 'B': /* fall through */;
+  case 'C': /* fall through */;
+  case 'F': /* fall through */;
+  case 'I': /* fall through */;
+  case 'L': /* fall through */;
+  case 'S': /* fall through */;
+  case 'Z': /* fall through */;
   case '[':
     {
       uint32_t value = operand_stack_pop_u32(vm->current_frame);
@@ -1958,7 +1958,7 @@ void op_putfield(struct vm * vm, uint32_t index)
       objectref->u32[field_entry->instance_index] = value;
     }
     break;
-  case 'D': [[fallthrough]];
+  case 'D': /* fall through */;
   case 'J':
     {
       uint32_t high = operand_stack_pop_u32(vm->current_frame);
@@ -2002,20 +2002,20 @@ void op_putstatic(struct vm * vm, uint32_t index)
     return;
 
   switch (field_descriptor_constant->utf8.bytes[0]) {
-  case 'B': [[fallthrough]];
-  case 'C': [[fallthrough]];
-  case 'F': [[fallthrough]];
-  case 'I': [[fallthrough]];
-  case 'L': [[fallthrough]];
-  case 'S': [[fallthrough]];
-  case 'Z': [[fallthrough]];
+  case 'B': /* fall through */;
+  case 'C': /* fall through */;
+  case 'F': /* fall through */;
+  case 'I': /* fall through */;
+  case 'L': /* fall through */;
+  case 'S': /* fall through */;
+  case 'Z': /* fall through */;
   case '[':
     {
       uint32_t value = operand_stack_pop_u32(vm->current_frame);
       class_entry->static_fields[field_entry->static_index] = value;
     }
     break;
-  case 'D': [[fallthrough]];
+  case 'D': /* fall through */;
   case 'J':
     {
       uint32_t high = operand_stack_pop_u32(vm->current_frame);

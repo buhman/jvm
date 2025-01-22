@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-
+#include "compat.h"
 #include "vm.h"
 
 void op_aaload(struct vm * vm);

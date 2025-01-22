@@ -11,7 +11,7 @@
 
 void main()
 {
-  scif_init(0);
+  //scif_init(0);
 
   const uint8_t * class_file_buffers[] = {
     #include "classpath.inc.c"

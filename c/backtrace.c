@@ -6,6 +6,10 @@
 #include "native_types_allocate.h"
 #include "vm_instance.h"
 
+int abort() {
+  while (1);
+}
+
 struct objectref * backtrace_allocate(struct vm * vm)
 {
   struct objectref * objectref = vm_instance_create(vm, "java/lang/Backtrace");
