@@ -75,7 +75,7 @@ public class JavaCubeMemory {
         float pz = position[ptn.position].z;
 
         float theta2 = theta * 2.0f;
-        float scale = (Math.sin(theta2) + 3.0f) * 0.3f;
+        float scale = (Math.sin(theta2) + 3.0f) * 0.24f;
 
         px *= scale;
         py *= scale;
