@@ -7,6 +7,7 @@ CLASS_PATH = \
 	classes/filesystem/iso9660/PrimaryVolumeDescriptor.class.o \
 	classes/filesystem/iso9660/VolumeParser.class.o \
 	classes/java/io/PrintStream.class.o \
+	classes/java/lang/Character.class.o \
 	classes/java/lang/DecimalDigits.class.o \
 	classes/java/lang/Integer.class.o \
 	classes/java/lang/Float.class.o \
@@ -79,4 +80,5 @@ CLASS_PATH = \
 	classes/sega/dreamcast/holly/TAGlobalParameter.class.o \
 	classes/sega/dreamcast/holly/TAVertexParameter.class.o \
 	classes/sega/dreamcast/holly/TextureMemoryAllocation.class.o \
-	classes/sega/dreamcast/sh7091/StoreQueueBuffer.class.o
+	classes/sega/dreamcast/sh7091/StoreQueueBuffer.class.o \
+	classes/example/JavaCubeMemory.class.o

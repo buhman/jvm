@@ -6,6 +6,7 @@
 (const uint8_t *)&_binary_classes_filesystem_iso9660_PrimaryVolumeDescriptor_class_start,
 (const uint8_t *)&_binary_classes_filesystem_iso9660_VolumeParser_class_start,
 (const uint8_t *)&_binary_classes_java_io_PrintStream_class_start,
+(const uint8_t *)&_binary_classes_java_lang_Character_class_start,
 (const uint8_t *)&_binary_classes_java_lang_DecimalDigits_class_start,
 (const uint8_t *)&_binary_classes_java_lang_Integer_class_start,
 (const uint8_t *)&_binary_classes_java_lang_Float_class_start,
@@ -79,3 +80,4 @@
 (const uint8_t *)&_binary_classes_sega_dreamcast_holly_TAVertexParameter_class_start,
 (const uint8_t *)&_binary_classes_sega_dreamcast_holly_TextureMemoryAllocation_class_start,
 (const uint8_t *)&_binary_classes_sega_dreamcast_sh7091_StoreQueueBuffer_class_start,
+(const uint8_t *)&_binary_classes_example_JavaCubeMemory_class_start,

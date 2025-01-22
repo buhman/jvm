@@ -81,6 +81,7 @@ declare -a boot_classes=(
     filesystem/iso9660/PrimaryVolumeDescriptor.class
     filesystem/iso9660/VolumeParser.class
     java/io/PrintStream.class
+    java/lang/Character.class
     java/lang/DecimalDigits.class
     java/lang/Integer.class
     java/lang/Float.class
@@ -158,6 +159,8 @@ declare -a boot_classes=(
     sega/dreamcast/holly/TAVertexParameter.class
     sega/dreamcast/holly/TextureMemoryAllocation.class
     sega/dreamcast/sh7091/StoreQueueBuffer.class
+
+    example/JavaCubeMemory.class
 )
 
 function boot_classes () {

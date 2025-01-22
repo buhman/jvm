@@ -20,7 +20,7 @@ void main()
 
   //const uint8_t * main_class = (const uint8_t *)"example/JavaCube";
   //const uint8_t * main_class = (const uint8_t *)"example/GdromClassLoader";
-  const uint8_t * main_class = (const uint8_t *)"Main";
+  const uint8_t * main_class = (const uint8_t *)"example/JavaCubeMemory";
   int main_class_length = string_length((const char *)main_class);
 
   for (int i = 0; i < main_class_length; i++)

@@ -6,6 +6,7 @@
 #include "classes/filesystem/iso9660/PrimaryVolumeDescriptor.class.h"
 #include "classes/filesystem/iso9660/VolumeParser.class.h"
 #include "classes/java/io/PrintStream.class.h"
+#include "classes/java/lang/Character.class.h"
 #include "classes/java/lang/DecimalDigits.class.h"
 #include "classes/java/lang/Integer.class.h"
 #include "classes/java/lang/Float.class.h"
@@ -79,3 +80,4 @@
 #include "classes/sega/dreamcast/holly/TAVertexParameter.class.h"
 #include "classes/sega/dreamcast/holly/TextureMemoryAllocation.class.h"
 #include "classes/sega/dreamcast/sh7091/StoreQueueBuffer.class.h"
+#include "classes/example/JavaCubeMemory.class.h"
