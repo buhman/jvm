@@ -20,7 +20,7 @@ OBJ = \
 	c/hash_table.o \
 	c/malloc.o \
 	c/memory_allocator.o \
-	c/native.o \
+	c/native_method.o \
 	c/native/class.o \
 	c/native/loader.o \
 	c/native/math.o \

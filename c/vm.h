@@ -3,20 +3,6 @@
 #include "frame_stack.h"
 #include "class_file.h"
 
-struct vm {
-  struct stack frame_stack;
-  struct stack data_stack;
-  struct frame * current_frame;
-  struct {
-    int length;
-    struct hash_table_entry * entry;
-  } class_hash_table;
-  struct {
-    int length;
-    struct hash_table_entry * entry;
-  } native_hash_table;
-};
-
 bool vm_initialize_class(struct vm * vm, struct class_entry * class_entry);
 void vm_special_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry);
 void vm_static_method_call(struct vm * vm, struct class_entry * class_entry, struct method_entry * method_entry);

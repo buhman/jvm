@@ -2,18 +2,19 @@
 
 #include "assert.h"
 #include "class_file.h"
-#include "hash_table.h"
-#include "malloc.h"
 #include "class_resolver.h"
-#include "string.h"
-#include "memory_allocator.h"
-#include "printf.h"
-#include "field_size.h"
 #include "debug.h"
 #include "fatal.h"
-#include "parse_type.h"
+#include "field_size.h"
 #include "find_attribute.h"
+#include "hash_table.h"
+#include "malloc.h"
+#include "memory_allocator.h"
+#include "native_method.h"
 #include "native_types_allocate.h"
+#include "parse_type.h"
+#include "printf.h"
+#include "string.h"
 #include "vm_instance.h"
 
 static int field_info_field_size(struct class_file * class_file, struct field_info * field_info)
@@ -441,9 +442,7 @@ struct method_info * class_resolver_lookup_method(int methods_hash_table_length,
 static struct Code_attribute * resolve_code_attribute(struct class_entry * class_entry,
                                                       struct method_info * method_info)
 {
-  if ((method_info->access_flags & METHOD_ACC_NATIVE) != 0) {
-    return nullptr;
-  }
+  assert((method_info->access_flags & METHOD_ACC_NATIVE) == 0);
 
   int code_index = find_code_name_index(class_entry->class_file);
   assert(code_index != 0);
@@ -454,7 +453,9 @@ static struct Code_attribute * resolve_code_attribute(struct class_entry * class
   return attribute->code;
 }
 
-static void resolve_method_entry(struct class_entry * class_entry,
+static void resolve_method_entry(int native_hash_table_length,
+                                 struct hash_table_entry * native_hash_table,
+                                 struct class_entry * class_entry,
                                  struct constant * method_name_constant,
                                  struct constant * method_descriptor_constant,
                                  struct method_entry * method_entry)
@@ -470,7 +471,26 @@ static void resolve_method_entry(struct class_entry * class_entry,
 
   method_entry->class_entry = class_entry;
   method_entry->method_info = method_info;
-  method_entry->code_attribute = resolve_code_attribute(class_entry, method_info);
+  if ((method_info->access_flags & METHOD_ACC_NATIVE) == 0) {
+    method_entry->code_attribute = resolve_code_attribute(class_entry, method_info);
+  } else {
+    struct class_file * class_file = class_entry->class_file;
+
+    struct constant * class_constant = &class_file->constant_pool[class_file->this_class - 1];
+    assert(class_constant->tag == CONSTANT_Class);
+    struct constant * class_name_constant = &class_file->constant_pool[class_constant->class.name_index - 1];
+    assert(class_name_constant->tag == CONSTANT_Utf8);
+    struct constant * method_name_constant = &class_file->constant_pool[method_info->name_index - 1];
+    assert(method_name_constant->tag == CONSTANT_Utf8);
+    struct constant * method_descriptor_constant = &class_file->constant_pool[method_info->descriptor_index - 1];
+    assert(method_descriptor_constant->tag == CONSTANT_Utf8);
+
+    method_entry->native_func = native_method_lookup(native_hash_table_length,
+                                                     native_hash_table,
+                                                     class_name_constant,
+                                                     method_name_constant,
+                                                     method_descriptor_constant);
+  }
 
   debugf("method resolved:\n");
   debugf("  class: ");
@@ -482,6 +502,8 @@ static void resolve_method_entry(struct class_entry * class_entry,
 
 static void resolve_method_entry_from_superclasses(int class_hash_table_length,
                                                    struct hash_table_entry * class_hash_table,
+                                                   int native_hash_table_length,
+                                                   struct hash_table_entry * native_hash_table,
                                                    struct class_entry * class_entry,
                                                    struct constant * method_name_constant,
                                                    struct constant * method_descriptor_constant,
@@ -492,7 +514,9 @@ static void resolve_method_entry_from_superclasses(int class_hash_table_length,
   method_entry->method_info = nullptr;
 
   while (true) {
-    resolve_method_entry(class_entry,
+    resolve_method_entry(native_hash_table_length,
+                         native_hash_table,
+                         class_entry,
                          method_name_constant,
                          method_descriptor_constant,
                          method_entry);
@@ -518,6 +542,8 @@ static void resolve_method_entry_from_superclasses(int class_hash_table_length,
 
 struct method_entry class_resolver_lookup_method_from_objectref_class(int class_hash_table_length,
                                                                       struct hash_table_entry * class_hash_table,
+                                                                      int native_hash_table_length,
+                                                                      struct hash_table_entry * native_hash_table,
                                                                       int32_t methodref_index,
                                                                       struct class_entry * objectref_class_entry,
                                                                       struct class_entry * origin_class_entry)
@@ -537,6 +563,8 @@ struct method_entry class_resolver_lookup_method_from_objectref_class(int class_
 
   resolve_method_entry_from_superclasses(class_hash_table_length,
                                          class_hash_table,
+                                         native_hash_table_length,
+                                         native_hash_table,
                                          class_entry,
                                          method_name_constant,
                                          method_descriptor_constant,
@@ -547,6 +575,8 @@ struct method_entry class_resolver_lookup_method_from_objectref_class(int class_
 
 struct method_entry * class_resolver_lookup_method_from_origin_class(int class_hash_table_length,
                                                                      struct hash_table_entry * class_hash_table,
+                                                                     int native_hash_table_length,
+                                                                     struct hash_table_entry * native_hash_table,
                                                                      int32_t methodref_index,
                                                                      struct class_entry * origin_class_entry)
 {
@@ -573,6 +603,8 @@ struct method_entry * class_resolver_lookup_method_from_origin_class(int class_h
 
   resolve_method_entry_from_superclasses(class_hash_table_length,
                                          class_hash_table,
+                                         native_hash_table_length,
+                                         native_hash_table,
                                          class_entry,
                                          method_name_constant,
                                          method_descriptor_constant,
@@ -597,8 +629,8 @@ struct method_entry class_resolver_lookup_method_from_method_name_method_descrip
                                                                   method_name_length,
                                                                   method_descriptor,
                                                                   method_descriptor_length);
-
   if (method_info != nullptr) {
+    assert ((method_info->access_flags & METHOD_ACC_NATIVE) == 0);
     int code_index = find_code_name_index(class_entry->class_file);
     assert(code_index != 0);
     debugf("code_index: %d\n", code_index);

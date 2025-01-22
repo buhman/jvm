@@ -1212,6 +1212,8 @@ void op_invokeinterface(struct vm * vm, uint32_t index, uint32_t count)
   struct method_entry method_entry =
     class_resolver_lookup_method_from_objectref_class(vm->class_hash_table.length,
                                                       vm->class_hash_table.entry,
+                                                      vm->native_hash_table.length,
+                                                      vm->native_hash_table.entry,
                                                       index,
                                                       objectref->class_entry,
                                                       vm->current_frame->class_entry);
@@ -1241,6 +1243,8 @@ void op_invokespecial(struct vm * vm, uint32_t index)
   struct method_entry * method_entry =
     class_resolver_lookup_method_from_origin_class(vm->class_hash_table.length,
                                                    vm->class_hash_table.entry,
+                                                   vm->native_hash_table.length,
+                                                   vm->native_hash_table.entry,
                                                    index,
                                                    vm->current_frame->class_entry);
 
@@ -1252,6 +1256,8 @@ void op_invokestatic(struct vm * vm, uint32_t index)
   struct method_entry * method_entry =
     class_resolver_lookup_method_from_origin_class(vm->class_hash_table.length,
                                                    vm->class_hash_table.entry,
+                                                   vm->native_hash_table.length,
+                                                   vm->native_hash_table.entry,
                                                    index,
                                                    vm->current_frame->class_entry);
 
@@ -1284,6 +1290,8 @@ void op_invokevirtual(struct vm * vm, uint32_t index)
   struct method_entry method_entry =
     class_resolver_lookup_method_from_objectref_class(vm->class_hash_table.length,
                                                       vm->class_hash_table.entry,
+                                                      vm->native_hash_table.length,
+                                                      vm->native_hash_table.entry,
                                                       index,
                                                       objectref->class_entry,
                                                       vm->current_frame->class_entry);

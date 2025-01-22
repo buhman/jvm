@@ -1,10 +1,10 @@
+#include "class_resolver.h"
+#include "loader.h"
+#include "malloc.h"
+#include "native_method.h"
 #include "native_types.h"
 #include "printf.h"
 #include "string.h"
-#include "malloc.h"
-#include "loader.h"
-#include "native.h"
-#include "class_resolver.h"
 
 static uint8_t loader_buffer[0x100000] __attribute__ ((aligned (32)));
 

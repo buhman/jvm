@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 
-#include "vm.h"
 #include "assert.h"
 
 enum initialization_state {
@@ -11,10 +10,17 @@ enum initialization_state {
   CLASS_INITIALIZED,
 };
 
+struct vm;
+
+typedef void (native_func_t)(struct vm * vm, uint32_t * args);
+
 struct method_entry {
   struct class_entry * class_entry;
   struct method_info * method_info;
-  struct Code_attribute * code_attribute;
+  union {
+    struct Code_attribute * code_attribute;
+    native_func_t * native_func;
+  };
 };
 
 union attribute_entry {
@@ -72,6 +78,20 @@ struct stack {
   };
   int32_t ix;
   int32_t capacity;
+};
+
+struct vm {
+  struct stack frame_stack;
+  struct stack data_stack;
+  struct frame * current_frame;
+  struct {
+    int length;
+    struct hash_table_entry * entry;
+  } class_hash_table;
+  struct {
+    int length;
+    struct hash_table_entry * entry;
+  } native_hash_table;
 };
 
 static inline struct frame * stack_push_frame(struct stack * stack, int num_frames)

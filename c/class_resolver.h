@@ -21,11 +21,15 @@ struct class_entry * class_resolver_lookup_class_from_class_index(int class_hash
 
 struct method_entry class_resolver_lookup_method_from_objectref_class(int class_hash_table_length,
                                                                       struct hash_table_entry * class_hash_table,
+                                                                      int native_hash_table_length,
+                                                                      struct hash_table_entry * native_hash_table,
                                                                       int32_t methodref_index,
                                                                       struct class_entry * objectref_class_entry,
                                                                       struct class_entry * origin_class_entry);
 struct method_entry * class_resolver_lookup_method_from_origin_class(int class_hash_table_length,
                                                                      struct hash_table_entry * class_hash_table,
+                                                                     int native_hash_table_length,
+                                                                     struct hash_table_entry * native_hash_table,
                                                                      int32_t methodref_index,
                                                                      struct class_entry * origin_class_entry);
 

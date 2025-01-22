@@ -7,7 +7,6 @@
 #include "class_resolver.h"
 #include "printf.h"
 #include "string.h"
-#include "native.h"
 #include "fatal.h"
 #include "debug.h"
 #include "find_attribute.h"
@@ -174,29 +173,9 @@ void vm_native_method_call(struct vm * vm, struct class_entry * class_entry, str
     args[nargs - i - 1] = value;
   }
 
-  debugf("native:  ");
-  struct constant * class_constant = &class_entry->class_file->constant_pool[class_entry->class_file->this_class - 1];
-  assert(class_constant->tag == CONSTANT_Class);
-  struct constant * class_name_constant = &class_entry->class_file->constant_pool[class_constant->class.name_index - 1];
-  assert(class_name_constant->tag == CONSTANT_Utf8);
-  debug_print__constant__utf8_string(class_name_constant);
-  debugs("  ");
-  struct constant * method_name_constant = &class_entry->class_file->constant_pool[method_entry->method_info->name_index - 1];
-  assert(method_name_constant->tag == CONSTANT_Utf8);
-  debug_print__constant__utf8_string(method_name_constant);
-  debugs("  ");
-  struct constant * method_descriptor_constant = &class_entry->class_file->constant_pool[method_entry->method_info->descriptor_index - 1];
-  assert(method_descriptor_constant->tag == CONSTANT_Utf8);
-  debug_print__constant__utf8_string(method_descriptor_constant);
-  debugc('\n');
-
   int old_stack_ix = vm->current_frame->operand_stack_ix;
 
-  native_method_call(vm,
-                     class_name_constant,
-                     method_name_constant,
-                     method_descriptor_constant,
-                     args);
+  method_entry->native_func(vm, args);
 
   if (return_type != 'V') {
     assert(old_stack_ix == vm->current_frame->operand_stack_ix - 1);

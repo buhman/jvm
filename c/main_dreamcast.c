@@ -2,7 +2,7 @@
 
 #include "string.h"
 #include "class_resolver.h"
-#include "native.h"
+#include "native_method.h"
 #include "malloc.h"
 
 #include "classpath.h"

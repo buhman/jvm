@@ -1,8 +1,6 @@
+#include "frame_stack.h" // for native_func_t
 #include "hash_table.h"
 #include "malloc.h"
-#include "string.h"
-#include "printf.h"
-#include "native.h"
 #include "native/class.h"
 #include "native/libcinputstream.h"
 #include "native/loader.h"
@@ -13,14 +11,15 @@
 #include "native/runtime.h"
 #include "native/sh4intrinsic.h"
 #include "native/system.h"
-
-typedef void (* native_func_t)(struct vm * vm, uint32_t * args);
+#include "native_method.h"
+#include "printf.h"
+#include "string.h"
 
 struct native_method {
   const char * class_name;
   const char * method_name;
   const char * method_descriptor;
-  native_func_t func;
+  native_func_t * func;
 };
 
 const static struct native_method native_method[] = {
@@ -301,14 +300,14 @@ struct hash_table_entry * native_init_hash_table(int * hash_table_length)
   return native_hash_table;
 }
 
-void native_method_call(struct vm * vm,
-                        struct constant * class_name_constant,
-                        struct constant * method_name_constant,
-                        struct constant * method_descriptor_constant,
-                        uint32_t * args)
+native_func_t * native_method_lookup(int native_hash_table_length,
+                                     struct hash_table_entry * native_hash_table,
+                                     struct constant * class_name_constant,
+                                     struct constant * method_name_constant,
+                                     struct constant * method_descriptor_constant)
 {
-  struct hash_table_entry * e = hash_table_find3(vm->native_hash_table.length,
-                                                 vm->native_hash_table.entry,
+  struct hash_table_entry * e = hash_table_find3(native_hash_table_length,
+                                                 native_hash_table,
                                                  class_name_constant->utf8.bytes,
                                                  class_name_constant->utf8.length,
                                                  method_name_constant->utf8.bytes,
@@ -327,6 +326,5 @@ void native_method_call(struct vm * vm,
   assert(e != nullptr);
   assert(e->value != nullptr);
 
-  native_func_t func = (native_func_t)e->value;
-  func(vm, args);
+  return(native_func_t *)e->value;
 }

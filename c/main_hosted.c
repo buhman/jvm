@@ -1,12 +1,12 @@
 #include <stdlib.h>
 
-#include "printf.h"
 #include "class_resolver.h"
-#include "string.h"
 #include "file.h"
 #include "malloc.h"
-#include "native.h"
 #include "memory_allocator.h"
+#include "native_method.h"
+#include "printf.h"
+#include "string.h"
 
 void * memset(void * s, int c, size_t n);
 
