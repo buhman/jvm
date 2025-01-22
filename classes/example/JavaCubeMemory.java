@@ -53,7 +53,7 @@ public class JavaCubeMemory {
                                           | ISPTSP.tsp_instruction_word__texture_v_size__1024
                                           | ISPTSP.tsp_instruction_word__use_alpha;
 
-    static final int texture_address = TextureMemoryAllocation.texture_regions[1][0] + 512;
+    static final int texture_address = TextureMemoryAllocation.texture_regions[0][0] + 512;
     static final int texture_control_word = ISPTSP.texture_control_word__pixel_format__4444
                                           | ISPTSP.texture_control_word__scan_order__non_twiddled
                                           | ISPTSP.texture_control_word__texture_address(texture_address / 8);
@@ -142,20 +142,13 @@ public class JavaCubeMemory {
     }
 
     public static void transfer_textures() {
-        int texture = MemoryMap.texture_memory64 + TextureMemoryAllocation.texture_regions[1][0] + 512;
+        int texture = MemoryMap.texture_memory64 + TextureMemoryAllocation.texture_regions[0][0] + 512;
 
         int length = 512 * 512 * 2 * 2 / 4;
         int address = 0xac400000;
         for (int i = 0; i < length; i++) {
             int value = Memory.getU4(address);
             Memory.putU4(texture, value);
-            if ((i & 2047) == 0) {
-                System.out.print(i);
-                System.out.print(' ');
-                System.out.print(address);
-                System.out.print(' ');
-                System.out.print(texture);
-            }
             address += 4;
             texture += 4;
         }
@@ -163,6 +156,11 @@ public class JavaCubeMemory {
 
     public static void main() {
         System.out.println("main1");
+
+        System.out.println("transfer_textures");
+        transfer_textures();
+        System.out.println("transfer_textures2");
+
         int ta_alloc =
               TABits.ta_alloc_ctrl__opb_mode__increasing_addresses
             | TABits.ta_alloc_ctrl__pt_opb__no_list
@@ -205,41 +203,67 @@ public class JavaCubeMemory {
 
         Core.init();
 
-        System.out.println("transfer_textures");
-        transfer_textures();
-        System.out.println("transfer_textures2");
-
         VideoOutput.set_framebuffer_resolution(640, 480);
         VideoOutput.set_mode(VideoOutputMode.vga);
 
         int core = 0;
         int ta = 0;
         System.out.println("main");
+        int framebuffer_tiles_width = framebuffer_width / 32;
+        int framebuffer_tiles_height = framebuffer_height / 32;
+
+        // prime
+        for (int i = 0; i < 2; i++) {
+            TAFIFOPolygonConverter.init(TextureMemoryAllocation.isp_tsp_parameters_start[i],
+                                        TextureMemoryAllocation.isp_tsp_parameters_end[i],
+                                        TextureMemoryAllocation.object_list_start[i],
+                                        TextureMemoryAllocation.object_list_end[i],
+                                        opb_size_total,
+                                        ta_alloc,
+                                        framebuffer_tiles_width,
+                                        framebuffer_tiles_height);
+            transfer_cube_scene();
+            if (i == 0)
+                TAFIFOPolygonConverter.wait_translucent_list();
+        }
+
+        for (int i = 0; i < 2; i++) {
+            Core.start_render(TextureMemoryAllocation.region_array_start[core],
+                              TextureMemoryAllocation.isp_tsp_parameters_start[core],
+                              TextureMemoryAllocation.background_start[1],
+                              TextureMemoryAllocation.framebuffer_start[i],
+                              framebuffer_width);
+            if (i == 0)
+                Core.wait_end_of_render_tsp();
+        }
+
         while (true) {
+            ta = (core + 1) & 1;
+
             // unpipelined render loop
+            TAFIFOPolygonConverter.wait_translucent_list();
             TAFIFOPolygonConverter.init(TextureMemoryAllocation.isp_tsp_parameters_start[ta],
                                         TextureMemoryAllocation.isp_tsp_parameters_end[ta],
                                         TextureMemoryAllocation.object_list_start[ta],
                                         TextureMemoryAllocation.object_list_end[ta],
                                         opb_size_total,
                                         ta_alloc,
-                                        framebuffer_width / 32,
-                                        framebuffer_height / 32);
+                                        framebuffer_tiles_width,
+                                        framebuffer_tiles_height);
             transfer_cube_scene();
-            TAFIFOPolygonConverter.wait_translucent_list();
 
-            Core.start_render(TextureMemoryAllocation.region_array_start[ta],
-                              TextureMemoryAllocation.isp_tsp_parameters_start[ta],
-                              TextureMemoryAllocation.background_start[1],
+            Core.wait_end_of_render_tsp();
+            Core.start_render(TextureMemoryAllocation.region_array_start[core],
+                              TextureMemoryAllocation.isp_tsp_parameters_start[core],
+                              TextureMemoryAllocation.background_start[core],
                               TextureMemoryAllocation.framebuffer_start[core],
                               framebuffer_width);
-            Core.wait_end_of_render_tsp();
 
             while (!(CoreBits.spg_status__vsync(Memory.getU4(Holly.SPG_STATUS)) != 0));
-            Memory.putU4(Holly.FB_R_SOF1, TextureMemoryAllocation.framebuffer_start[core]);
             while ((CoreBits.spg_status__vsync(Memory.getU4(Holly.SPG_STATUS)) != 0));
+            Memory.putU4(Holly.FB_R_SOF1, TextureMemoryAllocation.framebuffer_start[ta]);
 
-            core = (core + 1) % 1;
+            core = ta;
 
             theta += Math.DEGREES_TO_RADIANS;
         }

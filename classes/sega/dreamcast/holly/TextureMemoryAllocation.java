@@ -2,6 +2,7 @@ package sega.dreamcast.holly;
 
 public class TextureMemoryAllocation {
                                                         /* frame A   frame B  */
+    /*
     public static final int[] isp_tsp_parameters_start = { 0x000000, 0x080000 };
     public static final int[] isp_tsp_parameters_end   = { 0x07ffc0, 0x0fffc0 };
     public static final int[] background_start         = { 0x07ffc0, 0x0fffc0 };
@@ -12,10 +13,21 @@ public class TextureMemoryAllocation {
     public static final int[] region_array_end         = { 0x210000, 0x220000 };
     public static final int[] framebuffer_start        = { 0x220000, 0x2c8c00 }; // 720 x 480 @ 16bpp
     public static final int[] framebuffer_end          = { 0x2c8c00, 0x371800 }; // 720 x 480 @ 16bpp
+    */
+    public static final int[] isp_tsp_parameters_start = { 0x000000, 0x400000 };
+    public static final int[] isp_tsp_parameters_end   = { 0x0fffc0, 0x4fffc0 };
+    public static final int[] background_start         = { 0x0fffc0, 0x4fffc0 };
+    public static final int[] background_end           = { 0x100000, 0x500000 };
+    public static final int[] object_list_start        = { 0x100000, 0x500000 };
+    public static final int[] object_list_end          = { 0x200000 - 0x20, 0x600000 - 0x20 };
+    public static final int[] region_array_start       = { 0x296000, 0x696000 };
+    public static final int[] region_array_end         = { 0x2a6000, 0x6a0000 };
+    public static final int[] framebuffer_start        = { 0x200000, 0x600000 }; // 640 x 480 @ 16bpp
+    public static final int[] framebuffer_end          = { 0x296000, 0x696000 }; // 640 x 480 @ 16bpp
 
     public static final int[][] texture_regions        = {
        /* start     end      */
-        { 0x200000, 0x400000 },
-        { 0x600000, 0x800000 },
+        { 0x54c000, 0x400000 },
+        { 0x54c000, 0x800000 },
     };
 }
