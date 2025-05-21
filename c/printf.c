@@ -29,7 +29,7 @@ static const char * parse_fill_pad(const char * format, struct format * ft)
 {
   if (*format == 0)
     return format;
-  if (*format >= '1' || *format <= '9')
+  if (*format >= '1' && *format <= '9')
     ft->fill_char = ' ';
   else
     ft->fill_char = *format++;
@@ -143,7 +143,7 @@ void _printf(const char * format, ...)
             print_char('0');
             print_char('x');
           }
-          /* fall through */;
+          /* fall through */
         case FORMAT_BASE16:
           {
             uint32_t num = va_arg(args, uint32_t);
